@@ -1,281 +1,238 @@
 /**
- * 练习设置页模块 - Phase 2 完整版
- * 支持所有运算类型、难度、题量和模式选择
+ * 练习设置页模块 - Phase 2 修复版
  */
 
 const PracticeSettingsPage = {
-    /**
-     * 当前配置
-     */
     config: {
-        mode: 'keypad',        // keypad / choice
-        difficulty: 'beginner', // beginner / intermediate / advanced
-        types: ['addition'],   // 可多个: addition, subtraction, multiplication, division
-        count: 5               // 5 / 10 / 15 / 20
+        mode: 'keypad',
+        difficulty: 'beginner',
+        types: ['addition'],
+        count: 5
     },
 
-    /**
-     * 渲染设置页
-     */
     render() {
-        return `
-            <div class="fade-in max-w-2xl mx-auto">
-                <!-- 页面标题 -->
-                <div class="text-center mb-10">
-                    <h2 class="text-4xl font-bold text-gray-800 mb-3">练习设置</h2>
-                    <p class="text-xl text-gray-600">选择适合您的练习模式</p>
+        const container = document.getElementById('page-container');
+        if (!container) return;
+
+        // 构建运算类型选择按钮
+        const typeButtons = [
+            { id: 'addition', icon: '➕', name: '加法' },
+            { id: 'subtraction', icon: '➖', name: '减法' },
+            { id: 'multiplication', icon: '✖️', name: '乘法' },
+            { id: 'division', icon: '➗', name: '除法' }
+        ].map(type => {
+            const isActive = this.config.types.includes(type.id);
+            return `
+                <button id="type-${type.id}"
+                    class="setting-option ${isActive ? 'setting-active' : ''}"
+                    onclick="PracticeSettingsPage.toggleType('${type.id}')"
+                    style="padding: 1rem; border: 2px solid ${isActive ? '#3B82F6' : '#E5E7EB'};
+                           border-radius: 0.75rem; text-align: center; cursor: pointer;
+                           background: ${isActive ? '#EFF6FF' : 'white'};">
+                    <div style="font-size: 1.5rem; margin-bottom: 0.25rem;">${type.icon}</div>
+                    <div style="font-weight: bold;">${type.name}</div>
+                </button>
+            `;
+        }).join('');
+
+        // 构建题量按钮
+        const countButtons = [5, 10, 15, 20].map(num => {
+            const isActive = this.config.count === num;
+            return `
+                <button id="count-${num}"
+                    class="setting-option ${isActive ? 'setting-active' : ''}"
+                    onclick="PracticeSettingsPage.selectCount(${num})"
+                    style="padding: 1rem; border: 2px solid ${isActive ? '#3B82F6' : '#E5E7EB'};
+                           border-radius: 0.75rem; text-align: center; cursor: pointer;
+                           background: ${isActive ? '#EFF6FF' : 'white'};">
+                    <div style="font-size: 1.5rem; font-weight: bold;">${num}</div>
+                    <div style="font-size: 0.875rem; color: #6B7280;">题</div>
+                </button>
+            `;
+        }).join('');
+
+        container.innerHTML = `
+            <div class="fade-in" style="max-width: 42rem; margin: 0 auto;">
+                <div style="text-align: center; margin-bottom: 2.5rem;">
+                    <h2 style="font-size: 2.25rem; font-weight: bold; color: #1F2937; margin-bottom: 0.75rem;">练习设置</h2>
+                    <p style="font-size: 1.25rem; color: #4B5563;">选择适合您的练习模式</p>
                 </div>
 
-                <!-- 设置卡片 -->
-                <div class="bg-white rounded-3xl shadow-xl shadow-gray-100 border border-gray-100 overflow-hidden">
-                    <!-- 头部 -->
-                    <div class="bg-gradient-to-r from-blue-500 to-blue-600 px-8 py-6">
-                        <h3 class="text-2xl font-bold text-white flex items-center gap-3">
+                <div style="background: white; border-radius: 1.5rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1); border: 1px solid #E5E7EB; overflow: hidden;">
+                    <div style="background: linear-gradient(to right, #3B82F6, #2563EB); padding: 1.5rem 2rem; color: white;">
+                        <h3 style="font-size: 1.5rem; font-weight: bold; display: flex; align-items: center; gap: 0.75rem;">
                             <span>⚙️</span>
                             <span>当前配置</span>
                         </h3>
                     </div>
 
-                    <!-- 设置内容 -->
-                    <div class="p-8 space-y-8">
+                    <div style="padding: 2rem; display: flex; flex-direction: column; gap: 2rem;">
                         <!-- 答题模式 -->
                         <div>
-                            <label class="block text-lg font-bold text-gray-700 mb-4">答题模式</label>
-                            <div class="grid grid-cols-2 gap-4">
-                                <button id="mode-keypad"
-                                    class="setting-option ${this.config.mode === 'keypad' ? 'active' : ''}"
-                                    onclick="PracticeSettingsPage.selectMode('keypad')">
-                                    <div class="text-3xl mb-2">⌨️</div>
-                                    <div class="font-bold">键盘输入</div>
-                                    <div class="text-sm text-gray-500 mt-1">使用数字键盘</div>
+                            <label style="display: block; font-size: 1.125rem; font-weight: bold; color: #374151; margin-bottom: 1rem;">答题模式</label>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                <button onclick="PracticeSettingsPage.selectMode('keypad')"
+                                    style="padding: 1rem; border: 2px solid ${this.config.mode === 'keypad' ? '#3B82F6' : '#E5E7EB'};
+                                           border-radius: 0.75rem; text-align: center; cursor: pointer;
+                                           background: ${this.config.mode === 'keypad' ? '#EFF6FF' : 'white'};">
+                                    <div style="font-size: 1.875rem; margin-bottom: 0.5rem;">⌨️</div>
+                                    <div style="font-weight: bold;">键盘输入</div>
+                                    <div style="font-size: 0.875rem; color: #6B7280; margin-top: 0.25rem;">使用数字键盘</div>
                                 </button>
-                                <button id="mode-choice"
-                                    class="setting-option ${this.config.mode === 'choice' ? 'active' : ''}"
-                                    onclick="PracticeSettingsPage.selectMode('choice')">
-                                    <div class="text-3xl mb-2">🔘</div>
-                                    <div class="font-bold">选择题</div>
-                                    <div class="text-sm text-gray-500 mt-1">从选项中选择</div>
+                                <button onclick="PracticeSettingsPage.selectMode('choice')"
+                                    style="padding: 1rem; border: 2px solid ${this.config.mode === 'choice' ? '#3B82F6' : '#E5E7EB'};
+                                           border-radius: 0.75rem; text-align: center; cursor: pointer;
+                                           background: ${this.config.mode === 'choice' ? '#EFF6FF' : 'white'};">
+                                    <div style="font-size: 1.875rem; margin-bottom: 0.5rem;">🔘</div>
+                                    <div style="font-weight: bold;">选择题</div>
+                                    <div style="font-size: 0.875rem; color: #6B7280; margin-top: 0.25rem;">从选项中选择</div>
                                 </button>
                             </div>
                         </div>
 
                         <!-- 难度选择 -->
                         <div>
-                            <label class="block text-lg font-bold text-gray-700 mb-4">难度等级</label>
-                            <div class="grid grid-cols-3 gap-4">
-                                <button id="diff-beginner"
-                                    class="setting-option ${this.config.difficulty === 'beginner' ? 'active' : ''}"
-                                    onclick="PracticeSettingsPage.selectDifficulty('beginner')">
-                                    <div class="text-2xl mb-2">🌱</div>
-                                    <div class="font-bold">初级</div>
-                                    <div class="text-sm text-gray-500 mt-1">简单入门</div>
-                                </button>
-                                <button id="diff-intermediate"
-                                    class="setting-option ${this.config.difficulty === 'intermediate' ? 'active' : ''}"
-                                    onclick="PracticeSettingsPage.selectDifficulty('intermediate')">
-                                    <div class="text-2xl mb-2">🌿</div>
-                                    <div class="font-bold">中级</div>
-                                    <div class="text-sm text-gray-500 mt-1">进阶练习</div>
-                                </button>
-                                <button id="diff-advanced"
-                                    class="setting-option ${this.config.difficulty === 'advanced' ? 'active' : ''}"
-                                    onclick="PracticeSettingsPage.selectDifficulty('advanced')">
-                                    <div class="text-2xl mb-2">🌳</div>
-                                    <div class="font-bold">高级</div>
-                                    <div class="text-sm text-gray-500 mt-1">挑战自我</div>
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- 运算类型 -->
-                        <div>
-                            <label class="block text-lg font-bold text-gray-700 mb-4">
-                                运算类型
-                                <span class="text-sm font-normal text-gray-500 ml-2">（可多选）</span>
-                            </label>
-                            <div class="grid grid-cols-4 gap-3">
-                                <button id="type-addition"
-                                    class="setting-option ${this.config.types.includes('addition') ? 'active' : ''}"
-                                    onclick="PracticeSettingsPage.toggleType('addition')">
-                                    <div class="text-2xl mb-1">➕</div>
-                                    <div class="font-bold">加法</div>
-                                </button>
-                                <button id="type-subtraction"
-                                    class="setting-option ${this.config.types.includes('subtraction') ? 'active' : ''}"
-                                    onclick="PracticeSettingsPage.toggleType('subtraction')">
-                                    <div class="text-2xl mb-1">➖</div>
-                                    <div class="font-bold">减法</div>
-                                </button>
-                                <button id="type-multiplication"
-                                    class="setting-option ${this.config.types.includes('multiplication') ? 'active' : ''}"
-                                    onclick="PracticeSettingsPage.toggleType('multiplication')">
-                                    <div class="text-2xl mb-1">✖️</div>
-                                    <div class="font-bold">乘法</div>
-                                </button>
-                                <button id="type-division"
-                                    class="setting-option ${this.config.types.includes('division') ? 'active' : ''}"
-                                    onclick="PracticeSettingsPage.toggleType('division')">
-                                    <div class="text-2xl mb-1">➗</div>
-                                    <div class="font-bold">除法</div>
-                                </button>
-                            </div>
-                            <p id="type-error" class="text-red-500 text-sm mt-2 hidden">请至少选择一种运算类型</p>
-                        </div>
-
-                        <!-- 题量选择 -->
-                        <div>
-                            <label class="block text-lg font-bold text-gray-700 mb-4">题目数量</label>
-                            <div class="grid grid-cols-4 gap-3">
-                                ${[5, 10, 15, 20].map(num => `
-                                    <button id="count-${num}"
-                                        class="setting-option ${this.config.count === num ? 'active' : ''}"
-                                        onclick="PracticeSettingsPage.selectCount(${num})">
-                                        <div class="text-2xl font-bold">${num}</div>
-                                        <div class="text-sm text-gray-500">题</div>
+                            <label style="display: block; font-size: 1.125rem; font-weight: bold; color: #374151; margin-bottom: 1rem;">难度等级</label>
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+                                ${[
+                                    { id: 'beginner', icon: '🌱', name: '初级' },
+                                    { id: 'intermediate', icon: '🌿', name: '中级' },
+                                    { id: 'advanced', icon: '🌳', name: '高级' }
+                                ].map(diff => `
+                                    <button onclick="PracticeSettingsPage.selectDifficulty('${diff.id}')"
+                                        style="padding: 1rem; border: 2px solid ${this.config.difficulty === diff.id ? '#3B82F6' : '#E5E7EB'};
+                                               border-radius: 0.75rem; text-align: center; cursor: pointer;
+                                               background: ${this.config.difficulty === diff.id ? '#EFF6FF' : 'white'};">
+                                        <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">${diff.icon}</div>
+                                        <div style="font-weight: bold;">${diff.name}</div>
                                     </button>
                                 `).join('')}
                             </div>
                         </div>
 
-                        <!-- 难度说明卡片 -->
-                        <div class="bg-blue-50 rounded-2xl p-6 border-2 border-blue-100">
-                            <h4 class="text-lg font-bold text-blue-800 mb-3 flex items-center gap-2">
+                        <!-- 运算类型 -->
+                        <div>
+                            <label style="display: block; font-size: 1.125rem; font-weight: bold; color: #374151; margin-bottom: 1rem;">
+                                运算类型 <span style="font-weight: normal; color: #6B7280; margin-left: 0.5rem;">（可多选）</span>
+                            </label>
+                            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem;">
+                                ${typeButtons}
+                            </div>
+                            <p id="type-error" style="color: #EF4444; font-size: 0.875rem; margin-top: 0.5rem; display: none;">请至少选择一种运算类型</p>
+                        </div>
+
+                        <!-- 题量选择 -->
+                        <div>
+                            <label style="display: block; font-size: 1.125rem; font-weight: bold; color: #374151; margin-bottom: 1rem;">题目数量</label>
+                            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem;">
+                                ${countButtons}
+                            </div>
+                        </div>
+
+                        <!-- 配置说明 -->
+                        <div style="background: #EFF6FF; border-radius: 1rem; padding: 1.5rem; border: 2px solid #BFDBFE;">
+                            <h4 style="font-size: 1.125rem; font-weight: bold; color: #1E40AF; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
                                 <span>ℹ️</span>
                                 <span>当前配置说明</span>
                             </h4>
-                            <div class="space-y-2 text-blue-700" id="difficulty-description">
+                            <div style="color: #1E40AF; line-height: 1.75;">
                                 ${this.getDifficultyDescription()}
                             </div>
                         </div>
                     </div>
 
-                    <!-- 底部按钮 -->
-                    <div class="px-8 py-6 bg-gray-50 border-t border-gray-100">
+                    <div style="padding: 1.5rem 2rem; background: #F9FAFB; border-top: 1px solid #E5E7EB;">
                         <button onclick="PracticeSettingsPage.startPractice()"
-                            class="btn-press w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-5 rounded-2xl text-2xl font-bold shadow-lg shadow-blue-200 hover:shadow-xl transition-all duration-200 flex items-center justify-center gap-3">
+                            style="width: 100%; background: linear-gradient(to right, #3B82F6, #2563EB); color: white;
+                                   padding: 1.25rem; border-radius: 1rem; font-size: 1.5rem; font-weight: bold;
+                                   border: none; cursor: pointer; box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3);
+                                   display: flex; align-items: center; justify-content: center; gap: 0.75rem;">
                             <span>🚀</span>
                             <span>开始练习</span>
                         </button>
-                        <p class="text-center text-gray-400 text-sm mt-4">按 Enter 键快速开始</p>
+                        <p style="text-align: center; color: #9CA3AF; font-size: 0.875rem; margin-top: 1rem;">按 Enter 键快速开始</p>
                     </div>
                 </div>
             </div>
         `;
     },
 
-    /**
-     * 获取难度说明 HTML
-     */
     getDifficultyDescription() {
-        const typeNames = this.config.types.map(t => QuestionGenerator.getTypeName(t)).join('、');
-        const difficultyName = QuestionGenerator.getDifficultyName(this.config.difficulty);
-        const modeName = this.config.mode === 'keypad' ? '键盘输入' : '选择题';
+        const typeNames = this.config.types.map(t => {
+            const names = { addition: '加法', subtraction: '减法', multiplication: '乘法', division: '除法' };
+            return names[t] || t;
+        }).join('、');
 
-        let description = `
-            <p class="flex items-center gap-2">
-                <span class="w-2 h-2 bg-blue-500 rounded-full"></span>
-                <span><strong>运算类型：</strong>${typeNames || '未选择'}</span>
-            </p>
-            <p class="flex items-center gap-2">
-                <span class="w-2 h-2 bg-blue-500 rounded-full"></span>
-                <span><strong>难度等级：</strong>${difficultyName}</span>
-            </p>
-            <p class="flex items-center gap-2">
-                <span class="w-2 h-2 bg-blue-500 rounded-full"></span>
-                <span><strong>答题模式：</strong>${modeName}</span>
-            </p>
-            <p class="flex items-center gap-2">
-                <span class="w-2 h-2 bg-blue-500 rounded-full"></span>
-                <span><strong>题目数量：</strong>${this.config.count} 题</span>
-            </p>
+        const diffNames = { beginner: '初级', intermediate: '中级', advanced: '高级' };
+        const diffName = diffNames[this.config.difficulty] || this.config.difficulty;
+
+        const ranges = {
+            addition: { beginner: '1-20', intermediate: '10-100', advanced: '100-500' },
+            subtraction: { beginner: '1-20', intermediate: '10-100', advanced: '100-500' },
+            multiplication: { beginner: '1-9', intermediate: '2-12', advanced: '10-20' },
+            division: { beginner: '1-9', intermediate: '2-12', advanced: '2-20' }
+        };
+
+        let desc = `
+            <div style="margin-bottom: 0.5rem;">✓ 运算类型：${typeNames || '未选择'}</div>
+            <div style="margin-bottom: 0.5rem;">✓ 难度等级：${diffName}</div>
+            <div style="margin-bottom: 0.5rem;">✓ 答题模式：${this.config.mode === 'keypad' ? '键盘输入' : '选择题'}</div>
+            <div style="margin-bottom: 0.5rem;">✓ 题目数量：${this.config.count} 题</div>
         `;
 
-        // 添加每种运算的数字范围
         this.config.types.forEach(type => {
-            const range = QuestionGenerator.getDifficultyRange(type, this.config.difficulty);
-            const typeName = QuestionGenerator.getTypeName(type);
-            description += `
-                <p class="flex items-center gap-2">
-                    <span class="w-2 h-2 bg-blue-300 rounded-full"></span>
-                    <span>${typeName}数字范围：${range}</span>
-                </p>
-            `;
+            const typeNames = { addition: '加法', subtraction: '减法', multiplication: '乘法', division: '除法' };
+            const range = ranges[type]?.[this.config.difficulty] || '';
+            desc += `<div style="margin-left: 1rem; color: #3B82F6;">• ${typeNames[type]}范围：${range}</div>`;
         });
 
-        return description;
+        return desc;
     },
 
-    /**
-     * 选择答题模式
-     */
     selectMode(mode) {
         this.config.mode = mode;
         this.render();
-        this.bindKeyboardEvents();
     },
 
-    /**
-     * 选择难度
-     */
     selectDifficulty(difficulty) {
         this.config.difficulty = difficulty;
         this.render();
-        this.bindKeyboardEvents();
     },
 
-    /**
-     * 切换运算类型（多选）
-     */
     toggleType(type) {
         const index = this.config.types.indexOf(type);
-
         if (index > -1) {
-            // 如果已选中，且不是最后一个，则取消
             if (this.config.types.length > 1) {
                 this.config.types.splice(index, 1);
             }
         } else {
-            // 如果未选中，则添加
             this.config.types.push(type);
         }
-
         this.render();
-        this.bindKeyboardEvents();
     },
 
-    /**
-     * 选择题量
-     */
     selectCount(count) {
         this.config.count = count;
         this.render();
-        this.bindKeyboardEvents();
     },
 
-    /**
-     * 开始练习
-     */
     startPractice() {
-        // 验证至少选择了一种运算类型
         if (this.config.types.length === 0) {
-            document.getElementById('type-error').classList.remove('hidden');
+            const errorEl = document.getElementById('type-error');
+            if (errorEl) errorEl.style.display = 'block';
             return;
         }
 
-        // 保存配置
         sessionStorage.setItem('practice_config', JSON.stringify(this.config));
 
-        // 生成题目
         let questions;
         if (this.config.types.length === 1) {
-            // 单类型
             questions = QuestionGenerator.generate({
                 type: this.config.types[0],
                 difficulty: this.config.difficulty,
                 count: this.config.count
             });
         } else {
-            // 混合类型
             questions = QuestionGenerator.generateMixed(
                 this.config.types,
                 this.config.difficulty,
@@ -288,7 +245,6 @@ const PracticeSettingsPage = {
         sessionStorage.setItem('practice_answers', JSON.stringify([]));
         sessionStorage.setItem('practice_start_time', Date.now().toString());
 
-        // 根据模式跳转到不同页面
         if (this.config.mode === 'keypad') {
             router.navigate('practice-keypad');
         } else {
@@ -296,64 +252,18 @@ const PracticeSettingsPage = {
         }
     },
 
-    /**
-     * 初始化设置页
-     */
     init() {
-        // 重置配置
         this.config = {
             mode: 'keypad',
             difficulty: 'beginner',
             types: ['addition'],
             count: 5
         };
-
-        const container = document.getElementById('page-container');
-        container.innerHTML = this.render();
-
-        this.bindKeyboardEvents();
-        this.updateNavState();
-    },
-
-    /**
-     * 绑定键盘事件
-     */
-    bindKeyboardEvents() {
+        this.render();
         document.onkeydown = (e) => {
             if (e.key === 'Enter') {
                 this.startPractice();
             }
         };
-    },
-
-    /**
-     * 更新导航栏激活状态
-     */
-    updateNavState() {
-        document.querySelectorAll('.nav-item').forEach(item => {
-            item.classList.remove('bg-primary', 'text-white', 'shadow-lg', 'shadow-blue-200');
-            item.classList.add('text-gray-600', 'hover:bg-gray-100');
-        });
-
-        const activeNav = document.getElementById('nav-practice');
-        if (activeNav) {
-            activeNav.classList.remove('text-gray-600', 'hover:bg-gray-100');
-            activeNav.classList.add('bg-primary', 'text-white', 'shadow-lg', 'shadow-blue-200');
-        }
     }
 };
-
-// 添加样式
-const style = document.createElement('style');
-style.textContent = `
-    .setting-option {
-        @apply p-4 rounded-xl border-2 border-gray-200 text-center transition-all duration-200 cursor-pointer;
-    }
-    .setting-option:hover {
-        @apply border-blue-300 bg-blue-50;
-    }
-    .setting-option.active {
-        @apply border-blue-500 bg-blue-50 ring-2 ring-blue-200;
-    }
-`;
-document.head.appendChild(style);

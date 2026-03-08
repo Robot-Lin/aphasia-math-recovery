@@ -1,154 +1,143 @@
 /**
  * 练习页 - 键盘输入模式
- * Phase 1 核心功能
+ * Phase 2 修复版
  */
 
 const PracticeKeypadPage = {
-    /**
-     * 题目数据
-     */
     questions: [],
     currentIndex: 0,
     answers: [],
     startTime: 0,
-
-    /**
-     * 当前答案
-     */
     currentAnswer: '',
-
-    /**
-     * 是否已提交（用于显示反馈）
-     */
     hasSubmitted: false,
     isCorrect: false,
-
-    /**
-     * 连击数
-     */
     streak: 0,
 
-    /**
-     * 渲染练习页
-     */
     render() {
         const current = this.questions[this.currentIndex];
-        const progress = ((this.currentIndex + 1) / this.questions.length) * 100;
+        if (!current) return;
 
-        return `
-            <div class="fade-in max-w-3xl mx-auto">
+        const progress = ((this.currentIndex + 1) / this.questions.length) * 100;
+        const typeNames = { addition: '加法', subtraction: '减法', multiplication: '乘法', division: '除法' };
+        const diffNames = { beginner: '初级', intermediate: '中级', advanced: '高级' };
+        const typeName = typeNames[current.type] || current.type;
+        const diffName = diffNames[current.difficulty] || current.difficulty;
+
+        const container = document.getElementById('page-container');
+        if (!container) return;
+
+        let answerBg, answerColor;
+        if (this.hasSubmitted) {
+            if (this.isCorrect) {
+                answerBg = '#D1FAE5';
+                answerColor = '#059669';
+            } else {
+                answerBg = '#FEE2E2';
+                answerColor = '#DC2626';
+            }
+        } else {
+            answerBg = '#F3F4F6';
+            answerColor = '#1F2937';
+        }
+
+        container.innerHTML = `
+            <div class="fade-in" style="max-width: 48rem; margin: 0 auto;">
                 <!-- 顶部信息栏 -->
-                <div class="bg-white rounded-2xl p-6 shadow-lg shadow-gray-100 border border-gray-100 mb-6">
-                    <div class="flex items-center justify-between">
-                        <!-- 进度 -->
-                        <div class="flex items-center gap-4">
-                            <div class="text-lg font-medium text-gray-600">
-                                第 <span class="text-2xl font-bold text-primary">${this.currentIndex + 1}</span> / ${this.questions.length} 题
+                <div style="background: white; border-radius: 1rem; padding: 1.5rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05); border: 1px solid #E5E7EB; margin-bottom: 1.5rem;">
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <div style="font-size: 1.125rem; font-weight: 500; color: #4B5563;">
+                                第 <span style="font-size: 1.5rem; font-weight: bold; color: #3B82F6;">${this.currentIndex + 1}</span> / ${this.questions.length} 题
                             </div>
-                            <div class="px-4 py-2 bg-blue-50 rounded-full text-blue-700 font-medium">
-                                初级加法
+                            <div style="padding: 0.5rem 1rem; background: #EFF6FF; border-radius: 9999px; color: #1D4ED8; font-weight: 500;">
+                                ${diffName}${typeName}
                             </div>
                         </div>
 
-                        <!-- 得分 -->
-                        <div class="flex items-center gap-4">
+                        <div style="display: flex; align-items: center; gap: 1rem;">
                             ${this.streak > 2 ? `
-                            <div class="flex items-center gap-2 px-4 py-2 bg-orange-50 rounded-full">
-                                <span class="text-2xl">🔥</span>
-                                <span class="text-xl font-bold text-orange-600">${this.streak}</span>
+                            <div style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background: #FFEDD5; border-radius: 9999px;">
+                                <span style="font-size: 1.5rem;">🔥</span>
+                                <span style="font-size: 1.25rem; font-weight: bold; color: #EA580C;">${this.streak}</span>
                             </div>
                             ` : ''}
-                            <div class="text-lg text-gray-600">
-                                得分: <span class="text-2xl font-bold text-primary">${this.getScore()}</span>
+                            <div style="font-size: 1.125rem; color: #4B5563;">
+                                得分: <span style="font-size: 1.5rem; font-weight: bold; color: #3B82F6;">${this.getScore()}</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- 进度条 -->
-                    <div class="mt-4">
-                        <div class="h-3 bg-gray-100 rounded-full overflow-hidden">
-                            <div class="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full transition-all duration-500"
-                                style="width: ${progress}%"></div>
+                    <div style="margin-top: 1rem;">
+                        <div style="height: 0.75rem; background: #F3F4F6; border-radius: 9999px; overflow: hidden;">
+                            <div style="height: 100%; background: linear-gradient(to right, #3B82F6, #2563EB); border-radius: 9999px; transition: width 0.5s; width: ${progress}%;"></div>
                         </div>
                     </div>
                 </div>
 
                 <!-- 题目区域 -->
-                <div class="bg-white rounded-3xl p-12 shadow-xl shadow-gray-100 border border-gray-100 mb-6">
-                    <!-- 题目 -->
-                    <div class="text-center mb-12">
-                        <div class="text-question font-bold text-gray-800 large-text mb-8">
+                <div style="background: white; border-radius: 1.5rem; padding: 3rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1); border: 1px solid #E5E7EB; margin-bottom: 1.5rem;">
+                    <div style="text-align: center; margin-bottom: 3rem;">
+                        <div style="font-size: 3.5rem; font-weight: bold; color: #1F2937; margin-bottom: 2rem; font-feature-settings: 'tnum';">
                             ${current.display} =
                         </div>
 
-                        <!-- 答案显示区 -->
-                        <div id="answer-display" class="inline-block min-w-[200px] px-8 py-4 rounded-2xl text-5xl font-bold transition-all duration-300 ${
-                            this.hasSubmitted
-                                ? (this.isCorrect ? 'bg-success-light text-success' : 'bg-error-light text-error')
-                                : 'bg-gray-100 text-gray-800'
-                        }">
+                        <div id="answer-display" style="display: inline-block; min-width: 200px; padding: 1rem 2rem; border-radius: 1rem; font-size: 3rem; font-weight: bold; background: ${answerBg}; color: ${answerColor}; transition: all 0.3s;">
                             ${this.currentAnswer || '\u00A0'}
                         </div>
 
-                        <!-- 反馈信息 -->
                         ${this.hasSubmitted ? `
-                        <div class="mt-6 text-2xl font-bold ${this.isCorrect ? 'text-success' : 'text-error'}">
+                        <div style="margin-top: 1.5rem; font-size: 1.5rem; font-weight: bold; ${this.isCorrect ? 'color: #10B981;' : 'color: #EF4444;'}">
                             ${this.isCorrect ? '✓ 回答正确！' : `✗ 正确答案是 ${current.answer}`}
                         </div>
                         ` : ''}
                     </div>
 
                     <!-- 数字键盘 -->
-                    <div class="max-w-md mx-auto">
-                        <div class="grid grid-cols-3 gap-4">
+                    <div style="max-width: 28rem; margin: 0 auto;">
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
                             ${[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => `
                                 <button onclick="PracticeKeypadPage.inputNumber(${num})"
-                                    class="btn-press h-20 bg-white border-2 border-gray-200 rounded-2xl text-3xl font-bold text-gray-700 shadow-md hover:border-blue-400 hover:bg-blue-50 transition-all duration-150 flex items-center justify-center"
+                                    style="height: 5rem; background: white; border: 2px solid #E5E7EB; border-radius: 1rem; font-size: 1.875rem; font-weight: bold; color: #374151; cursor: ${this.hasSubmitted ? 'default' : 'pointer'}; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); display: flex; align-items: center; justify-content: center;"
                                     ${this.hasSubmitted ? 'disabled' : ''}>
                                     ${num}
                                 </button>
                             `).join('')}
 
-                            <!-- 清除按钮 -->
                             <button onclick="PracticeKeypadPage.clearAnswer()"
-                                class="btn-press h-20 bg-orange-50 border-2 border-orange-200 rounded-2xl text-2xl font-bold text-orange-600 shadow-md hover:bg-orange-100 transition-all duration-150 flex items-center justify-center"
+                                style="height: 5rem; background: #FFF7ED; border: 2px solid #FED7AA; border-radius: 1rem; font-size: 1.5rem; font-weight: bold; color: #EA580C; cursor: ${this.hasSubmitted ? 'default' : 'pointer'}; display: flex; align-items: center; justify-content: center;"
                                 ${this.hasSubmitted ? 'disabled' : ''}>
                                 C
                             </button>
 
-                            <!-- 0 -->
                             <button onclick="PracticeKeypadPage.inputNumber(0)"
-                                class="btn-press h-20 bg-white border-2 border-gray-200 rounded-2xl text-3xl font-bold text-gray-700 shadow-md hover:border-blue-400 hover:bg-blue-50 transition-all duration-150 flex items-center justify-center"
+                                style="height: 5rem; background: white; border: 2px solid #E5E7EB; border-radius: 1rem; font-size: 1.875rem; font-weight: bold; color: #374151; cursor: ${this.hasSubmitted ? 'default' : 'pointer'}; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); display: flex; align-items: center; justify-content: center;"
                                 ${this.hasSubmitted ? 'disabled' : ''}>
                                 0
                             </button>
 
-                            <!-- 提交/下一题按钮 -->
                             ${this.hasSubmitted ? `
                                 <button onclick="PracticeKeypadPage.nextQuestion()"
-                                    class="btn-press h-20 bg-success border-2 border-success rounded-2xl text-2xl font-bold text-white shadow-md hover:bg-green-600 transition-all duration-150 flex items-center justify-center animate-pulse">
+                                    style="height: 5rem; background: #10B981; border: 2px solid #10B981; border-radius: 1rem; font-size: 1.5rem; font-weight: bold; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; animation: pulse 2s infinite;">
                                     下一题 →
                                 </button>
                             ` : `
                                 <button onclick="PracticeKeypadPage.submitAnswer()"
-                                    class="btn-press h-20 bg-primary border-2 border-primary rounded-2xl text-2xl font-bold text-white shadow-md hover:bg-primary-hover transition-all duration-150 flex items-center justify-center"
-                                    ${!this.currentAnswer ? 'disabled class="opacity-50 cursor-not-allowed"' : ''}>
+                                    style="height: 5rem; background: ${this.currentAnswer ? '#3B82F6' : '#9CA3AF'}; border: 2px solid ${this.currentAnswer ? '#3B82F6' : '#9CA3AF'}; border-radius: 1rem; font-size: 1.5rem; font-weight: bold; color: white; cursor: ${this.currentAnswer ? 'pointer' : 'not-allowed'}; display: flex; align-items: center; justify-content: center;"
+                                    ${!this.currentAnswer ? 'disabled' : ''}>
                                     ↵
                                 </button>
                             `}
                         </div>
 
-                        <!-- 键盘提示 -->
-                        <div class="mt-6 text-center text-gray-400 text-sm">
+                        <div style="margin-top: 1.5rem; text-align: center; color: #9CA3AF; font-size: 0.875rem;">
                             可以使用电脑键盘输入数字，按 Enter 提交
                         </div>
                     </div>
                 </div>
 
-                <!-- 结束练习按钮 -->
-                <div class="text-center">
+                <div style="text-align: center;">
                     <button onclick="PracticeKeypadPage.endPractice()"
-                        class="text-gray-400 hover:text-gray-600 text-lg font-medium transition-colors duration-200">
+                        style="color: #9CA3AF; font-size: 1.125rem; font-weight: 500; cursor: pointer; background: none; border: none;">
                         结束练习
                     </button>
                 </div>
@@ -156,74 +145,52 @@ const PracticeKeypadPage = {
         `;
     },
 
-    /**
-     * 输入数字
-     */
     inputNumber(num) {
         if (this.hasSubmitted) return;
-        if (this.currentAnswer.length >= 4) return; // 最多4位
+        if (this.currentAnswer.length >= 4) return;
 
-        // 播放按键音效
-        SoundManager.playKeyPress();
+        if (typeof SoundManager !== 'undefined') {
+            SoundManager.playKeyPress();
+        }
 
         this.currentAnswer += num.toString();
-        this.updateAnswerDisplay();
+        this.render();
     },
 
-    /**
-     * 清除答案
-     */
     clearAnswer() {
         if (this.hasSubmitted) return;
         this.currentAnswer = '';
-        this.updateAnswerDisplay();
+        this.render();
     },
 
-    /**
-     * 删除最后一位
-     */
     backspace() {
         if (this.hasSubmitted) return;
         this.currentAnswer = this.currentAnswer.slice(0, -1);
-        this.updateAnswerDisplay();
+        this.render();
     },
 
-    /**
-     * 更新答案显示
-     */
-    updateAnswerDisplay() {
-        const display = document.getElementById('answer-display');
-        if (display) {
-            display.textContent = this.currentAnswer || '\u00A0';
-        }
-        this.render(); // 重新渲染以更新提交按钮状态
-        this.bindKeyboardEvents(); // 重新绑定事件
-    },
-
-    /**
-     * 提交答案
-     */
     submitAnswer() {
         if (!this.currentAnswer || this.hasSubmitted) return;
 
-        // 播放提交音效
-        SoundManager.playSubmit();
+        if (typeof SoundManager !== 'undefined') {
+            SoundManager.playSubmit();
+        }
 
         const current = this.questions[this.currentIndex];
         const userAnswer = parseInt(this.currentAnswer, 10);
-        const isCorrect = QuestionGenerator.checkAnswer(userAnswer, current.answer);
+        const isCorrect = !isNaN(userAnswer) && userAnswer === current.answer;
 
         this.isCorrect = isCorrect;
         this.hasSubmitted = true;
 
-        // 播放正确/错误音效
-        if (isCorrect) {
-            SoundManager.playCorrect();
-        } else {
-            SoundManager.playWrong();
+        if (typeof SoundManager !== 'undefined') {
+            if (isCorrect) {
+                SoundManager.playCorrect();
+            } else {
+                SoundManager.playWrong();
+            }
         }
 
-        // 记录答案
         this.answers.push({
             question: current,
             userAnswer: userAnswer,
@@ -231,31 +198,18 @@ const PracticeKeypadPage = {
             timeSpent: Date.now() - this.questionStartTime
         });
 
-        // 更新连击
         if (isCorrect) {
             this.streak++;
         } else {
             this.streak = 0;
-            // 记录错题
-            Storage.addMistake(current, userAnswer);
+            if (typeof Storage !== 'undefined') {
+                Storage.addMistake(current, userAnswer);
+            }
         }
 
-        // 更新页面
         this.render();
-        this.bindKeyboardEvents();
-
-        // 自动聚焦到下一题按钮（焦点管理）
-        setTimeout(() => {
-            const nextButton = document.querySelector('button[onclick="PracticeKeypadPage.nextQuestion()"]');
-            if (nextButton) {
-                nextButton.focus();
-            }
-        }, 100);
     },
 
-    /**
-     * 下一题
-     */
     nextQuestion() {
         if (this.currentIndex < this.questions.length - 1) {
             this.currentIndex++;
@@ -263,41 +217,25 @@ const PracticeKeypadPage = {
             this.hasSubmitted = false;
             this.isCorrect = false;
             this.questionStartTime = Date.now();
-
             this.render();
-            this.bindKeyboardEvents();
-
-            // 自动聚焦到数字键盘（焦点管理）
-            setTimeout(() => {
-                const firstNumberButton = document.querySelector('button[onclick="PracticeKeypadPage.inputNumber(1)"]');
-                if (firstNumberButton && !firstNumberButton.disabled) {
-                    firstNumberButton.focus();
-                }
-            }, 100);
         } else {
-            // 练习完成
             this.finishPractice();
         }
     },
 
-    /**
-     * 结束练习
-     */
     endPractice() {
         if (confirm('确定要结束当前练习吗？进度将不会保存。')) {
             router.navigate('home');
         }
     },
 
-    /**
-     * 完成练习
-     */
     finishPractice() {
-        // 播放完成音效
-        SoundManager.playComplete();
+        if (typeof SoundManager !== 'undefined') {
+            SoundManager.playComplete();
+        }
 
         const endTime = Date.now();
-        const totalTime = Math.round((endTime - this.startTime) / 1000 / 60); // 分钟
+        const totalTime = Math.round((endTime - this.startTime) / 1000 / 60);
 
         const correctCount = this.answers.filter(a => a.isCorrect).length;
         const wrongCount = this.answers.length - correctCount;
@@ -311,37 +249,28 @@ const PracticeKeypadPage = {
             answers: this.answers
         };
 
-        // 保存到 sessionStorage 用于结果页显示
         sessionStorage.setItem('practice_result', JSON.stringify(sessionStats));
-
-        // 更新用户数据
-        Storage.updateStats(sessionStats);
-
-        // 跳转到结果页
+        if (typeof Storage !== 'undefined') {
+            Storage.updateStats(sessionStats);
+        }
         router.navigate('result');
     },
 
-    /**
-     * 计算当前得分
-     */
     getScore() {
         return this.answers.filter(a => a.isCorrect).length * 10;
     },
 
-    /**
-     * 初始化练习页
-     */
     init() {
-        // 加载数据
         const questionsJson = sessionStorage.getItem('practice_questions');
         if (!questionsJson) {
             router.navigate('practice-settings');
             return;
         }
 
-        // 初始化音效（需要用户交互后才能播放）
         document.addEventListener('click', () => {
-            SoundManager.init();
+            if (typeof SoundManager !== 'undefined') {
+                SoundManager.init();
+            }
         }, { once: true });
 
         this.questions = JSON.parse(questionsJson);
@@ -355,7 +284,6 @@ const PracticeKeypadPage = {
         this.isCorrect = false;
         this.streak = 0;
 
-        // 恢复连击数
         this.answers.forEach(a => {
             if (a.isCorrect) {
                 this.streak++;
@@ -364,46 +292,23 @@ const PracticeKeypadPage = {
             }
         });
 
-        const container = document.getElementById('page-container');
-        container.innerHTML = this.render();
+        this.render();
 
-        this.bindKeyboardEvents();
-
-        // 自动聚焦到第一个数字按钮（焦点管理）
-        setTimeout(() => {
-            const firstNumberButton = document.querySelector('button[onclick="PracticeKeypadPage.inputNumber(1)"]');
-            if (firstNumberButton && !firstNumberButton.disabled) {
-                firstNumberButton.focus();
-            }
-        }, 100);
-    },
-
-    /**
-     * 绑定键盘事件
-     */
-    bindKeyboardEvents() {
         document.onkeydown = (e) => {
-            // 数字键 0-9
             if (e.key >= '0' && e.key <= '9') {
                 e.preventDefault();
                 this.inputNumber(parseInt(e.key, 10));
-            }
-            // Enter 提交或下一题
-            else if (e.key === 'Enter') {
+            } else if (e.key === 'Enter') {
                 e.preventDefault();
                 if (this.hasSubmitted) {
                     this.nextQuestion();
                 } else if (this.currentAnswer) {
                     this.submitAnswer();
                 }
-            }
-            // Backspace 删除
-            else if (e.key === 'Backspace') {
+            } else if (e.key === 'Backspace') {
                 e.preventDefault();
                 this.backspace();
-            }
-            // Escape 清除
-            else if (e.key === 'Escape') {
+            } else if (e.key === 'Escape') {
                 e.preventDefault();
                 this.clearAnswer();
             }
