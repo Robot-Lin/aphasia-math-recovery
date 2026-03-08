@@ -163,6 +163,9 @@ const PracticeKeypadPage = {
         if (this.hasSubmitted) return;
         if (this.currentAnswer.length >= 4) return; // 最多4位
 
+        // 播放按键音效
+        SoundManager.playKeyPress();
+
         this.currentAnswer += num.toString();
         this.updateAnswerDisplay();
     },
@@ -203,12 +206,22 @@ const PracticeKeypadPage = {
     submitAnswer() {
         if (!this.currentAnswer || this.hasSubmitted) return;
 
+        // 播放提交音效
+        SoundManager.playSubmit();
+
         const current = this.questions[this.currentIndex];
         const userAnswer = parseInt(this.currentAnswer, 10);
         const isCorrect = QuestionGenerator.checkAnswer(userAnswer, current.answer);
 
         this.isCorrect = isCorrect;
         this.hasSubmitted = true;
+
+        // 播放正确/错误音效
+        if (isCorrect) {
+            SoundManager.playCorrect();
+        } else {
+            SoundManager.playWrong();
+        }
 
         // 记录答案
         this.answers.push({
@@ -230,6 +243,14 @@ const PracticeKeypadPage = {
         // 更新页面
         this.render();
         this.bindKeyboardEvents();
+
+        // 自动聚焦到下一题按钮（焦点管理）
+        setTimeout(() => {
+            const nextButton = document.querySelector('button[onclick="PracticeKeypadPage.nextQuestion()"]');
+            if (nextButton) {
+                nextButton.focus();
+            }
+        }, 100);
     },
 
     /**
@@ -245,6 +266,14 @@ const PracticeKeypadPage = {
 
             this.render();
             this.bindKeyboardEvents();
+
+            // 自动聚焦到数字键盘（焦点管理）
+            setTimeout(() => {
+                const firstNumberButton = document.querySelector('button[onclick="PracticeKeypadPage.inputNumber(1)"]');
+                if (firstNumberButton && !firstNumberButton.disabled) {
+                    firstNumberButton.focus();
+                }
+            }, 100);
         } else {
             // 练习完成
             this.finishPractice();
@@ -264,6 +293,9 @@ const PracticeKeypadPage = {
      * 完成练习
      */
     finishPractice() {
+        // 播放完成音效
+        SoundManager.playComplete();
+
         const endTime = Date.now();
         const totalTime = Math.round((endTime - this.startTime) / 1000 / 60); // 分钟
 
@@ -307,6 +339,11 @@ const PracticeKeypadPage = {
             return;
         }
 
+        // 初始化音效（需要用户交互后才能播放）
+        document.addEventListener('click', () => {
+            SoundManager.init();
+        }, { once: true });
+
         this.questions = JSON.parse(questionsJson);
         this.currentIndex = parseInt(sessionStorage.getItem('practice_current') || '0');
         this.answers = JSON.parse(sessionStorage.getItem('practice_answers') || '[]');
@@ -331,6 +368,14 @@ const PracticeKeypadPage = {
         container.innerHTML = this.render();
 
         this.bindKeyboardEvents();
+
+        // 自动聚焦到第一个数字按钮（焦点管理）
+        setTimeout(() => {
+            const firstNumberButton = document.querySelector('button[onclick="PracticeKeypadPage.inputNumber(1)"]');
+            if (firstNumberButton && !firstNumberButton.disabled) {
+                firstNumberButton.focus();
+            }
+        }, 100);
     },
 
     /**
