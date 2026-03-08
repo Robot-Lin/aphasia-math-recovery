@@ -16,6 +16,7 @@ const router = {
         'home': () => HomePage.init(),
         'practice-settings': () => PracticeSettingsPage.init(),
         'practice-keypad': () => PracticeKeypadPage.init(),
+        'practice-choice': () => PracticeChoicePage.init(),
         'result': () => ResultPage.init()
     },
 
