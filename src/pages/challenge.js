@@ -569,6 +569,7 @@ const ChallengePage = {
                     ✓ 正确！
                 </div>
             `;
+            SpeechManager.speakFeedback(true);
 
             // 检查是否升级
             if (this.state.streak >= 5) {
@@ -602,6 +603,7 @@ const ChallengePage = {
                     ✗ 正确答案是 ${correct}
                 </div>
             `;
+            SpeechManager.speak(`正确答案是${SpeechManager.convertNumberToChinese(correct)}`);
 
             setTimeout(() => {
                 this.state.isProcessing = false;
@@ -682,6 +684,9 @@ const ChallengePage = {
         if (window.SoundManager && SoundManager.isEnabled()) {
             SoundManager.playComplete();
         }
+
+        // 语音播报
+        SpeechManager.speak(`恭喜升级到${newConfig.name}难度`);
     },
 
     /**
