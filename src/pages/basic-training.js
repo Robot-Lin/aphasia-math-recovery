@@ -577,6 +577,7 @@ const BasicTrainingPage = {
     createProgressMiniCard() {
         const typeConfig = this.trainingTypes[this.state.type];
         const card = document.createElement('div');
+        card.id = 'progress-mini-card';
         card.className = 'glass';
         card.style.cssText = `
             border-radius: 16px;
@@ -629,6 +630,53 @@ const BasicTrainingPage = {
     // 保留原来的大进度卡片方法（备用）
     createProgressCard() {
         return this.createProgressMiniCard();
+    },
+
+    // 实时更新进度面板
+    updateProgressPanel() {
+        const typeConfig = this.trainingTypes[this.state.type];
+        const total = this.state.items.length;
+        const mastered = this.state.items.filter(i => i.mastered).length;
+        const percent = total > 0 ? Math.round((mastered / total) * 100) : 0;
+
+        // 查找现有的进度面板并更新
+        const progressPanel = document.getElementById('progress-mini-card');
+        if (progressPanel) {
+            progressPanel.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="
+                        width: 48px;
+                        height: 48px;
+                        border-radius: 50%;
+                        background: conic-gradient(${typeConfig.color} ${percent * 3.6}deg, #E5E5EA 0deg);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        flex-shrink: 0;
+                    ">
+                        <div style="
+                            width: 36px;
+                            height: 36px;
+                            border-radius: 50%;
+                            background: white;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            font-size: 12px;
+                            font-weight: 700;
+                            color: ${typeConfig.color};
+                        ">${percent}%</div>
+                    </div>
+                    <div style="flex: 1;">
+                        <div style="font-size: 14px; font-weight: 600; color: #1C1C1E;">掌握进度</div>
+                        <div style="font-size: 12px; color: #8E8E93;">${mastered}/${total} 已掌握</div>
+                        <div style="margin-top: 6px; height: 4px; background: #E5E5EA; border-radius: 2px;">
+                            <div style="width: ${percent}%; height: 100%; background: ${typeConfig.color}; border-radius: 2px; transition: width 300ms ease;"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
     },
 
     createTrainingCard() {
@@ -725,7 +773,7 @@ const BasicTrainingPage = {
 
             <div style="display: flex; gap: 16px; justify-content: center;">
                 ${!this.state.showAnswer ? `
-                    <button onclick="BasicTrainingPage.showAnswer()" style="
+                    <button id="btn-show-answer" onclick="BasicTrainingPage.showAnswer(); this.disabled=true; this.style.opacity='0.5';" style="
                         padding: 20px 48px;
                         background: ${typeConfig.color};
                         color: white;
@@ -738,7 +786,7 @@ const BasicTrainingPage = {
                         transition: transform 150ms ease;
                     ">显示答案</button>
                 ` : `
-                    <button onclick="BasicTrainingPage.markIncorrect()" style="
+                    <button id="btn-incorrect" onclick="BasicTrainingPage.markIncorrect(); this.disabled=true; document.getElementById('btn-correct').disabled=true;" style="
                         padding: 16px 32px;
                         background: #FF3B30;
                         color: white;
@@ -748,7 +796,7 @@ const BasicTrainingPage = {
                         font-weight: 600;
                         cursor: pointer;
                     ">还需练习</button>
-                    <button onclick="BasicTrainingPage.markCorrect()" style="
+                    <button id="btn-correct" onclick="BasicTrainingPage.markCorrect(); this.disabled=true; document.getElementById('btn-incorrect').disabled=true;" style="
                         padding: 16px 32px;
                         background: #34C759;
                         color: white;
@@ -762,7 +810,7 @@ const BasicTrainingPage = {
             </div>
 
             <div style="margin-top: 32px;">
-                <button onclick="BasicTrainingPage.nextItem()" style="
+                <button id="btn-skip" onclick="BasicTrainingPage.nextItem(); this.disabled=true; this.style.opacity='0.5';" style="
                     padding: 12px 24px;
                     background: transparent;
                     color: #8E8E93;
@@ -920,8 +968,13 @@ const BasicTrainingPage = {
             return;
         }
 
+        // 更新 mastered 集合和 items 数组
         this.state.mastered.add(current.key);
+        current.mastered = true;
         this.saveProgress();
+
+        // 实时更新进度面板
+        this.updateProgressPanel();
 
         setTimeout(() => {
             this.state.isProcessing = false;
@@ -940,8 +993,13 @@ const BasicTrainingPage = {
             return;
         }
 
+        // 更新 mastered 集合和 items 数组
         this.state.mastered.delete(current.key);
+        current.mastered = false;
         this.saveProgress();
+
+        // 实时更新进度面板
+        this.updateProgressPanel();
 
         setTimeout(() => {
             this.state.isProcessing = false;
@@ -970,7 +1028,9 @@ const BasicTrainingPage = {
 
         if (selected === correct) {
             this.state.mastered.add(current.key);
+            current.mastered = true;
             this.saveProgress();
+            this.updateProgressPanel();
             feedback.innerHTML = `
                 <div style="color: #34C759; font-size: 18px; font-weight: 600; animation: fadeIn 200ms ease; margin-bottom: 16px;">✓ 正确！</div>
                 <button onclick="BasicTrainingPage.nextItem()" style="
@@ -990,7 +1050,9 @@ const BasicTrainingPage = {
             SpeechManager.speakFeedback(true);
         } else {
             this.state.mastered.delete(current.key);
+            current.mastered = false;
             this.saveProgress();
+            this.updateProgressPanel();
             // 高亮正确答案
             buttons.forEach(btn => {
                 if (parseInt(btn.textContent) === correct) {
