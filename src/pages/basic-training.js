@@ -71,9 +71,15 @@ const BasicTrainingPage = {
 
     // 开始训练
     startTraining(type, level) {
+        console.log(`startTraining called: type=${type}, level=${level}`);
+
         // 停止可能正在播放的语音
         if (typeof SpeechManager !== 'undefined') {
-            SpeechManager.stop();
+            try {
+                SpeechManager.stop();
+            } catch (e) {
+                console.warn('停止语音失败:', e);
+            }
         }
         // 重置渲染ID
         this._currentRenderId = Date.now();
@@ -85,9 +91,28 @@ const BasicTrainingPage = {
         this.state.showAnswer = false;
         this.state.isProcessing = false;
 
-        this.loadProgress();
-        this.generateItems();
-        this.render();
+        try {
+            this.loadProgress();
+            console.log('Progress loaded, mastered:', this.state.mastered.size);
+        } catch (e) {
+            console.error('加载进度失败:', e);
+            this.state.mastered = new Set();
+        }
+
+        try {
+            this.generateItems();
+            console.log('Items generated:', this.state.items.length);
+        } catch (e) {
+            console.error('生成题目失败:', e);
+            this.state.items = [];
+        }
+
+        try {
+            this.render();
+            console.log('Render completed');
+        } catch (e) {
+            console.error('渲染失败:', e);
+        }
     },
 
     // 渲染选择页面
@@ -271,11 +296,28 @@ const BasicTrainingPage = {
 
     // 加载已掌握的进度
     loadProgress() {
-        const userData = Storage.getUserData();
-        const progressKey = `basic_${this.state.type}`;
-        const progress = userData.skillProgress?.[progressKey] || {};
-        this.state.mastered = new Set(progress.mastered || []);
-        // 不覆盖 level，使用用户选择的 level
+        try {
+            const userData = Storage.getUserData();
+            if (!userData) {
+                console.warn('Storage.getUserData() returned null/undefined');
+                this.state.mastered = new Set();
+                return;
+            }
+            const progressKey = `basic_${this.state.type}`;
+            const progress = userData.skillProgress?.[progressKey] || {};
+            const masteredArray = progress.mastered || [];
+            // 确保 mastered 是数组
+            if (!Array.isArray(masteredArray)) {
+                console.warn('progress.mastered is not an array:', masteredArray);
+                this.state.mastered = new Set();
+            } else {
+                this.state.mastered = new Set(masteredArray);
+            }
+            // 不覆盖 level，使用用户选择的 level
+        } catch (e) {
+            console.error('loadProgress error:', e);
+            this.state.mastered = new Set();
+        }
     },
 
     // 生成训练题目
