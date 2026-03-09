@@ -914,6 +914,12 @@ const BasicTrainingPage = {
         this.state.isProcessing = true;
 
         const current = this.state.items[this.state.currentIndex];
+        if (!current) {
+            console.error('markCorrect: current item is undefined');
+            this.state.isProcessing = false;
+            return;
+        }
+
         this.state.mastered.add(current.key);
         this.saveProgress();
 
@@ -928,6 +934,12 @@ const BasicTrainingPage = {
         this.state.isProcessing = true;
 
         const current = this.state.items[this.state.currentIndex];
+        if (!current) {
+            console.error('markIncorrect: current item is undefined');
+            this.state.isProcessing = false;
+            return;
+        }
+
         this.state.mastered.delete(current.key);
         this.saveProgress();
 
@@ -944,6 +956,13 @@ const BasicTrainingPage = {
 
         const feedback = document.getElementById('fillblank-feedback');
         const current = this.state.items[this.state.currentIndex];
+
+        // 检查 current 是否存在
+        if (!current) {
+            console.error('selectAnswer: current item is undefined');
+            this.state.isProcessing = false;
+            return;
+        }
 
         // 禁用所有选项按钮
         const buttons = document.querySelectorAll('#fillblank-options button');
@@ -1002,6 +1021,13 @@ const BasicTrainingPage = {
     nextItem() {
         this.state.showAnswer = false;
         this.state.isProcessing = false;
+
+        // 检查 items 数组是否为空
+        if (!this.state.items || this.state.items.length === 0) {
+            console.error('nextItem: items array is empty');
+            return;
+        }
+
         this.state.currentIndex = (this.state.currentIndex + 1) % this.state.items.length;
         this.render();
     },
