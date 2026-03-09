@@ -18,6 +18,8 @@ const HomePage = {
 
         const summary = Storage.getStatsSummary();
         const achievements = Storage.getAchievements();
+        const userData = Storage.getUserData();
+        const displaySettings = userData.displaySettings || {};
 
         const page = document.createElement('div');
         page.style.cssText = `
@@ -26,43 +28,49 @@ const HomePage = {
             padding: 20px;
         `;
 
-        // 欢迎区域
-        this.elements.welcomeSection = this.createWelcomeSection();
-        page.appendChild(this.elements.welcomeSection);
+        // 欢迎区域（可开关）
+        if (displaySettings.welcomeSection !== false) {
+            this.elements.welcomeSection = this.createWelcomeSection();
+            page.appendChild(this.elements.welcomeSection);
+        }
 
-        // 统计卡片网格
+        // 统计卡片网格（始终显示）
         this.elements.statsGrid = this.createStatsGrid(summary);
         page.appendChild(this.elements.statsGrid);
 
-        // 快速开始卡片
+        // 快速开始卡片（始终显示）
         this.elements.quickStartCard = this.createQuickStartCard();
         page.appendChild(this.elements.quickStartCard);
 
-        // 能力雷达图
-        this.elements.radarChart = this.createRadarChart();
-        page.appendChild(this.elements.radarChart);
+        // 能力雷达图（可开关）
+        if (displaySettings.radarChart !== false) {
+            this.elements.radarChart = this.createRadarChart();
+            page.appendChild(this.elements.radarChart);
+        }
 
-        // 复习提醒（有条件显示）
-        if (summary.reviewCount > 0) {
+        // 复习提醒（有条件显示，可开关）
+        if (displaySettings.reviewAlert !== false && summary.reviewCount > 0) {
             this.elements.reviewAlert = this.createReviewAlert(summary.reviewCount);
             page.appendChild(this.elements.reviewAlert);
         }
 
-        // 进步曲线图
-        if (summary.practiceCount > 0) {
+        // 进步曲线图（有条件显示，可开关）
+        if (displaySettings.progressChart !== false && summary.practiceCount > 0) {
             this.elements.progressChart = this.createProgressChart();
             page.appendChild(this.elements.progressChart);
         }
 
-        // 徽章展示
-        if (achievements.badges.length > 0) {
+        // 徽章展示（有条件显示，可开关）
+        if (displaySettings.badgesSection !== false && achievements.badges.length > 0) {
             this.elements.badgesSection = this.createBadgesSection(achievements);
             page.appendChild(this.elements.badgesSection);
         }
 
-        // 使用提示
-        this.elements.tipsSection = this.createTipsSection();
-        page.appendChild(this.elements.tipsSection);
+        // 使用提示（可开关）
+        if (displaySettings.tipsSection !== false) {
+            this.elements.tipsSection = this.createTipsSection();
+            page.appendChild(this.elements.tipsSection);
+        }
 
         container.appendChild(page);
     },

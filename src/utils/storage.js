@@ -37,7 +37,21 @@ const Storage = {
                 multiplication: { beginner: 0, intermediate: 0, advanced: 0 },
                 division: { beginner: 0, intermediate: 0, advanced: 0 }
             },
-            dailyRecords: {}
+            dailyRecords: {},
+            typeStats: {
+                addition: { correct: 0, wrong: 0, total: 0 },
+                subtraction: { correct: 0, wrong: 0, total: 0 },
+                multiplication: { correct: 0, wrong: 0, total: 0 },
+                division: { correct: 0, wrong: 0, total: 0 }
+            },
+            displaySettings: {
+                radarChart: true,
+                progressChart: true,
+                badgesSection: true,
+                reviewAlert: true,
+                tipsSection: true,
+                welcomeSection: true
+            }
         };
     },
 

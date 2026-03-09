@@ -37,6 +37,10 @@ const SettingsPage = {
         page.appendChild(this.createSectionTitle('音效设置'));
         page.appendChild(this.createSoundSettings());
 
+        // 首页显示设置组
+        page.appendChild(this.createSectionTitle('首页显示'));
+        page.appendChild(this.createDisplaySettings());
+
         // 数据管理组
         page.appendChild(this.createSectionTitle('数据管理'));
         page.appendChild(this.createDataManagement());
@@ -123,6 +127,128 @@ const SettingsPage = {
                     <div style="font-size: 13px; color: #8E8E93; margin-top: 2px;">${setting.desc}</div>
                 </div>
                 <div class="toggle-switch ${isEnabled ? 'active' : ''}" data-key="${setting.key}" style="
+                    width: 51px;
+                    height: 31px;
+                    background: ${isEnabled ? '#34C759' : '#E5E5EA'};
+                    border-radius: 15.5px;
+                    position: relative;
+                    cursor: pointer;
+                    transition: background 200ms ease;
+                ">
+                    <div style="
+                        width: 27px;
+                        height: 27px;
+                        background: white;
+                        border-radius: 50%;
+                        position: absolute;
+                        top: 2px;
+                        left: ${isEnabled ? '22px' : '2px'};
+                        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+                        transition: left 200ms ease;
+                    "></div>
+                </div>
+            `;
+
+            card.appendChild(item);
+        });
+
+        return card;
+    },
+
+    createDisplaySettings() {
+        const card = document.createElement('div');
+        card.className = 'glass';
+        card.style.cssText = `
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+        `;
+
+        // 获取当前显示设置
+        const userData = Storage.getUserData();
+        const displaySettings = userData.displaySettings || {};
+
+        const settings = [
+            {
+                id: 'display-radar',
+                icon: '📊',
+                title: '能力雷达图',
+                desc: '显示加减乘除能力分析',
+                key: 'radarChart',
+                defaultValue: true
+            },
+            {
+                id: 'display-progress',
+                icon: '📈',
+                title: '进步曲线',
+                desc: '显示最近7天正确率趋势',
+                key: 'progressChart',
+                defaultValue: true
+            },
+            {
+                id: 'display-badges',
+                icon: '🏆',
+                title: '徽章展示',
+                desc: '显示已获得的成就徽章',
+                key: 'badgesSection',
+                defaultValue: true
+            },
+            {
+                id: 'display-review',
+                icon: '🧠',
+                title: '复习提醒',
+                desc: '有待复习错题时显示提醒',
+                key: 'reviewAlert',
+                defaultValue: true
+            },
+            {
+                id: 'display-tips',
+                icon: '💡',
+                title: '使用提示',
+                desc: '显示使用帮助和提示',
+                key: 'tipsSection',
+                defaultValue: true
+            },
+            {
+                id: 'display-welcome',
+                icon: '👋',
+                title: '欢迎区域',
+                desc: '显示欢迎标题和描述',
+                key: 'welcomeSection',
+                defaultValue: true
+            }
+        ];
+
+        settings.forEach((setting, index) => {
+            const item = document.createElement('div');
+            item.style.cssText = `
+                display: flex;
+                align-items: center;
+                padding: 16px;
+                ${index !== settings.length - 1 ? 'border-bottom: 1px solid rgba(0, 0, 0, 0.06);' : ''}
+            `;
+
+            const isEnabled = displaySettings[setting.key] !== undefined
+                ? displaySettings[setting.key]
+                : setting.defaultValue;
+
+            item.innerHTML = `
+                <div style="
+                    width: 32px;
+                    height: 32px;
+                    background: rgba(175, 82, 222, 0.1);
+                    border-radius: 8px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    margin-right: 12px;
+                    font-size: 16px;
+                ">${setting.icon}</div>
+                <div style="flex: 1;">
+                    <div style="font-size: 16px; font-weight: 600; color: #1C1C1E;">${setting.title}</div>
+                    <div style="font-size: 13px; color: #8E8E93; margin-top: 2px;">${setting.desc}</div>
+                </div>
+                <div class="toggle-switch display-toggle ${isEnabled ? 'active' : ''}" data-key="${setting.key}" style="
                     width: 51px;
                     height: 31px;
                     background: ${isEnabled ? '#34C759' : '#E5E5EA'};
@@ -253,8 +379,8 @@ const SettingsPage = {
     },
 
     bindEvents() {
-        // 切换开关事件
-        document.querySelectorAll('.toggle-switch').forEach(toggle => {
+        // 音效/语音切换开关事件（使用 localStorage 存储）
+        document.querySelectorAll('.toggle-switch:not(.display-toggle)').forEach(toggle => {
             toggle.onclick = () => {
                 const key = toggle.dataset.key;
                 const isActive = toggle.classList.contains('active');
@@ -278,6 +404,28 @@ const SettingsPage = {
                         window.SpeechManager.setEnabled(newState);
                     }
                 }
+            };
+        });
+
+        // 首页显示切换开关事件（使用 userData 存储）
+        document.querySelectorAll('.display-toggle').forEach(toggle => {
+            toggle.onclick = () => {
+                const key = toggle.dataset.key;
+                const isActive = toggle.classList.contains('active');
+                const newState = !isActive;
+
+                // 更新样式
+                toggle.classList.toggle('active', newState);
+                toggle.style.background = newState ? '#34C759' : '#E5E5EA';
+                toggle.querySelector('div').style.left = newState ? '22px' : '2px';
+
+                // 保存到用户数据
+                const userData = Storage.getUserData();
+                if (!userData.displaySettings) {
+                    userData.displaySettings = {};
+                }
+                userData.displaySettings[key] = newState;
+                Storage.saveUserData(userData);
             };
         });
     },
