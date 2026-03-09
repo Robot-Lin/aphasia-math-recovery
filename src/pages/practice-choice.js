@@ -1,6 +1,6 @@
 /**
  * 练习页 - 选择题模式
- * Phase 2 修复版
+ * Apple 风格重构版
  */
 
 const PracticeChoicePage = {
@@ -14,134 +14,316 @@ const PracticeChoicePage = {
     currentOptions: [],
     streak: 0,
 
-    render() {
-        const current = this.questions[this.currentIndex];
-        if (!current) return;
+    // DOM 元素缓存
+    elements: {},
 
+    init() {
+        this.loadData();
+        if (this.questions.length === 0) return;
+
+        this.initAudio();
+        this.render();
+        this.bindKeyboard();
+    },
+
+    loadData() {
+        const questionsJson = sessionStorage.getItem('practice_questions');
+        if (!questionsJson) {
+            router.navigate('practice-settings');
+            return;
+        }
+
+        this.questions = JSON.parse(questionsJson);
+        this.currentIndex = parseInt(sessionStorage.getItem('practice_current') || '0');
+        this.answers = JSON.parse(sessionStorage.getItem('practice_answers') || '[]');
+        this.startTime = parseInt(sessionStorage.getItem('practice_start_time') || Date.now().toString());
+        this.questionStartTime = Date.now();
+
+        this.hasSelected = false;
+        this.isCorrect = false;
+        this.selectedAnswer = null;
+        this.currentOptions = [];
+        this.streak = 0;
+
+        // 恢复连击数
+        this.answers.forEach(a => {
+            this.streak = a.isCorrect ? this.streak + 1 : 0;
+        });
+    },
+
+    initAudio() {
+        document.addEventListener('click', () => {
+            if (typeof SoundManager !== 'undefined') {
+                SoundManager.init();
+            }
+        }, { once: true });
+    },
+
+    render() {
+        const container = document.getElementById('page-container');
+        if (!container) return;
+
+        container.innerHTML = '';
+
+        const page = document.createElement('div');
+        page.style.cssText = `
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        `;
+
+        // 头部信息栏
+        this.elements.header = this.createHeader();
+        page.appendChild(this.elements.header);
+
+        // 题目卡片
+        this.elements.questionCard = this.createQuestionCard();
+        page.appendChild(this.elements.questionCard);
+
+        // 结束按钮
+        const endBtn = document.createElement('button');
+        endBtn.style.cssText = `
+            display: block;
+            margin: 24px auto 0;
+            padding: 8px 16px;
+            background: transparent;
+            border: none;
+            color: #8E8E93;
+            font-size: 15px;
+            cursor: pointer;
+            transition: color 200ms;
+        `;
+        endBtn.textContent = '结束练习';
+        endBtn.onclick = () => this.endPractice();
+        endBtn.onmouseenter = () => endBtn.style.color = '#FF3B30';
+        endBtn.onmouseleave = () => endBtn.style.color = '#8E8E93';
+        page.appendChild(endBtn);
+
+        container.appendChild(page);
+
+        this.updateDisplay();
+    },
+
+    createHeader() {
+        const current = this.questions[this.currentIndex];
         const progress = ((this.currentIndex + 1) / this.questions.length) * 100;
 
+        const typeNames = { addition: '加法', subtraction: '减法', multiplication: '乘法', division: '除法' };
+        const diffNames = { beginner: '初级', intermediate: '中级', advanced: '高级' };
+
+        const header = document.createElement('div');
+        header.className = 'glass';
+        header.style.cssText = `
+            border-radius: 20px;
+            padding: 20px 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+        `;
+
+        header.innerHTML = `
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span style="font-size: 17px; color: #3C3C43;">
+                        第 <span style="font-size: 22px; font-weight: 700; color: #007AFF;">${this.currentIndex + 1}</span> / ${this.questions.length} 题
+                    </span>
+                    <span style="padding: 4px 12px; background: rgba(0, 122, 255, 0.1); border-radius: 100px; font-size: 13px; font-weight: 600; color: #007AFF;">
+                        ${diffNames[current.difficulty]}${typeNames[current.type]}
+                    </span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    ${this.streak > 2 ? `
+                    <div style="display: flex; align-items: center; gap: 4px; padding: 4px 10px; background: rgba(255, 149, 0, 0.12); border-radius: 100px;">
+                        <span style="font-size: 16px;">🔥</span>
+                        <span style="font-weight: 700; color: #FF9500;">${this.streak}</span>
+                    </div>
+                    ` : ''}
+                    <span style="font-size: 17px; color: #3C3C43;">
+                        得分: <span style="font-weight: 700; color: #007AFF;">${this.getScore()}</span>
+                    </span>
+                </div>
+            </div>
+            <div style="height: 6px; background: rgba(0, 0, 0, 0.06); border-radius: 3px; overflow: hidden;">
+                <div style="height: 100%; background: linear-gradient(90deg, #007AFF 0%, #34C759 100%); border-radius: 3px; width: ${progress}%; transition: width 400ms cubic-bezier(0.4, 0.0, 0.2, 1);"></div>
+            </div>
+        `;
+
+        return header;
+    },
+
+    createQuestionCard() {
+        const card = document.createElement('div');
+        card.className = 'glass';
+        card.style.cssText = `
+            border-radius: 28px;
+            padding: 40px 32px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        `;
+
+        // 题目显示
+        this.elements.questionDisplay = document.createElement('div');
+        this.elements.questionDisplay.style.cssText = `
+            text-align: center;
+            margin-bottom: 32px;
+        `;
+        card.appendChild(this.elements.questionDisplay);
+
+        // 选项区域 - 2x2 网格
+        this.elements.optionsGrid = document.createElement('div');
+        this.elements.optionsGrid.style.cssText = `
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            max-width: 360px;
+            margin: 0 auto 24px;
+        `;
+        card.appendChild(this.elements.optionsGrid);
+
+        // 反馈信息
+        this.elements.feedback = document.createElement('div');
+        this.elements.feedback.style.cssText = `
+            text-align: center;
+            min-height: 48px;
+        `;
+        card.appendChild(this.elements.feedback);
+
+        return card;
+    },
+
+    updateDisplay() {
+        const current = this.questions[this.currentIndex];
+
+        // 生成选项
         if (this.currentOptions.length === 0) {
             this.currentOptions = this.generateOptions(current);
         }
 
-        const typeNames = { addition: '加法', subtraction: '减法', multiplication: '乘法', division: '除法' };
-        const diffNames = { beginner: '初级', intermediate: '中级', advanced: '高级' };
-        const typeName = typeNames[current.type] || current.type;
-        const diffName = diffNames[current.difficulty] || current.difficulty;
-
-        const container = document.getElementById('page-container');
-        if (!container) return;
-
-        container.innerHTML = `
-            <div class="fade-in" style="max-width: 48rem; margin: 0 auto;">
-                <!-- 顶部信息栏 -->
-                <div style="background: white; border-radius: 1rem; padding: 1.5rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05); border: 1px solid #E5E7EB; margin-bottom: 1.5rem;">
-                    <div style="display: flex; align-items: center; justify-content: space-between;">
-                        <div style="display: flex; align-items: center; gap: 1rem;">
-                            <div style="font-size: 1.125rem; font-weight: 500; color: #4B5563;">
-                                第 <span style="font-size: 1.5rem; font-weight: bold; color: #3B82F6;">${this.currentIndex + 1}</span> / ${this.questions.length} 题
-                            </div>
-                            <div style="padding: 0.5rem 1rem; background: #EFF6FF; border-radius: 9999px; color: #1D4ED8; font-weight: 500;">
-                                ${diffName}${typeName}
-                            </div>
-                        </div>
-
-                        <div style="display: flex; align-items: center; gap: 1rem;">
-                            ${this.streak > 2 ? `
-                            <div style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background: #FFEDD5; border-radius: 9999px;">
-                                <span style="font-size: 1.5rem;">🔥</span>
-                                <span style="font-size: 1.25rem; font-weight: bold; color: #EA580C;">${this.streak}</span>
-                            </div>
-                            ` : ''}
-                            <div style="font-size: 1.125rem; color: #4B5563;">
-                                得分: <span style="font-size: 1.5rem; font-weight: bold; color: #3B82F6;">${this.getScore()}</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div style="margin-top: 1rem;">
-                        <div style="height: 0.75rem; background: #F3F4F6; border-radius: 9999px; overflow: hidden;">
-                            <div style="height: 100%; background: linear-gradient(to right, #3B82F6, #2563EB); border-radius: 9999px; transition: width 0.5s; width: ${progress}%;"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 题目区域 -->
-                <div style="background: white; border-radius: 1.5rem; padding: 3rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1); border: 1px solid #E5E7EB; margin-bottom: 1.5rem;">
-                    <div style="text-align: center; margin-bottom: 2.5rem;">
-                        <div style="font-size: 3.5rem; font-weight: bold; color: #1F2937; margin-bottom: 2rem; font-feature-settings: 'tnum';">
-                            ${current.display} = ?
-                        </div>
-                    </div>
-
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; max-width: 28rem; margin: 0 auto;">
-                        ${this.currentOptions.map((option, index) => this.renderOption(option, index))}
-                    </div>
-
-                    ${this.hasSelected ? `
-                    <div style="margin-top: 2rem; text-align: center;">
-                        <div style="font-size: 1.5rem; font-weight: bold; ${this.isCorrect ? 'color: #10B981;' : 'color: #EF4444;'}">
-                            ${this.isCorrect ? '✓ 回答正确！' : `✗ 正确答案是 ${current.answer}`}
-                        </div>
-                    </div>
-                    ` : ''}
-
-                    ${this.hasSelected ? `
-                    <div style="margin-top: 2rem; text-align: center;">
-                        <button onclick="PracticeChoicePage.nextQuestion()"
-                            style="background: #10B981; color: white; padding: 1rem 2.5rem; border-radius: 1rem; font-size: 1.25rem; font-weight: bold; border: none; cursor: pointer; box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.3); animation: pulse 2s infinite;">
-                            下一题 →
-                        </button>
-                    </div>
-                    ` : ''}
-                </div>
-
-                <div style="text-align: center;">
-                    <button onclick="PracticeChoicePage.endPractice()"
-                        style="color: #9CA3AF; font-size: 1.125rem; font-weight: 500; cursor: pointer; background: none; border: none;">
-                        结束练习
-                    </button>
-                </div>
+        // 更新题目
+        this.elements.questionDisplay.innerHTML = `
+            <div style="font-size: 48px; font-weight: 700; color: #1C1C1E; letter-spacing: 2px; font-feature-settings: 'tnum';">
+                ${current.display} = ?
             </div>
         `;
+
+        // 更新选项按钮
+        this.elements.optionsGrid.innerHTML = '';
+        this.currentOptions.forEach((option, index) => {
+            const btn = this.createOptionButton(option, index);
+            this.elements.optionsGrid.appendChild(btn);
+        });
+
+        // 更新反馈
+        if (this.hasSelected) {
+            this.elements.feedback.innerHTML = `
+                <div style="font-size: 20px; font-weight: 600; color: ${this.isCorrect ? '#34C759' : '#FF3B30'};
+                     animation: fadeInUp 300ms ease; margin-bottom: 16px;">
+                    ${this.isCorrect ? '✓ 回答正确！' : `✗ 正确答案是 ${current.answer}`}
+                </div>
+                <button onclick="PracticeChoicePage.nextQuestion()"
+                    class="btn-press pulse-gentle"
+                    style="
+                        background: #34C759;
+                        color: white;
+                        padding: 14px 32px;
+                        border-radius: 12px;
+                        font-size: 17px;
+                        font-weight: 600;
+                        border: none;
+                        cursor: pointer;
+                        box-shadow: 0 4px 16px rgba(52, 199, 89, 0.3);
+                        transition: all 200ms ease;
+                    ">
+                    下一题 →
+                </button>
+            `;
+        } else {
+            this.elements.feedback.innerHTML = '';
+        }
     },
 
-    renderOption(option, index) {
-        let bgColor, borderColor, textColor;
+    createOptionButton(option, index) {
+        const btn = document.createElement('button');
+        btn.className = 'btn-press';
+
+        // 计算样式
+        let bgColor, borderColor, textColor, shadow;
 
         if (!this.hasSelected) {
-            bgColor = 'white';
-            borderColor = '#E5E7EB';
-            textColor = '#374151';
+            bgColor = 'rgba(255, 255, 255, 0.9)';
+            borderColor = 'rgba(120, 120, 128, 0.16)';
+            textColor = '#1C1C1E';
+            shadow = '0 2px 8px rgba(0, 0, 0, 0.08)';
         } else {
             if (option === this.selectedAnswer) {
                 if (this.isCorrect) {
-                    bgColor = '#10B981';
-                    borderColor = '#10B981';
+                    bgColor = '#34C759';
+                    borderColor = '#34C759';
                     textColor = 'white';
+                    shadow = '0 4px 16px rgba(52, 199, 89, 0.4)';
                 } else {
-                    bgColor = '#EF4444';
-                    borderColor = '#EF4444';
+                    bgColor = '#FF3B30';
+                    borderColor = '#FF3B30';
                     textColor = 'white';
+                    shadow = '0 4px 16px rgba(255, 59, 48, 0.4)';
                 }
             } else if (option === this.questions[this.currentIndex].answer && !this.isCorrect) {
                 bgColor = '#D1FAE5';
-                borderColor = '#10B981';
+                borderColor = '#34C759';
                 textColor = '#059669';
+                shadow = '0 2px 8px rgba(0, 0, 0, 0.06)';
             } else {
-                bgColor = '#F3F4F6';
-                borderColor = '#E5E7EB';
-                textColor = '#9CA3AF';
+                bgColor = 'rgba(120, 120, 128, 0.08)';
+                borderColor = 'rgba(120, 120, 128, 0.08)';
+                textColor = '#8E8E93';
+                shadow = 'none';
             }
         }
 
-        return `
-            <button onclick="PracticeChoicePage.selectAnswer(${option})"
-                style="height: 6rem; border-radius: 1rem; font-size: 1.875rem; font-weight: bold; border: 2px solid ${borderColor}; background: ${bgColor}; color: ${textColor}; cursor: ${this.hasSelected ? 'default' : 'pointer'}; transition: all 0.15s; display: flex; align-items: center; justify-content: center;"
-                ${this.hasSelected ? 'disabled' : ''}>
-                ${option}
-            </button>
+        btn.style.cssText = `
+            aspect-ratio: 1.3;
+            border-radius: 20px;
+            border: 2px solid ${borderColor};
+            background: ${bgColor};
+            color: ${textColor};
+            font-size: 32px;
+            font-weight: 700;
+            cursor: ${this.hasSelected ? 'default' : 'pointer'};
+            box-shadow: ${shadow};
+            transition: all 200ms cubic-bezier(0.4, 0.0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: ${this.hasSelected && option !== this.selectedAnswer && option !== this.questions[this.currentIndex].answer ? '0.6' : '1'};
         `;
+
+        btn.textContent = option;
+
+        if (!this.hasSelected) {
+            btn.onclick = () => this.selectAnswer(option);
+
+            // 悬停效果
+            btn.addEventListener('mouseenter', () => {
+                btn.style.transform = 'scale(1.03)';
+                btn.style.borderColor = '#007AFF';
+                btn.style.boxShadow = '0 4px 16px rgba(0, 122, 255, 0.15)';
+            });
+
+            btn.addEventListener('mouseleave', () => {
+                btn.style.transform = 'scale(1)';
+                btn.style.borderColor = borderColor;
+                btn.style.boxShadow = shadow;
+            });
+
+            // 按下效果
+            btn.addEventListener('mousedown', () => {
+                btn.style.transform = 'scale(0.97)';
+            });
+
+            btn.addEventListener('mouseup', () => {
+                btn.style.transform = 'scale(1.03)';
+            });
+        }
+
+        return btn;
     },
 
     generateOptions(question) {
@@ -216,7 +398,8 @@ const PracticeChoicePage = {
             }
         }
 
-        this.render();
+        this.updateDisplay();
+        this.updateHeader();
     },
 
     nextQuestion() {
@@ -227,10 +410,23 @@ const PracticeChoicePage = {
             this.selectedAnswer = null;
             this.currentOptions = [];
             this.questionStartTime = Date.now();
-            this.render();
+
+            // 动画过渡
+            this.elements.questionCard.style.animation = 'pageExit 200ms ease';
+            setTimeout(() => {
+                this.updateDisplay();
+                this.updateHeader();
+                this.elements.questionCard.style.animation = 'pageEnter 300ms cubic-bezier(0.34, 1.56, 0.64, 1)';
+            }, 200);
         } else {
             this.finishPractice();
         }
+    },
+
+    updateHeader() {
+        const newHeader = this.createHeader();
+        this.elements.header.replaceWith(newHeader);
+        this.elements.header = newHeader;
     },
 
     endPractice() {
@@ -270,41 +466,7 @@ const PracticeChoicePage = {
         return this.answers.filter(a => a.isCorrect).length * 10;
     },
 
-    init() {
-        const questionsJson = sessionStorage.getItem('practice_questions');
-        if (!questionsJson) {
-            router.navigate('practice-settings');
-            return;
-        }
-
-        document.addEventListener('click', () => {
-            if (typeof SoundManager !== 'undefined') {
-                SoundManager.init();
-            }
-        }, { once: true });
-
-        this.questions = JSON.parse(questionsJson);
-        this.currentIndex = parseInt(sessionStorage.getItem('practice_current') || '0');
-        this.answers = JSON.parse(sessionStorage.getItem('practice_answers') || '[]');
-        this.startTime = parseInt(sessionStorage.getItem('practice_start_time') || Date.now().toString());
-        this.questionStartTime = Date.now();
-
-        this.hasSelected = false;
-        this.isCorrect = false;
-        this.selectedAnswer = null;
-        this.currentOptions = [];
-        this.streak = 0;
-
-        this.answers.forEach(a => {
-            if (a.isCorrect) {
-                this.streak++;
-            } else {
-                this.streak = 0;
-            }
-        });
-
-        this.render();
-
+    bindKeyboard() {
         document.onkeydown = (e) => {
             if (this.hasSelected) {
                 if (e.key === 'Enter') {
