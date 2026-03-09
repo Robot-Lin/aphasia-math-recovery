@@ -27,13 +27,28 @@ const router = {
      * @param {string} page - 页面名称
      */
     navigate(page) {
-        if (this.routes[page]) {
-            this.currentPage = page;
-            this.updateNavStyles();
-            this.routes[page]();
-        } else {
-            console.error(`Page not found: ${page}`);
-            this.navigate('home');
+        try {
+            if (this.routes[page]) {
+                this.currentPage = page;
+                this.updateNavStyles();
+                this.routes[page]();
+            } else {
+                console.error(`Page not found: ${page}`);
+                this.navigate('home');
+            }
+        } catch (error) {
+            console.error('页面导航错误:', error);
+            const container = document.getElementById('page-container');
+            if (container) {
+                container.innerHTML = `
+                    <div style="padding: 40px; text-align: center; color: #FF3B30;">
+                        <h2 style="margin-bottom: 16px;">页面加载出错</h2>
+                        <p style="margin-bottom: 16px;">${error.message}</p>
+                        <pre style="text-align: left; background: #f5f5f5; padding: 16px; border-radius: 8px; overflow: auto;">${error.stack}</pre>
+                        <button onclick="location.reload()" style="margin-top: 20px; padding: 12px 24px; background: #007AFF; color: white; border: none; border-radius: 8px; cursor: pointer;">刷新页面</button>
+                    </div>
+                `;
+            }
         }
     },
 
@@ -91,12 +106,23 @@ const router = {
  * 应用初始化
  */
 function initApp() {
-    // 检查是否有用户数据，没有则初始化
-    const userData = Storage.getUserData();
-    console.log('用户数据已加载:', userData.name);
+    try {
+        // 检查是否有用户数据，没有则初始化
+        const userData = Storage.getUserData();
+        console.log('用户数据已加载:', userData.name);
 
-    // 加载首页
-    router.navigate('home');
+        // 加载首页
+        router.navigate('home');
+    } catch (error) {
+        console.error('应用初始化错误:', error);
+        document.getElementById('page-container').innerHTML = `
+            <div style="padding: 40px; text-align: center; color: #FF3B30;">
+                <h2 style="margin-bottom: 16px;">初始化出错</h2>
+                <p style="margin-bottom: 16px;">${error.message}</p>
+                <pre style="text-align: left; background: #f5f5f5; padding: 16px; border-radius: 8px; overflow: auto;">${error.stack}</pre>
+            </div>
+        `;
+    }
 
     // 添加全局错误处理
     window.onerror = function(msg, url, lineNo, columnNo, error) {
