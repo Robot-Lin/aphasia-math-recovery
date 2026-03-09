@@ -19,35 +19,47 @@ const SettingsPage = {
 
         const page = document.createElement('div');
         page.style.cssText = `
-            max-width: 600px;
+            max-width: 1000px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 16px 24px;
         `;
 
         // 页面标题
         const header = document.createElement('div');
-        header.style.cssText = 'text-align: center; margin-bottom: 32px;';
+        header.style.cssText = 'text-align: center; margin-bottom: 24px;';
         header.innerHTML = `
-            <h2 style="font-size: 32px; font-weight: 700; color: #1C1C1E; margin-bottom: 8px;">设置</h2>
-            <p style="font-size: 17px; color: #8E8E93;">自定义你的练习体验</p>
+            <h2 style="font-size: 28px; font-weight: 700; color: #1C1C1E; margin-bottom: 8px;">设置</h2>
+            <p style="font-size: 15px; color: #8E8E93;">自定义你的练习体验</p>
         `;
         page.appendChild(header);
 
-        // 音效设置组
-        page.appendChild(this.createSectionTitle('音效设置'));
-        page.appendChild(this.createSoundSettings());
+        // 设置内容网格
+        const settingsGrid = document.createElement('div');
+        settingsGrid.style.cssText = `
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        `;
 
-        // 首页显示设置组
-        page.appendChild(this.createSectionTitle('首页显示'));
-        page.appendChild(this.createDisplaySettings());
+        // 左侧列
+        const leftColumn = document.createElement('div');
+        leftColumn.style.cssText = 'display: flex; flex-direction: column; gap: 4px;';
+        leftColumn.appendChild(this.createSectionTitle('音效设置'));
+        leftColumn.appendChild(this.createSoundSettings());
+        leftColumn.appendChild(this.createSectionTitle('首页显示'));
+        leftColumn.appendChild(this.createDisplaySettings());
+        settingsGrid.appendChild(leftColumn);
 
-        // 数据管理组
-        page.appendChild(this.createSectionTitle('数据管理'));
-        page.appendChild(this.createDataManagement());
+        // 右侧列
+        const rightColumn = document.createElement('div');
+        rightColumn.style.cssText = 'display: flex; flex-direction: column; gap: 4px;';
+        rightColumn.appendChild(this.createSectionTitle('数据管理'));
+        rightColumn.appendChild(this.createDataManagement());
+        rightColumn.appendChild(this.createSectionTitle('关于'));
+        rightColumn.appendChild(this.createAboutSection());
+        settingsGrid.appendChild(rightColumn);
 
-        // 关于组
-        page.appendChild(this.createSectionTitle('关于'));
-        page.appendChild(this.createAboutSection());
+        page.appendChild(settingsGrid);
 
         container.appendChild(page);
     },
@@ -55,12 +67,12 @@ const SettingsPage = {
     createSectionTitle(title) {
         const el = document.createElement('div');
         el.style.cssText = `
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
             color: #8E8E93;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            margin: 24px 0 8px 16px;
+            margin: 16px 0 8px 12px;
         `;
         el.textContent = title;
         return el;
@@ -80,21 +92,21 @@ const SettingsPage = {
                 id: 'sound-keypress',
                 icon: '🔊',
                 title: '按键音效',
-                desc: '按下数字键盘时播放声音',
+                desc: '按下数字键盘时播放',
                 key: 'soundKeypress'
             },
             {
                 id: 'sound-feedback',
                 icon: '✅',
                 title: '答题反馈',
-                desc: '答对/答错时播放提示音',
+                desc: '答对/答错提示音',
                 key: 'soundFeedback'
             },
             {
                 id: 'speech-enabled',
                 icon: '🗣️',
                 title: '语音朗读',
-                desc: '朗读题目和答案，辅助听觉学习',
+                desc: '朗读题目和答案',
                 key: 'speechEnabled'
             }
         ];
@@ -104,7 +116,7 @@ const SettingsPage = {
             item.style.cssText = `
                 display: flex;
                 align-items: center;
-                padding: 16px;
+                padding: 12px 16px;
                 ${index !== settings.length - 1 ? 'border-bottom: 1px solid rgba(0, 0, 0, 0.06);' : ''}
             `;
 
@@ -122,9 +134,9 @@ const SettingsPage = {
                     margin-right: 12px;
                     font-size: 16px;
                 ">${setting.icon}</div>
-                <div style="flex: 1;">
-                    <div style="font-size: 16px; font-weight: 600; color: #1C1C1E;">${setting.title}</div>
-                    <div style="font-size: 13px; color: #8E8E93; margin-top: 2px;">${setting.desc}</div>
+                <div style="flex: 1; min-width: 0;">
+                    <div style="font-size: 15px; font-weight: 600; color: #1C1C1E;">${setting.title}</div>
+                    <div style="font-size: 12px; color: #8E8E93; margin-top: 1px;">${setting.desc}</div>
                 </div>
                 <div class="toggle-switch ${isEnabled ? 'active' : ''}" data-key="${setting.key}" style="
                     width: 51px;
@@ -173,7 +185,7 @@ const SettingsPage = {
                 id: 'display-radar',
                 icon: '📊',
                 title: '能力雷达图',
-                desc: '显示加减乘除能力分析',
+                desc: '加减乘除能力分析',
                 key: 'radarChart',
                 defaultValue: false
             },
@@ -181,7 +193,7 @@ const SettingsPage = {
                 id: 'display-progress',
                 icon: '📈',
                 title: '进步曲线',
-                desc: '显示最近7天正确率趋势',
+                desc: '最近7天正确率趋势',
                 key: 'progressChart',
                 defaultValue: true
             },
@@ -189,7 +201,7 @@ const SettingsPage = {
                 id: 'display-badges',
                 icon: '🏆',
                 title: '徽章展示',
-                desc: '显示已获得的成就徽章',
+                desc: '已获得的成就徽章',
                 key: 'badgesSection',
                 defaultValue: true
             },
@@ -197,7 +209,7 @@ const SettingsPage = {
                 id: 'display-review',
                 icon: '🧠',
                 title: '复习提醒',
-                desc: '有待复习错题时显示提醒',
+                desc: '待复习错题提醒',
                 key: 'reviewAlert',
                 defaultValue: true
             },
@@ -205,7 +217,7 @@ const SettingsPage = {
                 id: 'display-tips',
                 icon: '💡',
                 title: '使用提示',
-                desc: '显示使用帮助和提示',
+                desc: '使用帮助和提示',
                 key: 'tipsSection',
                 defaultValue: true
             },
@@ -213,7 +225,7 @@ const SettingsPage = {
                 id: 'display-welcome',
                 icon: '👋',
                 title: '欢迎区域',
-                desc: '显示欢迎标题和描述',
+                desc: '欢迎标题和描述',
                 key: 'welcomeSection',
                 defaultValue: true
             }
@@ -224,7 +236,7 @@ const SettingsPage = {
             item.style.cssText = `
                 display: flex;
                 align-items: center;
-                padding: 16px;
+                padding: 12px 16px;
                 ${index !== settings.length - 1 ? 'border-bottom: 1px solid rgba(0, 0, 0, 0.06);' : ''}
             `;
 
@@ -244,9 +256,9 @@ const SettingsPage = {
                     margin-right: 12px;
                     font-size: 16px;
                 ">${setting.icon}</div>
-                <div style="flex: 1;">
-                    <div style="font-size: 16px; font-weight: 600; color: #1C1C1E;">${setting.title}</div>
-                    <div style="font-size: 13px; color: #8E8E93; margin-top: 2px;">${setting.desc}</div>
+                <div style="flex: 1; min-width: 0;">
+                    <div style="font-size: 15px; font-weight: 600; color: #1C1C1E;">${setting.title}</div>
+                    <div style="font-size: 12px; color: #8E8E93; margin-top: 1px;">${setting.desc}</div>
                 </div>
                 <div class="toggle-switch display-toggle ${isEnabled ? 'active' : ''}" data-key="${setting.key}" style="
                     width: 51px;
@@ -291,15 +303,15 @@ const SettingsPage = {
                 id: 'export-data',
                 icon: '📤',
                 title: '导出数据',
-                desc: '将所有练习数据导出为 JSON 文件',
+                desc: '导出为 JSON 文件',
                 color: '#007AFF',
                 action: () => this.exportData()
             },
             {
                 id: 'clear-data',
                 icon: '🗑️',
-                title: '清除所有数据',
-                desc: '重置所有练习记录（不可恢复）',
+                title: '清除数据',
+                desc: '重置所有记录',
                 color: '#FF3B30',
                 action: () => this.showClearConfirm()
             }
@@ -310,7 +322,7 @@ const SettingsPage = {
             item.style.cssText = `
                 display: flex;
                 align-items: center;
-                padding: 16px;
+                padding: 12px 16px;
                 cursor: pointer;
                 transition: background 150ms ease;
                 ${index !== actions.length - 1 ? 'border-bottom: 1px solid rgba(0, 0, 0, 0.06);' : ''}
@@ -328,9 +340,9 @@ const SettingsPage = {
                     margin-right: 12px;
                     font-size: 16px;
                 ">${action.icon}</div>
-                <div style="flex: 1;">
-                    <div style="font-size: 16px; font-weight: 600; color: ${action.color};">${action.title}</div>
-                    <div style="font-size: 13px; color: #8E8E93; margin-top: 2px;">${action.desc}</div>
+                <div style="flex: 1; min-width: 0;">
+                    <div style="font-size: 15px; font-weight: 600; color: ${action.color};">${action.title}</div>
+                    <div style="font-size: 12px; color: #8E8E93; margin-top: 1px;">${action.desc}</div>
                 </div>
                 <div style="color: #C7C7CC; font-size: 14px;">›</div>
             `;
@@ -350,28 +362,30 @@ const SettingsPage = {
         card.className = 'glass';
         card.style.cssText = `
             border-radius: 16px;
-            padding: 24px;
-            text-align: center;
+            padding: 20px;
             box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
         `;
 
         card.innerHTML = `
-            <div style="
-                width: 64px;
-                height: 64px;
-                background: linear-gradient(135deg, #007AFF 0%, #0051D5 100%);
-                border-radius: 16px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                margin: 0 auto 16px;
-                font-size: 32px;
-            ">🧮</div>
-            <div style="font-size: 20px; font-weight: 700; color: #1C1C1E; margin-bottom: 4px;">算术康复</div>
-            <div style="font-size: 15px; color: #8E8E93; margin-bottom: 16px;">版本 1.0.0</div>
-            <div style="font-size: 13px; color: #8E8E93; line-height: 1.6;">
-                专为命名性失语症患者设计的算术康复练习工具<br>
-                采用科学的艾宾浩斯遗忘曲线进行错题复习
+            <div style="display: flex; align-items: center; gap: 16px;">
+                <div style="
+                    width: 56px;
+                    height: 56px;
+                    background: linear-gradient(135deg, #007AFF 0%, #0051D5 100%);
+                    border-radius: 14px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 28px;
+                    flex-shrink: 0;
+                ">🧮</div>
+                <div>
+                    <div style="font-size: 17px; font-weight: 700; color: #1C1C1E; margin-bottom: 2px;">算术康复</div>
+                    <div style="font-size: 13px; color: #8E8E93; margin-bottom: 4px;">版本 1.0.0</div>
+                    <div style="font-size: 12px; color: #8E8E93; line-height: 1.5;">
+                        专为命名性失语症患者设计的算术康复练习工具
+                    </div>
+                </div>
             </div>
         `;
 

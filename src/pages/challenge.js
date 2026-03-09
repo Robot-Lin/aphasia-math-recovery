@@ -311,9 +311,9 @@ const ChallengePage = {
 
         const page = document.createElement('div');
         page.style.cssText = `
-            max-width: 800px;
+            max-width: 1200px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 16px 24px;
         `;
 
         // 页面标题

@@ -67,9 +67,9 @@ const PracticeChoicePage = {
 
         const page = document.createElement('div');
         page.style.cssText = `
-            max-width: 600px;
+            max-width: 900px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 16px 24px;
         `;
 
         // 头部信息栏

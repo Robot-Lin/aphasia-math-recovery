@@ -23,9 +23,9 @@ const HomePage = {
 
         const page = document.createElement('div');
         page.style.cssText = `
-            max-width: 800px;
+            max-width: 1400px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 16px 24px;
         `;
 
         // 欢迎区域（可开关）
@@ -91,9 +91,9 @@ const HomePage = {
         const grid = document.createElement('div');
         grid.style.cssText = `
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 16px;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
         `;
 
         const stats = [
@@ -144,19 +144,19 @@ const HomePage = {
         const card = document.createElement('div');
         card.style.cssText = `
             background: linear-gradient(135deg, #007AFF 0%, #0051D5 100%);
-            border-radius: 24px;
-            padding: 32px;
-            margin-bottom: 24px;
+            border-radius: 20px;
+            padding: 24px 32px;
+            margin-bottom: 20px;
             box-shadow: 0 8px 32px rgba(0, 122, 255, 0.3);
         `;
 
         const content = document.createElement('div');
         content.style.cssText = `
             display: flex;
-            flex-direction: column;
+            flex-direction: row;
             align-items: center;
+            justify-content: space-between;
             gap: 24px;
-            text-align: center;
         `;
 
         // 文字区域
