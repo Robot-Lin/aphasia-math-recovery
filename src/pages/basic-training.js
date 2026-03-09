@@ -13,7 +13,8 @@ const BasicTrainingPage = {
         mode: 'fillblank', // fillblank, flashcard
         type: 'multiplication', // multiplication, additionTen, subtractionTen
         level: 1,
-        isProcessing: false // 防止重复点击锁
+        isProcessing: false, // 防止重复点击锁
+        hasStarted: false // 是否已开始训练
     },
 
     // 训练类型配置
@@ -57,9 +58,188 @@ const BasicTrainingPage = {
     },
 
     init() {
+        // 重置状态，显示选择页面
+        this.state.hasStarted = false;
+        this.renderSelection();
+    },
+
+    // 开始训练
+    startTraining(type, level) {
+        this.state.type = type;
+        this.state.level = level;
+        this.state.hasStarted = true;
+        this.state.currentIndex = 0;
+        this.state.showAnswer = false;
+        this.state.isProcessing = false;
+
         this.loadProgress();
         this.generateItems();
         this.render();
+    },
+
+    // 渲染选择页面
+    renderSelection() {
+        const container = document.getElementById('page-container');
+        if (!container) return;
+
+        container.innerHTML = '';
+
+        const page = document.createElement('div');
+        page.style.cssText = `
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        `;
+
+        // 页面标题
+        const header = document.createElement('div');
+        header.style.cssText = 'text-align: center; margin-bottom: 40px;';
+        header.innerHTML = `
+            <h2 style="font-size: 36px; font-weight: 800; color: #1C1C1E; margin-bottom: 12px;">
+                📚 基础训练
+            </h2>
+            <p style="font-size: 17px; color: #8E8E93;">
+                选择训练类型，建立扎实基础
+            </p>
+        `;
+        page.appendChild(header);
+
+        // 训练类型卡片网格
+        const typesGrid = document.createElement('div');
+        typesGrid.style.cssText = `
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        `;
+
+        // 三种训练类型
+        const types = ['additionTen', 'subtractionTen', 'multiplication'];
+        types.forEach(typeKey => {
+            const type = this.trainingTypes[typeKey];
+            const typeCard = this.createTypeCard(typeKey, type);
+            typesGrid.appendChild(typeCard);
+        });
+
+        page.appendChild(typesGrid);
+
+        // 提示信息
+        const tip = document.createElement('div');
+        tip.style.cssText = `
+            text-align: center;
+            padding: 20px;
+            background: rgba(0, 122, 255, 0.06);
+            border-radius: 16px;
+            color: #8E8E93;
+            font-size: 14px;
+        `;
+        tip.innerHTML = '💡 建议从 L1 开始，循序渐进提升能力';
+        page.appendChild(tip);
+
+        container.appendChild(page);
+    },
+
+    // 创建训练类型卡片
+    createTypeCard(typeKey, type) {
+        const card = document.createElement('div');
+        card.className = 'glass';
+        card.style.cssText = `
+            border-radius: 24px;
+            padding: 28px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.9) 100%);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+            transition: transform 200ms ease, box-shadow 200ms ease;
+        `;
+
+        // 获取该类型的进度
+        const userData = Storage.getUserData();
+        const progressKey = `basic_${typeKey}`;
+        const progress = userData.skillProgress?.[progressKey] || {};
+        const currentLevel = progress.level || 1;
+        const masteredCount = progress.mastered?.length || 0;
+
+        // 计算总题数
+        const totalItems = typeKey === 'multiplication' ? (currentLevel === 1 ? 25 : (currentLevel === 2 ? 81 : 144)) : 45;
+        const progressPercent = Math.round((masteredCount / totalItems) * 100);
+
+        card.innerHTML = `
+            <div style="text-align: center; margin-bottom: 20px;">
+                <div style="
+                    width: 64px;
+                    height: 64px;
+                    margin: 0 auto 16px;
+                    background: ${type.color}15;
+                    border-radius: 20px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 32px;
+                ">${type.icon}</div>
+                <h3 style="font-size: 22px; font-weight: 700; color: #1C1C1E; margin-bottom: 6px;">
+                    ${type.name}
+                </h3>
+                <p style="font-size: 14px; color: #8E8E93;">${type.desc}</p>
+            </div>
+
+            <!-- 进度条 -->
+            <div style="margin-bottom: 20px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                    <span style="font-size: 12px; color: #8E8E93;">当前进度</span>
+                    <span style="font-size: 12px; color: ${type.color}; font-weight: 600;">${progressPercent}%</span>
+                </div>
+                <div style="height: 6px; background: #E5E5EA; border-radius: 3px; overflow: hidden;">
+                    <div style="
+                        width: ${progressPercent}%;
+                        height: 100%;
+                        background: ${type.color};
+                        border-radius: 3px;
+                        transition: width 400ms ease;
+                    "></div>
+                </div>
+            </div>
+
+            <!-- 等级选择按钮 -->
+            <div style="display: flex; gap: 8px;">
+                ${type.levels.map((lvl, idx) => {
+                    const levelNum = idx + 1;
+                    const isUnlocked = levelNum <= currentLevel;
+                    return `
+                        <button
+                            onclick="BasicTrainingPage.startTraining('${typeKey}', ${levelNum})"
+                            style="
+                                flex: 1;
+                                padding: 12px 8px;
+                                border-radius: 12px;
+                                border: 2px solid ${isUnlocked ? type.color : '#E5E5EA'};
+                                background: ${isUnlocked ? type.color : '#F2F2F7'};
+                                color: ${isUnlocked ? 'white' : '#C7C7CC'};
+                                font-size: 14px;
+                                font-weight: 600;
+                                cursor: ${isUnlocked ? 'pointer' : 'not-allowed'};
+                                transition: all 200ms ease;
+                                ${isUnlocked ? `box-shadow: 0 4px 12px ${type.color}30;` : ''}
+                            "
+                            ${!isUnlocked ? 'disabled' : ''}
+                        >
+                            <div style="font-size: 11px; opacity: 0.9; margin-bottom: 2px;">${lvl.label}</div>
+                            <div style="font-size: 10px; opacity: 0.7;">${lvl.desc}</div>
+                        </button>
+                    `;
+                }).join('')}
+            </div>
+        `;
+
+        // 悬停效果
+        card.addEventListener('mouseenter', () => {
+            card.style.transform = 'translateY(-4px)';
+            card.style.boxShadow = '0 12px 40px rgba(0, 0, 0, 0.12)';
+        });
+        card.addEventListener('mouseleave', () => {
+            card.style.transform = 'translateY(0)';
+            card.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.08)';
+        });
+
+        return card;
     },
 
     // 加载已掌握的进度
@@ -68,7 +248,7 @@ const BasicTrainingPage = {
         const progressKey = `basic_${this.state.type}`;
         const progress = userData.skillProgress?.[progressKey] || {};
         this.state.mastered = new Set(progress.mastered || []);
-        this.state.level = progress.level || 1;
+        // 不覆盖 level，使用用户选择的 level
     },
 
     // 生成训练题目
@@ -272,15 +452,36 @@ const BasicTrainingPage = {
         const header = document.createElement('div');
         header.style.cssText = 'margin-bottom: 20px;';
         header.innerHTML = `
-            <div style="display: flex; align-items: center; gap: 12px;">
-                <span style="font-size: 32px;">${typeConfig.icon}</span>
-                <div>
-                    <h2 style="font-size: 24px; font-weight: 700; color: #1C1C1E; margin: 0;">${typeConfig.name}</h2>
-                    <p style="font-size: 14px; color: #8E8E93; margin: 2px 0 0 0;">${typeConfig.desc}</p>
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span style="font-size: 32px;">${typeConfig.icon}</span>
+                    <div>
+                        <h2 style="font-size: 24px; font-weight: 700; color: #1C1C1E; margin: 0;">${typeConfig.name}</h2>
+                        <p style="font-size: 14px; color: #8E8E93; margin: 2px 0 0 0;">${typeConfig.desc}</p>
+                    </div>
                 </div>
+                <button onclick="BasicTrainingPage.backToSelection()" style="
+                    padding: 10px 20px;
+                    background: rgba(0, 0, 0, 0.06);
+                    border: none;
+                    border-radius: 10px;
+                    font-size: 14px;
+                    font-weight: 600;
+                    color: #007AFF;
+                    cursor: pointer;
+                    transition: all 200ms ease;
+                ">
+                    ← 返回选择
+                </button>
             </div>
         `;
         return header;
+    },
+
+    // 返回选择页面
+    backToSelection() {
+        this.state.hasStarted = false;
+        this.renderSelection();
     },
 
     createTypeSelector() {
