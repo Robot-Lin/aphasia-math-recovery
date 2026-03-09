@@ -1,5 +1,6 @@
 /**
- * 练习设置页模块 - Phase 2 修复版
+ * 练习设置页 - Apple 风格重构版
+ * 局部更新，无页面刷新
  */
 
 const PracticeSettingsPage = {
@@ -10,161 +11,258 @@ const PracticeSettingsPage = {
         count: 5
     },
 
+    // DOM 引用缓存
+    elements: {},
+
+    init() {
+        this.resetConfig();
+        this.render();
+        this.bindKeyboard();
+    },
+
+    resetConfig() {
+        this.config = {
+            mode: 'keypad',
+            difficulty: 'beginner',
+            types: ['addition'],
+            count: 5
+        };
+    },
+
     render() {
         const container = document.getElementById('page-container');
         if (!container) return;
 
-        // 构建运算类型选择按钮
-        const typeButtons = [
-            { id: 'addition', icon: '➕', name: '加法' },
-            { id: 'subtraction', icon: '➖', name: '减法' },
-            { id: 'multiplication', icon: '✖️', name: '乘法' },
-            { id: 'division', icon: '➗', name: '除法' }
-        ].map(type => {
-            const isActive = this.config.types.includes(type.id);
-            return `
-                <button id="type-${type.id}"
-                    class="setting-option ${isActive ? 'setting-active' : ''}"
-                    onclick="PracticeSettingsPage.toggleType('${type.id}')"
-                    style="padding: 1rem; border: 2px solid ${isActive ? '#3B82F6' : '#E5E7EB'};
-                           border-radius: 0.75rem; text-align: center; cursor: pointer;
-                           background: ${isActive ? '#EFF6FF' : 'white'};">
-                    <div style="font-size: 1.5rem; margin-bottom: 0.25rem;">${type.icon}</div>
-                    <div style="font-weight: bold;">${type.name}</div>
-                </button>
-            `;
-        }).join('');
+        // 清空容器
+        container.innerHTML = '';
 
-        // 构建题量按钮
-        const countButtons = [5, 10, 15, 20].map(num => {
-            const isActive = this.config.count === num;
-            return `
-                <button id="count-${num}"
-                    class="setting-option ${isActive ? 'setting-active' : ''}"
-                    onclick="PracticeSettingsPage.selectCount(${num})"
-                    style="padding: 1rem; border: 2px solid ${isActive ? '#3B82F6' : '#E5E7EB'};
-                           border-radius: 0.75rem; text-align: center; cursor: pointer;
-                           background: ${isActive ? '#EFF6FF' : 'white'};">
-                    <div style="font-size: 1.5rem; font-weight: bold;">${num}</div>
-                    <div style="font-size: 0.875rem; color: #6B7280;">题</div>
-                </button>
-            `;
-        }).join('');
+        // 创建页面容器（只创建一次）
+        const page = document.createElement('div');
+        page.className = 'page-enter';
+        page.style.cssText = `
+            max-width: 640px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        `;
 
-        container.innerHTML = `
-            <div class="fade-in" style="max-width: 42rem; margin: 0 auto;">
-                <div style="text-align: center; margin-bottom: 2.5rem;">
-                    <h2 style="font-size: 2.25rem; font-weight: bold; color: #1F2937; margin-bottom: 0.75rem;">练习设置</h2>
-                    <p style="font-size: 1.25rem; color: #4B5563;">选择适合您的练习模式</p>
-                </div>
+        // 标题
+        const header = document.createElement('div');
+        header.style.cssText = 'text-align: center; margin-bottom: 32px;';
+        header.innerHTML = `
+            <h1 style="font-size: 32px; font-weight: 700; color: #1C1C1E; margin-bottom: 8px; letter-spacing: -0.5px;">练习设置</h1>
+            <p style="font-size: 17px; color: #8E8E93;">选择适合您的练习模式</p>
+        `;
+        page.appendChild(header);
 
-                <div style="background: white; border-radius: 1.5rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1); border: 1px solid #E5E7EB; overflow: hidden;">
-                    <div style="background: linear-gradient(to right, #3B82F6, #2563EB); padding: 1.5rem 2rem; color: white;">
-                        <h3 style="font-size: 1.5rem; font-weight: bold; display: flex; align-items: center; gap: 0.75rem;">
-                            <span>⚙️</span>
-                            <span>当前配置</span>
-                        </h3>
-                    </div>
+        // 主卡片
+        const card = document.createElement('div');
+        card.className = 'glass card-hover';
+        card.style.cssText = `
+            border-radius: 24px;
+            padding: 8px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+        `;
 
-                    <div style="padding: 2rem; display: flex; flex-direction: column; gap: 2rem;">
-                        <!-- 答题模式 -->
-                        <div>
-                            <label style="display: block; font-size: 1.125rem; font-weight: bold; color: #374151; margin-bottom: 1rem;">答题模式</label>
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                                <button onclick="PracticeSettingsPage.selectMode('keypad')"
-                                    style="padding: 1rem; border: 2px solid ${this.config.mode === 'keypad' ? '#3B82F6' : '#E5E7EB'};
-                                           border-radius: 0.75rem; text-align: center; cursor: pointer;
-                                           background: ${this.config.mode === 'keypad' ? '#EFF6FF' : 'white'};">
-                                    <div style="font-size: 1.875rem; margin-bottom: 0.5rem;">⌨️</div>
-                                    <div style="font-weight: bold;">键盘输入</div>
-                                    <div style="font-size: 0.875rem; color: #6B7280; margin-top: 0.25rem;">使用数字键盘</div>
-                                </button>
-                                <button onclick="PracticeSettingsPage.selectMode('choice')"
-                                    style="padding: 1rem; border: 2px solid ${this.config.mode === 'choice' ? '#3B82F6' : '#E5E7EB'};
-                                           border-radius: 0.75rem; text-align: center; cursor: pointer;
-                                           background: ${this.config.mode === 'choice' ? '#EFF6FF' : 'white'};">
-                                    <div style="font-size: 1.875rem; margin-bottom: 0.5rem;">🔘</div>
-                                    <div style="font-weight: bold;">选择题</div>
-                                    <div style="font-size: 0.875rem; color: #6B7280; margin-top: 0.25rem;">从选项中选择</div>
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- 难度选择 -->
-                        <div>
-                            <label style="display: block; font-size: 1.125rem; font-weight: bold; color: #374151; margin-bottom: 1rem;">难度等级</label>
-                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
-                                ${[
-                                    { id: 'beginner', icon: '🌱', name: '初级' },
-                                    { id: 'intermediate', icon: '🌿', name: '中级' },
-                                    { id: 'advanced', icon: '🌳', name: '高级' }
-                                ].map(diff => `
-                                    <button onclick="PracticeSettingsPage.selectDifficulty('${diff.id}')"
-                                        style="padding: 1rem; border: 2px solid ${this.config.difficulty === diff.id ? '#3B82F6' : '#E5E7EB'};
-                                               border-radius: 0.75rem; text-align: center; cursor: pointer;
-                                               background: ${this.config.difficulty === diff.id ? '#EFF6FF' : 'white'};">
-                                        <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">${diff.icon}</div>
-                                        <div style="font-weight: bold;">${diff.name}</div>
-                                    </button>
-                                `).join('')}
-                            </div>
-                        </div>
-
-                        <!-- 运算类型 -->
-                        <div>
-                            <label style="display: block; font-size: 1.125rem; font-weight: bold; color: #374151; margin-bottom: 1rem;">
-                                运算类型 <span style="font-weight: normal; color: #6B7280; margin-left: 0.5rem;">（可多选）</span>
-                            </label>
-                            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem;">
-                                ${typeButtons}
-                            </div>
-                            <p id="type-error" style="color: #EF4444; font-size: 0.875rem; margin-top: 0.5rem; display: none;">请至少选择一种运算类型</p>
-                        </div>
-
-                        <!-- 题量选择 -->
-                        <div>
-                            <label style="display: block; font-size: 1.125rem; font-weight: bold; color: #374151; margin-bottom: 1rem;">题目数量</label>
-                            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem;">
-                                ${countButtons}
-                            </div>
-                        </div>
-
-                        <!-- 配置说明 -->
-                        <div style="background: #EFF6FF; border-radius: 1rem; padding: 1.5rem; border: 2px solid #BFDBFE;">
-                            <h4 style="font-size: 1.125rem; font-weight: bold; color: #1E40AF; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
-                                <span>ℹ️</span>
-                                <span>当前配置说明</span>
-                            </h4>
-                            <div style="color: #1E40AF; line-height: 1.75;">
-                                ${this.getDifficultyDescription()}
-                            </div>
-                        </div>
-                    </div>
-
-                    <div style="padding: 1.5rem 2rem; background: #F9FAFB; border-top: 1px solid #E5E7EB;">
-                        <button onclick="PracticeSettingsPage.startPractice()"
-                            style="width: 100%; background: linear-gradient(to right, #3B82F6, #2563EB); color: white;
-                                   padding: 1.25rem; border-radius: 1rem; font-size: 1.5rem; font-weight: bold;
-                                   border: none; cursor: pointer; box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3);
-                                   display: flex; align-items: center; justify-content: center; gap: 0.75rem;">
-                            <span>🚀</span>
-                            <span>开始练习</span>
-                        </button>
-                        <p style="text-align: center; color: #9CA3AF; font-size: 0.875rem; margin-top: 1rem;">按 Enter 键快速开始</p>
-                    </div>
-                </div>
+        // 卡片头部
+        const cardHeader = document.createElement('div');
+        cardHeader.style.cssText = `
+            background: linear-gradient(135deg, #007AFF 0%, #0051D5 100%);
+            border-radius: 20px;
+            padding: 20px 24px;
+            margin: 8px 8px 16px 8px;
+            color: white;
+        `;
+        cardHeader.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <span style="font-size: 24px;">⚙️</span>
+                <span style="font-size: 20px; font-weight: 700;">当前配置</span>
             </div>
         `;
+        card.appendChild(cardHeader);
+
+        // 设置内容区域
+        const content = document.createElement('div');
+        content.style.cssText = 'padding: 8px 16px 16px 16px; display: flex; flex-direction: column; gap: 24px;';
+
+        // 1. 答题模式
+        this.elements.modeSection = this.createSection('答题模式');
+        this.elements.modeGrid = this.createGrid(2);
+        this.updateModeButtons();
+        this.elements.modeSection.appendChild(this.elements.modeGrid);
+        content.appendChild(this.elements.modeSection);
+
+        // 2. 难度选择
+        this.elements.diffSection = this.createSection('难度等级');
+        this.elements.diffGrid = this.createGrid(3);
+        this.updateDifficultyButtons();
+        this.elements.diffSection.appendChild(this.elements.diffGrid);
+        content.appendChild(this.elements.diffSection);
+
+        // 3. 运算类型
+        this.elements.typeSection = this.createSection('运算类型', '可多选');
+        this.elements.typeGrid = this.createGrid(4);
+        this.updateTypeButtons();
+        this.elements.typeSection.appendChild(this.elements.typeGrid);
+
+        // 错误提示
+        this.elements.typeError = document.createElement('p');
+        this.elements.typeError.style.cssText = 'color: #FF3B30; font-size: 13px; margin-top: 8px; display: none;';
+        this.elements.typeError.textContent = '请至少选择一种运算类型';
+        this.elements.typeSection.appendChild(this.elements.typeError);
+        content.appendChild(this.elements.typeSection);
+
+        // 4. 题量选择
+        this.elements.countSection = this.createSection('题目数量');
+        this.elements.countGrid = this.createGrid(4);
+        this.updateCountButtons();
+        this.elements.countSection.appendChild(this.elements.countGrid);
+        content.appendChild(this.elements.countSection);
+
+        // 5. 配置说明
+        this.elements.infoCard = this.createInfoCard();
+        this.updateInfoCard();
+        content.appendChild(this.elements.infoCard);
+
+        // 开始按钮
+        const buttonWrapper = document.createElement('div');
+        buttonWrapper.style.cssText = 'padding: 16px 8px 8px 8px;';
+
+        const startBtn = DesignSystem.createPrimaryButton('开始练习', () => this.startPractice(), {
+            icon: '🚀',
+            size: 'large'
+        });
+        buttonWrapper.appendChild(startBtn);
+
+        const hint = document.createElement('p');
+        hint.style.cssText = 'text-align: center; color: #8E8E93; font-size: 13px; margin-top: 12px;';
+        hint.textContent = '按 Enter 键快速开始';
+        buttonWrapper.appendChild(hint);
+
+        content.appendChild(buttonWrapper);
+        card.appendChild(content);
+        page.appendChild(card);
+        container.appendChild(page);
+
+        // 缓存引用
+        this.elements.container = container;
+        this.elements.page = page;
     },
 
-    getDifficultyDescription() {
-        const typeNames = this.config.types.map(t => {
-            const names = { addition: '加法', subtraction: '减法', multiplication: '乘法', division: '除法' };
-            return names[t] || t;
-        }).join('、');
+    createSection(title, subtitle = '') {
+        const section = document.createElement('div');
+        const label = document.createElement('label');
+        label.style.cssText = `
+            display: block;
+            font-size: 15px;
+            font-weight: 600;
+            color: #1C1C1E;
+            margin-bottom: 12px;
+        `;
+        label.innerHTML = subtitle
+            ? `${title} <span style="font-weight: 400; color: #8E8E93; margin-left: 4px;">(${subtitle})</span>`
+            : title;
+        section.appendChild(label);
+        return section;
+    },
 
+    createGrid(columns) {
+        const grid = document.createElement('div');
+        grid.style.cssText = `
+            display: grid;
+            grid-template-columns: repeat(${columns}, 1fr);
+            gap: 12px;
+        `;
+        return grid;
+    },
+
+    createInfoCard() {
+        const card = document.createElement('div');
+        card.style.cssText = `
+            background: rgba(0, 122, 255, 0.06);
+            border-radius: 16px;
+            padding: 16px 20px;
+            border: 1px solid rgba(0, 122, 255, 0.15);
+        `;
+        return card;
+    },
+
+    // 更新模式按钮（局部更新）
+    updateModeButtons() {
+        this.elements.modeGrid.innerHTML = '';
+
+        const modes = [
+            { id: 'keypad', icon: '⌨️', label: '键盘输入', desc: '使用数字键盘' },
+            { id: 'choice', icon: '🔘', label: '选择题', desc: '从选项中选择' }
+        ];
+
+        modes.forEach(mode => {
+            const isActive = this.config.mode === mode.id;
+            const btn = this.createOptionButton(mode.icon, mode.label, mode.desc, isActive, () => {
+                this.selectMode(mode.id);
+            });
+            this.elements.modeGrid.appendChild(btn);
+        });
+    },
+
+    // 更新难度按钮（局部更新）
+    updateDifficultyButtons() {
+        this.elements.diffGrid.innerHTML = '';
+
+        const diffs = [
+            { id: 'beginner', icon: '🌱', label: '初级' },
+            { id: 'intermediate', icon: '🌿', label: '中级' },
+            { id: 'advanced', icon: '🌳', label: '高级' }
+        ];
+
+        diffs.forEach(diff => {
+            const isActive = this.config.difficulty === diff.id;
+            const btn = this.createOptionButton(diff.icon, diff.label, '', isActive, () => {
+                this.selectDifficulty(diff.id);
+            });
+            this.elements.diffGrid.appendChild(btn);
+        });
+    },
+
+    // 更新类型按钮（局部更新）
+    updateTypeButtons() {
+        this.elements.typeGrid.innerHTML = '';
+
+        const types = [
+            { id: 'addition', icon: '➕', label: '加法' },
+            { id: 'subtraction', icon: '➖', label: '减法' },
+            { id: 'multiplication', icon: '✖️', label: '乘法' },
+            { id: 'division', icon: '➗', label: '除法' }
+        ];
+
+        types.forEach(type => {
+            const isActive = this.config.types.includes(type.id);
+            const btn = this.createOptionButton(type.icon, type.label, '', isActive, () => {
+                this.toggleType(type.id);
+            });
+            this.elements.typeGrid.appendChild(btn);
+        });
+    },
+
+    // 更新题量按钮（局部更新）
+    updateCountButtons() {
+        this.elements.countGrid.innerHTML = '';
+
+        [5, 10, 15, 20].forEach(count => {
+            const isActive = this.config.count === count;
+            const btn = this.createCountButton(count, isActive, () => {
+                this.selectCount(count);
+            });
+            this.elements.countGrid.appendChild(btn);
+        });
+    },
+
+    // 更新信息卡片（局部更新）
+    updateInfoCard() {
+        const typeNames = {
+            addition: '加法', subtraction: '减法',
+            multiplication: '乘法', division: '除法'
+        };
         const diffNames = { beginner: '初级', intermediate: '中级', advanced: '高级' };
-        const diffName = diffNames[this.config.difficulty] || this.config.difficulty;
 
         const ranges = {
             addition: { beginner: '1-20', intermediate: '10-100', advanced: '100-500' },
@@ -173,53 +271,150 @@ const PracticeSettingsPage = {
             division: { beginner: '1-9', intermediate: '2-12', advanced: '2-20' }
         };
 
-        let desc = `
-            <div style="margin-bottom: 0.5rem;">✓ 运算类型：${typeNames || '未选择'}</div>
-            <div style="margin-bottom: 0.5rem;">✓ 难度等级：${diffName}</div>
-            <div style="margin-bottom: 0.5rem;">✓ 答题模式：${this.config.mode === 'keypad' ? '键盘输入' : '选择题'}</div>
-            <div style="margin-bottom: 0.5rem;">✓ 题目数量：${this.config.count} 题</div>
+        const selectedTypes = this.config.types.map(t => typeNames[t]).join('、');
+
+        let html = `
+            <div style="font-size: 13px; color: #007AFF; font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+                <span>ℹ️</span> 当前配置说明
+            </div>
+            <div style="font-size: 14px; color: #1C1C1E; line-height: 1.6;">
+                <div>✓ 运算类型：${selectedTypes}</div>
+                <div>✓ 难度等级：${diffNames[this.config.difficulty]}</div>
+                <div>✓ 答题模式：${this.config.mode === 'keypad' ? '键盘输入' : '选择题'}</div>
+                <div>✓ 题目数量：${this.config.count} 题</div>
+            </div>
         `;
 
+        // 显示每种运算的范围
         this.config.types.forEach(type => {
-            const typeNames = { addition: '加法', subtraction: '减法', multiplication: '乘法', division: '除法' };
-            const range = ranges[type]?.[this.config.difficulty] || '';
-            desc += `<div style="margin-left: 1rem; color: #3B82F6;">• ${typeNames[type]}范围：${range}</div>`;
+            const range = ranges[type]?.[this.config.difficulty];
+            html += `<div style="font-size: 13px; color: #8E8E93; margin-left: 12px; margin-top: 4px;">• ${typeNames[type]}范围：${range}</div>`;
         });
 
-        return desc;
+        this.elements.infoCard.innerHTML = html;
     },
 
+    createOptionButton(icon, label, desc, isActive, onClick) {
+        const btn = document.createElement('button');
+        btn.className = 'btn-press';
+        btn.style.cssText = `
+            padding: 16px 12px;
+            border-radius: 16px;
+            border: 2px solid ${isActive ? '#007AFF' : 'rgba(120, 120, 128, 0.16)'};
+            background: ${isActive ? 'rgba(0, 122, 255, 0.08)' : 'white'};
+            cursor: pointer;
+            transition: all 200ms cubic-bezier(0.4, 0.0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        `;
+
+        btn.innerHTML = `
+            <span style="font-size: 28px; filter: ${isActive ? 'none' : 'grayscale(30%)'}; transition: filter 200ms;">${icon}</span>
+            <span style="font-weight: 600; font-size: 14px; color: ${isActive ? '#007AFF' : '#1C1C1E'};">${label}</span>
+            ${desc ? `<span style="font-size: 12px; color: #8E8E93;">${desc}</span>` : ''}
+        `;
+
+        btn.onclick = onClick;
+
+        btn.addEventListener('mouseenter', () => {
+            if (!isActive) {
+                btn.style.borderColor = 'rgba(120, 120, 128, 0.32)';
+                btn.style.background = 'rgba(120, 120, 128, 0.04)';
+            }
+        });
+
+        btn.addEventListener('mouseleave', () => {
+            if (!isActive) {
+                btn.style.borderColor = 'rgba(120, 120, 128, 0.16)';
+                btn.style.background = 'white';
+            }
+        });
+
+        return btn;
+    },
+
+    createCountButton(count, isActive, onClick) {
+        const btn = document.createElement('button');
+        btn.className = 'btn-press';
+        btn.style.cssText = `
+            padding: 16px;
+            border-radius: 16px;
+            border: 2px solid ${isActive ? '#007AFF' : 'rgba(120, 120, 128, 0.16)'};
+            background: ${isActive ? 'rgba(0, 122, 255, 0.08)' : 'white'};
+            cursor: pointer;
+            transition: all 200ms cubic-bezier(0.4, 0.0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        `;
+
+        btn.innerHTML = `
+            <span style="font-size: 24px; font-weight: 700; color: ${isActive ? '#007AFF' : '#1C1C1E'};">${count}</span>
+            <span style="font-size: 12px; color: #8E8E93;">题</span>
+        `;
+
+        btn.onclick = onClick;
+
+        btn.addEventListener('mouseenter', () => {
+            if (!isActive) {
+                btn.style.borderColor = 'rgba(120, 120, 128, 0.32)';
+                btn.style.background = 'rgba(120, 120, 128, 0.04)';
+            }
+        });
+
+        btn.addEventListener('mouseleave', () => {
+            if (!isActive) {
+                btn.style.borderColor = 'rgba(120, 120, 128, 0.16)';
+                btn.style.background = 'white';
+            }
+        });
+
+        return btn;
+    },
+
+    // 选择操作（局部更新）
     selectMode(mode) {
         this.config.mode = mode;
-        this.render();
+        this.updateModeButtons();
+        this.updateInfoCard();
     },
 
     selectDifficulty(difficulty) {
         this.config.difficulty = difficulty;
-        this.render();
+        this.updateDifficultyButtons();
+        this.updateInfoCard();
     },
 
     toggleType(type) {
         const index = this.config.types.indexOf(type);
+
         if (index > -1) {
             if (this.config.types.length > 1) {
                 this.config.types.splice(index, 1);
+                this.elements.typeError.style.display = 'none';
             }
         } else {
             this.config.types.push(type);
+            this.elements.typeError.style.display = 'none';
         }
-        this.render();
+
+        this.updateTypeButtons();
+        this.updateInfoCard();
     },
 
     selectCount(count) {
         this.config.count = count;
-        this.render();
+        this.updateCountButtons();
+        this.updateInfoCard();
     },
 
     startPractice() {
         if (this.config.types.length === 0) {
-            const errorEl = document.getElementById('type-error');
-            if (errorEl) errorEl.style.display = 'block';
+            this.elements.typeError.style.display = 'block';
+            this.elements.typeError.classList.add('shake');
+            setTimeout(() => this.elements.typeError.classList.remove('shake'), 400);
             return;
         }
 
@@ -252,14 +447,7 @@ const PracticeSettingsPage = {
         }
     },
 
-    init() {
-        this.config = {
-            mode: 'keypad',
-            difficulty: 'beginner',
-            types: ['addition'],
-            count: 5
-        };
-        this.render();
+    bindKeyboard() {
         document.onkeydown = (e) => {
             if (e.key === 'Enter') {
                 this.startPractice();
