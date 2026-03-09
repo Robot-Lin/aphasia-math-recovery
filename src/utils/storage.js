@@ -97,8 +97,9 @@ const Storage = {
     /**
      * 更新统计数据
      * @param {Object} sessionStats - 练习统计数据
+     * @param {Object} typeStats - 运算类型统计 {addition: {correct, wrong}, subtraction: {...}, ...}
      */
-    updateStats(sessionStats) {
+    updateStats(sessionStats, typeStats = null) {
         const userData = this.getUserData();
         const stats = userData.stats;
 
@@ -146,6 +147,27 @@ const Storage = {
         dailyRecord.correct += sessionStats.correct;
         dailyRecord.wrong += sessionStats.wrong;
         dailyRecord.time += sessionStats.time || 0;
+
+        // 更新运算类型统计（用于能力雷达图）
+        if (!userData.typeStats) {
+            userData.typeStats = {
+                addition: { correct: 0, wrong: 0, total: 0 },
+                subtraction: { correct: 0, wrong: 0, total: 0 },
+                multiplication: { correct: 0, wrong: 0, total: 0 },
+                division: { correct: 0, wrong: 0, total: 0 }
+            };
+        }
+
+        // 如果传入了 typeStats，累加进去
+        if (typeStats) {
+            Object.keys(typeStats).forEach(type => {
+                if (userData.typeStats[type]) {
+                    userData.typeStats[type].correct += typeStats[type].correct || 0;
+                    userData.typeStats[type].wrong += typeStats[type].wrong || 0;
+                    userData.typeStats[type].total += (typeStats[type].correct || 0) + (typeStats[type].wrong || 0);
+                }
+            });
+        }
 
         this.saveUserData(userData);
         return userData;

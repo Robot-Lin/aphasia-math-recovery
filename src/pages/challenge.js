@@ -327,6 +327,9 @@ const ChallengePage = {
             this.state.totalCorrect++;
             this.state.streak++;
 
+            // 实时更新统计数据（用于能力雷达图）
+            this.updateTypeStats('addition', true);
+
             feedback.innerHTML = `
                 <div style="color: #34C759; font-size: 20px; font-weight: 600; animation: fadeIn 200ms ease;">
                     ✓ 正确！
@@ -349,6 +352,9 @@ const ChallengePage = {
             // 答错
             this.state.totalWrong++;
             this.state.streak = 0;
+
+            // 实时更新统计数据（用于能力雷达图）
+            this.updateTypeStats('addition', false);
 
             // 高亮正确答案
             buttons.forEach(btn => {
@@ -447,5 +453,36 @@ const ChallengePage = {
 
         // 语音播报
         SpeechManager.speak(`恭喜升级到${newConfig.name}难度`);
+    },
+
+    /**
+     * 更新运算类型统计（用于能力雷达图）
+     * @param {string} type - 运算类型
+     * @param {boolean} isCorrect - 是否答对
+     */
+    updateTypeStats(type, isCorrect) {
+        if (typeof Storage === 'undefined') return;
+
+        const userData = Storage.getUserData();
+
+        // 初始化运算类型统计
+        if (!userData.typeStats) {
+            userData.typeStats = {
+                addition: { correct: 0, wrong: 0, total: 0 },
+                subtraction: { correct: 0, wrong: 0, total: 0 },
+                multiplication: { correct: 0, wrong: 0, total: 0 },
+                division: { correct: 0, wrong: 0, total: 0 }
+            };
+        }
+
+        if (userData.typeStats[type]) {
+            if (isCorrect) {
+                userData.typeStats[type].correct++;
+            } else {
+                userData.typeStats[type].wrong++;
+            }
+            userData.typeStats[type].total++;
+            Storage.saveUserData(userData);
+        }
     }
 };

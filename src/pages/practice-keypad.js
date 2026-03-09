@@ -495,9 +495,28 @@ const PracticeKeypadPage = {
             answers: this.answers
         };
 
+        // 统计运算类型数据（用于能力雷达图）
+        const typeStats = {
+            addition: { correct: 0, wrong: 0 },
+            subtraction: { correct: 0, wrong: 0 },
+            multiplication: { correct: 0, wrong: 0 },
+            division: { correct: 0, wrong: 0 }
+        };
+
+        this.answers.forEach((answer, index) => {
+            const question = this.questions[index];
+            if (question && question.type && typeStats[question.type]) {
+                if (answer.isCorrect) {
+                    typeStats[question.type].correct++;
+                } else {
+                    typeStats[question.type].wrong++;
+                }
+            }
+        });
+
         sessionStorage.setItem('practice_result', JSON.stringify(sessionStats));
         if (typeof Storage !== 'undefined') {
-            Storage.updateStats(sessionStats);
+            Storage.updateStats(sessionStats, typeStats);
         }
         router.navigate('result');
     },

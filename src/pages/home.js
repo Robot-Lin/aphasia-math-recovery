@@ -200,16 +200,12 @@ const HomePage = {
     },
 
     createRadarChart() {
-        // 获取各项能力的掌握程度
-        const userData = Storage.getUserData();
-        const skillProgress = userData.skillProgress || {};
-
-        // 计算各项技能得分 (0-100)
+        // 从全局统计数据计算各项能力的掌握程度
         const skills = {
-            addition: this.calculateSkillScore(skillProgress.addition),
-            subtraction: this.calculateSkillScore(skillProgress.subtraction),
-            multiplication: this.calculateSkillScore(skillProgress.multiplicationFacts),
-            division: this.calculateSkillScore(skillProgress.division)
+            addition: this.calculateSkillScore('addition'),
+            subtraction: this.calculateSkillScore('subtraction'),
+            multiplication: this.calculateSkillScore('multiplication'),
+            division: this.calculateSkillScore('division')
         };
 
         const card = document.createElement('div');
@@ -330,12 +326,38 @@ const HomePage = {
         return card;
     },
 
-    calculateSkillScore(skillData) {
-        if (!skillData || !skillData.mastered) return 0;
-        const mastered = skillData.mastered.length;
-        // 根据等级估算总题数
-        const totalByLevel = skillData.level === 1 ? 15 : (skillData.level === 2 ? 40 : 100);
-        return Math.min(100, Math.round((mastered / totalByLevel) * 100));
+    calculateSkillScore(skillType) {
+        const userData = Storage.getUserData();
+
+        // 优先使用 typeStats（全局统计）
+        if (userData.typeStats && userData.typeStats[skillType]) {
+            const stats = userData.typeStats[skillType];
+            if (stats.total === 0) return 0;
+            // 根据正确率计算得分，至少做5题才开始计分
+            const accuracy = stats.total >= 5 ? (stats.correct / stats.total) : (stats.correct / 5);
+            return Math.min(100, Math.round(accuracy * 100));
+        }
+
+        // 兼容旧数据：从 skillProgress 计算
+        const skillProgress = userData.skillProgress || {};
+        const skillData = skillProgress[skillType];
+        if (!skillData) return 0;
+
+        // 转换旧数据格式
+        if (skillData.correct !== undefined && skillData.total !== undefined) {
+            if (skillData.total === 0) return 0;
+            const accuracy = skillData.total >= 5 ? (skillData.correct / skillData.total) : (skillData.correct / 5);
+            return Math.min(100, Math.round(accuracy * 100));
+        }
+
+        // 旧的基础训练格式
+        if (skillData.mastered) {
+            const mastered = skillData.mastered.length;
+            const totalByLevel = skillData.level === 1 ? 15 : (skillData.level === 2 ? 40 : 100);
+            return Math.min(100, Math.round((mastered / totalByLevel) * 100));
+        }
+
+        return 0;
     },
 
     createReviewAlert(count) {
