@@ -27,10 +27,47 @@ const router = {
     navigate(page) {
         if (this.routes[page]) {
             this.currentPage = page;
+            this.updateNavStyles();
             this.routes[page]();
         } else {
             console.error(`Page not found: ${page}`);
             this.navigate('home');
+        }
+    },
+
+    /**
+     * 更新侧边栏导航样式
+     */
+    updateNavStyles() {
+        const navHome = document.getElementById('nav-home');
+        const navPractice = document.getElementById('nav-practice');
+
+        if (!navHome || !navPractice) return;
+
+        // 重置样式
+        const inactiveStyle = {
+            background: 'transparent',
+            color: '#3C3C43',
+            boxShadow: 'none'
+        };
+
+        const activeStyle = {
+            background: '#007AFF',
+            color: 'white',
+            boxShadow: '0 2px 8px rgba(0, 122, 255, 0.3)'
+        };
+
+        // 根据当前页面设置样式
+        if (this.currentPage === 'home') {
+            Object.assign(navHome.style, activeStyle);
+            Object.assign(navPractice.style, inactiveStyle);
+        } else if (['practice-settings', 'practice-keypad', 'practice-choice'].includes(this.currentPage)) {
+            Object.assign(navHome.style, inactiveStyle);
+            Object.assign(navPractice.style, activeStyle);
+        } else {
+            // 其他页面（如 result）默认都不高亮，或者保持原样
+            Object.assign(navHome.style, inactiveStyle);
+            Object.assign(navPractice.style, inactiveStyle);
         }
     },
 
