@@ -1038,7 +1038,7 @@ const BasicTrainingPage = {
             this.updateProgressPanel();
             feedback.innerHTML = `
                 <div style="color: #34C759; font-size: 18px; font-weight: 600; animation: fadeIn 200ms ease; margin-bottom: 16px;">✓ 正确！</div>
-                <button onclick="BasicTrainingPage.nextItem()" style="
+                <button onclick="BasicTrainingPage.state.isProcessing=false;BasicTrainingPage.nextItem();" style="
                     padding: 14px 32px;
                     background: #34C759;
                     color: white;
@@ -1067,7 +1067,7 @@ const BasicTrainingPage = {
             });
             feedback.innerHTML = `
                 <div style="color: #FF3B30; font-size: 18px; font-weight: 600; animation: fadeIn 200ms ease; margin-bottom: 16px;">✗ 正确答案是 ${correct}</div>
-                <button onclick="BasicTrainingPage.nextItem()" style="
+                <button onclick="BasicTrainingPage.state.isProcessing=false;BasicTrainingPage.nextItem();" style="
                     padding: 14px 32px;
                     background: #007AFF;
                     color: white;
