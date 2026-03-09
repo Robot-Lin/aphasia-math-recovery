@@ -773,7 +773,7 @@ const BasicTrainingPage = {
 
             <div style="display: flex; gap: 16px; justify-content: center;">
                 ${!this.state.showAnswer ? `
-                    <button id="btn-show-answer" onclick="BasicTrainingPage.showAnswer(); this.disabled=true; this.style.opacity='0.5';" style="
+                    <button id="btn-show-answer" onclick="if(BasicTrainingPage.state.isProcessing)return;BasicTrainingPage.showAnswer();this.disabled=true;this.style.opacity='0.5';" style="
                         padding: 20px 48px;
                         background: ${typeConfig.color};
                         color: white;
@@ -786,7 +786,7 @@ const BasicTrainingPage = {
                         transition: transform 150ms ease;
                     ">显示答案</button>
                 ` : `
-                    <button id="btn-incorrect" onclick="BasicTrainingPage.markIncorrect(); this.disabled=true; document.getElementById('btn-correct').disabled=true;" style="
+                    <button id="btn-incorrect" onclick="if(BasicTrainingPage.state.isProcessing)return;BasicTrainingPage.markIncorrect();this.disabled=true;document.getElementById('btn-correct').disabled=true;" style="
                         padding: 16px 32px;
                         background: #FF3B30;
                         color: white;
@@ -796,7 +796,7 @@ const BasicTrainingPage = {
                         font-weight: 600;
                         cursor: pointer;
                     ">还需练习</button>
-                    <button id="btn-correct" onclick="BasicTrainingPage.markCorrect(); this.disabled=true; document.getElementById('btn-incorrect').disabled=true;" style="
+                    <button id="btn-correct" onclick="if(BasicTrainingPage.state.isProcessing)return;BasicTrainingPage.markCorrect();this.disabled=true;document.getElementById('btn-incorrect').disabled=true;" style="
                         padding: 16px 32px;
                         background: #34C759;
                         color: white;
@@ -810,7 +810,7 @@ const BasicTrainingPage = {
             </div>
 
             <div style="margin-top: 32px;">
-                <button id="btn-skip" onclick="BasicTrainingPage.nextItem(); this.disabled=true; this.style.opacity='0.5';" style="
+                <button id="btn-skip" onclick="if(BasicTrainingPage.state.isProcessing)return;BasicTrainingPage.nextItem();this.disabled=true;this.style.opacity='0.5';" style="
                     padding: 12px 24px;
                     background: transparent;
                     color: #8E8E93;
@@ -953,8 +953,13 @@ const BasicTrainingPage = {
 
     showAnswer() {
         if (this.state.isProcessing) return;
+        this.state.isProcessing = true;
         this.state.showAnswer = true;
         this.render();
+        // 渲染完成后重置 isProcessing，允许点击"已掌握"/"还需练习"
+        setTimeout(() => {
+            this.state.isProcessing = false;
+        }, 100);
     },
 
     markCorrect() {
@@ -1081,17 +1086,26 @@ const BasicTrainingPage = {
     },
 
     nextItem() {
+        // 防止重复点击
+        if (this.state.isProcessing) return;
+        this.state.isProcessing = true;
+
         this.state.showAnswer = false;
-        this.state.isProcessing = false;
 
         // 检查 items 数组是否为空
         if (!this.state.items || this.state.items.length === 0) {
             console.error('nextItem: items array is empty');
+            this.state.isProcessing = false;
             return;
         }
 
         this.state.currentIndex = (this.state.currentIndex + 1) % this.state.items.length;
         this.render();
+
+        // 渲染完成后重置 isProcessing
+        setTimeout(() => {
+            this.state.isProcessing = false;
+        }, 100);
     },
 
     saveProgress() {
