@@ -46,11 +46,6 @@ const ChallengePage = {
         this.state.hasStarted = true;
         this.generateQuestion();
         this.render();
-
-        // 播放开场语音
-        if (SpeechManager.isEnabled()) {
-            SpeechManager.speak('挑战开始！准备好迎接算数挑战了吗？');
-        }
     },
 
     // 加载历史进度
@@ -262,9 +257,10 @@ const ChallengePage = {
                 cursor: pointer;
                 box-shadow: 0 8px 32px rgba(0, 122, 255, 0.4);
                 transition: all 300ms ease;
-                display: flex;
+                display: inline-flex;
                 align-items: center;
                 gap: 12px;
+                margin: 0 auto;
             ">
                 <span style="font-size: 28px;">🚀</span>
                 <span>开始挑战</span>
@@ -295,13 +291,6 @@ const ChallengePage = {
                 });
             }
         }, 100);
-
-        // 开场语音
-        if (SpeechManager.isEnabled()) {
-            setTimeout(() => {
-                SpeechManager.speak('欢迎来到挑战模式！准备好突破自己的极限了吗？');
-            }, 500);
-        }
     },
 
     // 颜色调整辅助函数
@@ -580,7 +569,6 @@ const ChallengePage = {
                     ✓ 正确！
                 </div>
             `;
-            SpeechManager.speakFeedback(true);
 
             // 检查是否升级
             if (this.state.streak >= 5) {
@@ -614,7 +602,6 @@ const ChallengePage = {
                     ✗ 正确答案是 ${correct}
                 </div>
             `;
-            SpeechManager.speak(`正确答案是${SpeechManager.convertNumberToChinese(correct)}`);
 
             setTimeout(() => {
                 this.state.isProcessing = false;
@@ -695,9 +682,6 @@ const ChallengePage = {
         if (window.SoundManager && SoundManager.isEnabled()) {
             SoundManager.playComplete();
         }
-
-        // 语音播报
-        SpeechManager.speak(`恭喜升级到${newConfig.name}难度`);
     },
 
     /**
