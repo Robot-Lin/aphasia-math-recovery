@@ -175,7 +175,7 @@ const SettingsPage = {
                 title: '能力雷达图',
                 desc: '显示加减乘除能力分析',
                 key: 'radarChart',
-                defaultValue: true
+                defaultValue: false
             },
             {
                 id: 'display-progress',

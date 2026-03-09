@@ -45,7 +45,7 @@ const Storage = {
                 division: { correct: 0, wrong: 0, total: 0 }
             },
             displaySettings: {
-                radarChart: true,
+                radarChart: false,
                 progressChart: true,
                 badgesSection: true,
                 reviewAlert: true,
