@@ -953,14 +953,22 @@ const BasicTrainingPage = {
             this.state.mastered.add(current.key);
             this.saveProgress();
             feedback.innerHTML = `
-                <div style="color: #34C759; font-size: 18px; font-weight: 600; animation: fadeIn 200ms ease;">✓ 正确！</div>
+                <div style="color: #34C759; font-size: 18px; font-weight: 600; animation: fadeIn 200ms ease; margin-bottom: 16px;">✓ 正确！</div>
+                <button onclick="BasicTrainingPage.nextItem()" style="
+                    padding: 14px 32px;
+                    background: #34C759;
+                    color: white;
+                    border: none;
+                    border-radius: 12px;
+                    font-size: 17px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    box-shadow: 0 4px 16px rgba(52, 199, 89, 0.3);
+                    transition: all 200ms ease;
+                ">下一题 →</button>
             `;
             // 语音反馈
             SpeechManager.speakFeedback(true);
-            setTimeout(() => {
-                this.state.isProcessing = false;
-                this.nextItem();
-            }, 800);
         } else {
             this.state.mastered.delete(current.key);
             this.saveProgress();
@@ -972,14 +980,22 @@ const BasicTrainingPage = {
                 }
             });
             feedback.innerHTML = `
-                <div style="color: #FF3B30; font-size: 18px; font-weight: 600; animation: fadeIn 200ms ease;">✗ 正确答案是 ${correct}</div>
+                <div style="color: #FF3B30; font-size: 18px; font-weight: 600; animation: fadeIn 200ms ease; margin-bottom: 16px;">✗ 正确答案是 ${correct}</div>
+                <button onclick="BasicTrainingPage.nextItem()" style="
+                    padding: 14px 32px;
+                    background: #007AFF;
+                    color: white;
+                    border: none;
+                    border-radius: 12px;
+                    font-size: 17px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    box-shadow: 0 4px 16px rgba(0, 122, 255, 0.3);
+                    transition: all 200ms ease;
+                ">下一题 →</button>
             `;
             // 语音反馈：朗读正确答案
             SpeechManager.speak(`正确答案是${SpeechManager.convertNumberToChinese(correct)}`);
-            setTimeout(() => {
-                this.state.isProcessing = false;
-                this.nextItem();
-            }, 1500);
         }
     },
 
