@@ -87,26 +87,44 @@ const SpeechManager = {
         // 停止当前播放
         this.stop();
 
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = 'zh-CN';
-        utterance.rate = options.rate || 0.9; // 稍慢语速，适合康复训练
-        utterance.pitch = options.pitch || 1;
-        utterance.volume = options.volume || 1;
+        // 使用 try-catch 防止语音合成异常导致页面卡死
+        try {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'zh-CN';
+            utterance.rate = options.rate || 0.9; // 稍慢语速，适合康复训练
+            utterance.pitch = options.pitch || 1;
+            utterance.volume = options.volume || 1;
 
-        // 选择中文语音
-        const voices = this.synthesis.getVoices();
-        const chineseVoice = voices.find(v => v.lang.includes('zh'));
-        if (chineseVoice) {
-            utterance.voice = chineseVoice;
+            // 选择中文语音（添加错误保护）
+            try {
+                const voices = this.synthesis.getVoices();
+                if (voices && voices.length > 0) {
+                    const chineseVoice = voices.find(v => v.lang && v.lang.includes('zh'));
+                    if (chineseVoice) {
+                        utterance.voice = chineseVoice;
+                    }
+                }
+            } catch (e) {
+                console.warn('获取语音列表失败:', e);
+            }
+
+            // 事件回调
+            if (options.onstart) utterance.onstart = options.onstart;
+            if (options.onend) utterance.onend = options.onend;
+            if (options.onerror) utterance.onerror = options.onerror;
+
+            // 添加默认错误处理，防止未捕获的异常
+            utterance.onerror = utterance.onerror || ((e) => {
+                console.warn('语音播放错误:', e);
+                this.currentUtterance = null;
+            });
+
+            this.currentUtterance = utterance;
+            this.synthesis.speak(utterance);
+        } catch (e) {
+            console.error('语音合成异常:', e);
+            this.currentUtterance = null;
         }
-
-        // 事件回调
-        if (options.onstart) utterance.onstart = options.onstart;
-        if (options.onend) utterance.onend = options.onend;
-        if (options.onerror) utterance.onerror = options.onerror;
-
-        this.currentUtterance = utterance;
-        this.synthesis.speak(utterance);
     },
 
     /**

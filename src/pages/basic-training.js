@@ -58,6 +58,12 @@ const BasicTrainingPage = {
     },
 
     init() {
+        // 停止可能正在播放的语音
+        if (typeof SpeechManager !== 'undefined') {
+            SpeechManager.stop();
+        }
+        // 重置渲染ID，防止残留语音调用
+        this._currentRenderId = Date.now();
         // 重置状态，显示选择页面
         this.state.hasStarted = false;
         this.renderSelection();
@@ -65,6 +71,13 @@ const BasicTrainingPage = {
 
     // 开始训练
     startTraining(type, level) {
+        // 停止可能正在播放的语音
+        if (typeof SpeechManager !== 'undefined') {
+            SpeechManager.stop();
+        }
+        // 重置渲染ID
+        this._currentRenderId = Date.now();
+
         this.state.type = type;
         this.state.level = level;
         this.state.hasStarted = true;
@@ -494,6 +507,11 @@ const BasicTrainingPage = {
 
     // 返回选择页面
     backToSelection() {
+        // 停止语音
+        if (typeof SpeechManager !== 'undefined') {
+            SpeechManager.stop();
+        }
+        this._currentRenderId = Date.now();
         this.state.hasStarted = false;
         this.renderSelection();
     },
@@ -710,9 +728,16 @@ const BasicTrainingPage = {
     },
 
     createFlashcardHTML(current, progress, typeConfig) {
-        // 朗读题目
+        // 使用更短的延迟，并添加页面状态检查
+        const pageRenderId = Date.now();
+        this._currentRenderId = pageRenderId;
+
         setTimeout(() => {
-            if (SpeechManager.isEnabled() && !this.state.showAnswer) {
+            // 检查是否仍然是同一页面渲染，避免页面切换后的残留调用
+            if (this._currentRenderId === pageRenderId &&
+                SpeechManager.isEnabled() &&
+                !this.state.showAnswer &&
+                this.state.hasStarted) {
                 SpeechManager.speakExpression(current.display);
             }
         }, 300);
@@ -823,9 +848,15 @@ const BasicTrainingPage = {
     },
 
     createFillblankHTML(current, progress, typeConfig) {
-        // 朗读题目
+        // 使用更短的延迟，并添加页面状态检查
+        const pageRenderId = Date.now();
+        this._currentRenderId = pageRenderId;
+
         setTimeout(() => {
-            if (SpeechManager.isEnabled()) {
+            // 检查是否仍然是同一页面渲染
+            if (this._currentRenderId === pageRenderId &&
+                SpeechManager.isEnabled() &&
+                this.state.hasStarted) {
                 SpeechManager.speakExpression(current.display);
             }
         }, 300);
@@ -928,6 +959,11 @@ const BasicTrainingPage = {
 
     // 交互方法
     setType(type) {
+        // 停止语音
+        if (typeof SpeechManager !== 'undefined') {
+            SpeechManager.stop();
+        }
+        this._currentRenderId = Date.now();
         this.state.type = type;
         this.state.level = 1;
         this.state.isProcessing = false;
@@ -937,6 +973,11 @@ const BasicTrainingPage = {
     },
 
     setLevel(level) {
+        // 停止语音
+        if (typeof SpeechManager !== 'undefined') {
+            SpeechManager.stop();
+        }
+        this._currentRenderId = Date.now();
         this.state.level = level;
         this.state.isProcessing = false;
         this.saveProgress();
@@ -945,6 +986,11 @@ const BasicTrainingPage = {
     },
 
     setMode(mode) {
+        // 停止语音
+        if (typeof SpeechManager !== 'undefined') {
+            SpeechManager.stop();
+        }
+        this._currentRenderId = Date.now();
         this.state.mode = mode;
         this.state.showAnswer = false;
         this.state.isProcessing = false;
@@ -954,6 +1000,12 @@ const BasicTrainingPage = {
     showAnswer() {
         if (this.state.isProcessing) return;
         this.state.isProcessing = true;
+
+        // 停止语音
+        if (typeof SpeechManager !== 'undefined') {
+            SpeechManager.stop();
+        }
+
         this.state.showAnswer = true;
         this.render();
         // 渲染完成后重置 isProcessing，允许点击"已掌握"/"还需练习"
@@ -965,6 +1017,11 @@ const BasicTrainingPage = {
     markCorrect() {
         if (this.state.isProcessing) return;
         this.state.isProcessing = true;
+
+        // 停止语音
+        if (typeof SpeechManager !== 'undefined') {
+            SpeechManager.stop();
+        }
 
         const current = this.state.items[this.state.currentIndex];
         if (!current) {
@@ -991,6 +1048,11 @@ const BasicTrainingPage = {
         if (this.state.isProcessing) return;
         this.state.isProcessing = true;
 
+        // 停止语音
+        if (typeof SpeechManager !== 'undefined') {
+            SpeechManager.stop();
+        }
+
         const current = this.state.items[this.state.currentIndex];
         if (!current) {
             console.error('markIncorrect: current item is undefined');
@@ -1016,6 +1078,11 @@ const BasicTrainingPage = {
         // 防止重复点击
         if (this.state.isProcessing) return;
         this.state.isProcessing = true;
+
+        // 停止语音
+        if (typeof SpeechManager !== 'undefined') {
+            SpeechManager.stop();
+        }
 
         const feedback = document.getElementById('fillblank-feedback');
         const current = this.state.items[this.state.currentIndex];
@@ -1089,6 +1156,13 @@ const BasicTrainingPage = {
         // 防止重复点击
         if (this.state.isProcessing) return;
         this.state.isProcessing = true;
+
+        // 停止当前语音
+        if (typeof SpeechManager !== 'undefined') {
+            SpeechManager.stop();
+        }
+        // 重置渲染ID，防止旧语音在新页面播放
+        this._currentRenderId = Date.now();
 
         this.state.showAnswer = false;
 
