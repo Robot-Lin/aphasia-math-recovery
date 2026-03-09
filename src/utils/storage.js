@@ -219,7 +219,10 @@ const Storage = {
      * @returns {string} - ISO 日期字符串
      */
     calculateNextReviewDate(correctCount) {
-        const intervals = [1, 2, 4, 7, 15]; // 复习间隔天数
+        // correctCount=0 表示新错题，今天就可以复习
+        // correctCount=1 表示答对1次，1天后复习
+        // correctCount=2 表示答对2次，2天后复习
+        const intervals = [0, 1, 2, 4, 7, 15];
         const interval = intervals[Math.min(correctCount, intervals.length - 1)];
 
         const nextDate = new Date();
