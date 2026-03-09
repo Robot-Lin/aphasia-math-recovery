@@ -46,15 +46,222 @@ const MistakesPage = {
             return;
         }
 
-        // 统计概览
-        this.elements.statsCard = this.createStatsCard();
-        page.appendChild(this.elements.statsCard);
+        // 数据洞察卡片
+        this.elements.insightCard = this.createInsightCard();
+        page.appendChild(this.elements.insightCard);
+
+        // 批量复习按钮（今日有错题时显示）
+        const todayMistakes = this.getTodayReviewMistakes();
+        if (todayMistakes.length > 0) {
+            this.elements.batchReviewBtn = this.createBatchReviewButton(todayMistakes.length);
+            page.appendChild(this.elements.batchReviewBtn);
+        }
 
         // 错题列表
         this.elements.mistakesList = this.createMistakesList();
         page.appendChild(this.elements.mistakesList);
 
         container.appendChild(page);
+    },
+
+    getTodayReviewMistakes() {
+        const today = new Date().toISOString().split('T')[0];
+        return this.mistakes.filter(m => m.nextReviewDate <= today);
+    },
+
+    createInsightCard() {
+        const card = document.createElement('div');
+        card.className = 'glass';
+        card.style.cssText = `
+            border-radius: 20px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+        `;
+
+        // 统计数据
+        const typeDistribution = this.getTypeDistribution();
+        const difficultyDistribution = this.getDifficultyDistribution();
+        const totalWrong = this.mistakes.reduce((sum, m) => sum + m.wrongCount, 0);
+
+        card.innerHTML = `
+            <h3 style="font-size: 18px; font-weight: 700; color: #1C1C1E; margin-bottom: 20px;">
+                📊 错题分析
+            </h3>
+
+            <!-- 概览统计 -->
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px;">
+                <div style="text-align: center; padding: 16px; background: rgba(0, 122, 255, 0.06); border-radius: 12px;">
+                    <div style="font-size: 28px; font-weight: 700; color: #007AFF;">${this.mistakes.length}</div>
+                    <div style="font-size: 13px; color: #8E8E93; margin-top: 4px;">错题总数</div>
+                </div>
+                <div style="text-align: center; padding: 16px; background: rgba(255, 59, 48, 0.06); border-radius: 12px;">
+                    <div style="font-size: 28px; font-weight: 700; color: #FF3B30;">${totalWrong}</div>
+                    <div style="font-size: 13px; color: #8E8E93; margin-top: 4px;">累计错误</div>
+                </div>
+                <div style="text-align: center; padding: 16px; background: rgba(255, 149, 0, 0.06); border-radius: 12px;">
+                    <div style="font-size: 28px; font-weight: 700; color: #FF9500;">${this.getTodayReviewMistakes().length}</div>
+                    <div style="font-size: 13px; color: #8E8E93; margin-top: 4px;">今日待复习</div>
+                </div>
+            </div>
+
+            <!-- 运算类型分布 -->
+            <div style="margin-bottom: 20px;">
+                <div style="font-size: 14px; font-weight: 600; color: #3C3C43; margin-bottom: 12px;">运算类型分布</div>
+                <div style="display: flex; gap: 8px; height: 8px; border-radius: 4px; overflow: hidden; margin-bottom: 8px;">
+                    ${typeDistribution.map(type => `
+                        <div style="width: ${type.percent}%; background: ${type.color};" title="${type.name}: ${type.count}道"></div>
+                    `).join('')}
+                </div>
+                <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+                    ${typeDistribution.map(type => `
+                        <div style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: #3C3C43;">
+                            <span style="width: 8px; height: 8px; background: ${type.color}; border-radius: 2px;"></span>
+                            <span>${type.name}</span>
+                            <span style="font-weight: 600; color: #1C1C1E;">${type.count}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+
+            <!-- 难度分布 -->
+            <div>
+                <div style="font-size: 14px; font-weight: 600; color: #3C3C43; margin-bottom: 12px;">难度分布</div>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    ${difficultyDistribution.map(diff => `
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <span style="font-size: 13px; color: #8E8E93; width: 40px;">${diff.name}</span>
+                            <div style="flex: 1; height: 8px; background: rgba(0, 0, 0, 0.06); border-radius: 4px; overflow: hidden;">
+                                <div style="width: ${diff.percent}%; height: 100%; background: ${diff.color}; border-radius: 4px; transition: width 400ms ease;"></div>
+                            </div>
+                            <span style="font-size: 13px; font-weight: 600; color: #1C1C1E; width: 30px; text-align: right;">${diff.count}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+
+        return card;
+    },
+
+    getTypeDistribution() {
+        const types = [
+            { id: 'addition', name: '加法', color: '#34C759' },
+            { id: 'subtraction', name: '减法', color: '#FF9500' },
+            { id: 'multiplication', name: '乘法', color: '#007AFF' },
+            { id: 'division', name: '除法', color: '#AF52DE' }
+        ];
+
+        const total = this.mistakes.length;
+        return types.map(type => {
+            const count = this.mistakes.filter(m => m.type === type.id).length;
+            return {
+                ...type,
+                count,
+                percent: total > 0 ? (count / total) * 100 : 0
+            };
+        }).filter(t => t.count > 0);
+    },
+
+    getDifficultyDistribution() {
+        const difficulties = [
+            { id: 'beginner', name: '初级', color: '#34C759' },
+            { id: 'intermediate', name: '中级', color: '#FF9500' },
+            { id: 'advanced', name: '高级', color: '#FF3B30' }
+        ];
+
+        const total = this.mistakes.length;
+        return difficulties.map(diff => {
+            const count = this.mistakes.filter(m => m.difficulty === diff.id).length;
+            return {
+                ...diff,
+                count,
+                percent: total > 0 ? (count / total) * 100 : 0
+            };
+        });
+    },
+
+    createBatchReviewButton(count) {
+        const wrapper = document.createElement('div');
+        wrapper.style.cssText = 'margin-bottom: 20px;';
+
+        const btn = document.createElement('button');
+        btn.className = 'btn-press';
+        btn.style.cssText = `
+            width: 100%;
+            background: linear-gradient(135deg, #FF9500 0%, #FF6B00 100%);
+            color: white;
+            padding: 18px 24px;
+            border-radius: 14px;
+            font-size: 17px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(255, 149, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        `;
+        btn.innerHTML = `
+            <span style="font-size: 20px;">📚</span>
+            <span>批量复习今日错题 (${count}道)</span>
+        `;
+        btn.onclick = () => this.startBatchReview();
+
+        // 悬停效果
+        btn.addEventListener('mouseenter', () => {
+            btn.style.transform = 'scale(1.01)';
+            btn.style.boxShadow = '0 6px 20px rgba(255, 149, 0, 0.4)';
+        });
+        btn.addEventListener('mouseleave', () => {
+            btn.style.transform = 'scale(1)';
+            btn.style.boxShadow = '0 4px 16px rgba(255, 149, 0, 0.3)';
+        });
+
+        wrapper.appendChild(btn);
+        return wrapper;
+    },
+
+    startBatchReview() {
+        const todayMistakes = this.getTodayReviewMistakes();
+        if (todayMistakes.length === 0) return;
+
+        // 生成错题练习题目
+        const questions = todayMistakes.map(mistake => {
+            // 解析题目
+            const match = mistake.question.match(/(\d+)\s*([+\-×÷])\s*(\d+)/);
+            let num1 = 0, num2 = 0, operator = '+';
+            if (match) {
+                num1 = parseInt(match[1]);
+                operator = match[2];
+                num2 = parseInt(match[3]);
+            }
+
+            return {
+                id: mistake.id,
+                type: mistake.type,
+                difficulty: mistake.difficulty,
+                question: mistake.question,
+                display: mistake.question,
+                answer: mistake.correctAnswer,
+                num1,
+                num2,
+                operator,
+                isMistakeReview: true
+            };
+        });
+
+        // 保存到 sessionStorage
+        sessionStorage.setItem('mistake_mode', 'true');
+        sessionStorage.setItem('mistake_batch', 'true');
+        sessionStorage.setItem('practice_questions', JSON.stringify(questions));
+        sessionStorage.setItem('practice_current', '0');
+        sessionStorage.setItem('practice_answers', JSON.stringify([]));
+        sessionStorage.setItem('practice_start_time', Date.now().toString());
+
+        // 跳转到键盘输入模式
+        router.navigate('practice-keypad');
     },
 
     renderEmptyState(page) {
@@ -87,44 +294,6 @@ const MistakesPage = {
             </button>
         `;
         page.appendChild(emptyCard);
-    },
-
-    createStatsCard() {
-        const card = document.createElement('div');
-        card.className = 'glass';
-        card.style.cssText = `
-            border-radius: 20px;
-            padding: 24px;
-            margin-bottom: 24px;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
-            background: linear-gradient(135deg, #FF9500 0%, #FF6B00 100%);
-            color: white;
-        `;
-
-        const totalWrong = this.mistakes.reduce((sum, m) => sum + m.wrongCount, 0);
-        const reviewToday = this.mistakes.filter(m => m.nextReviewDate <= new Date().toISOString().split('T')[0]).length;
-
-        card.innerHTML = `
-            <div style="display: flex; align-items: center; justify-content: space-between;">
-                <div>
-                    <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 4px;">错题统计</h3>
-                    <p style="font-size: 15px; opacity: 0.9;">共 ${this.mistakes.length} 道错题，累计做错 ${totalWrong} 次</p>
-                </div>
-                ${reviewToday > 0 ? `
-                <div style="
-                    background: rgba(255, 255, 255, 0.2);
-                    padding: 8px 16px;
-                    border-radius: 100px;
-                    font-size: 14px;
-                    font-weight: 600;
-                ">
-                    今日需复习: ${reviewToday}
-                </div>
-                ` : ''}
-            </div>
-        `;
-
-        return card;
     },
 
     createMistakesList() {
@@ -259,7 +428,7 @@ const MistakesPage = {
             num2: 0
         };
 
-        // 解析题目获取数字（简单解析）
+        // 解析题目获取数字
         const match = mistake.question.match(/(\d+)\s*[+\-×÷]\s*(\d+)/);
         if (match) {
             question.num1 = parseInt(match[1]);
