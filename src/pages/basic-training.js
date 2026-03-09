@@ -714,6 +714,17 @@ const BasicTrainingPage = {
         `;
 
         const current = this.state.items[this.state.currentIndex];
+
+        // 检查 current 是否存在
+        if (!current) {
+            card.innerHTML = `
+                <div style="font-size: 18px; color: #8E8E93; padding: 40px;">
+                    加载中...
+                </div>
+            `;
+            return card;
+        }
+
         const progress = `${this.state.currentIndex + 1} / ${this.state.items.length}`;
 
         if (this.state.mode === 'flashcard') {
