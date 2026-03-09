@@ -21,7 +21,8 @@ const router = {
         'mistakes': () => MistakesPage.init(),
         'history': () => HistoryPage.init(),
         'settings': () => SettingsPage.init(),
-        'basic-training': () => BasicTrainingPage.init()
+        'basic-training': () => BasicTrainingPage.init(),
+        'challenge': () => ChallengePage.init()
     },
 
     /**
@@ -61,6 +62,7 @@ const router = {
         const navHome = document.getElementById('nav-home');
         const navPractice = document.getElementById('nav-practice');
         const navBasic = document.getElementById('nav-basic');
+        const navChallenge = document.getElementById('nav-challenge');
         const navMistakes = document.getElementById('nav-mistakes');
         const navHistory = document.getElementById('nav-history');
         const navSettings = document.getElementById('nav-settings');
@@ -84,6 +86,7 @@ const router = {
         Object.assign(navHome.style, inactiveStyle);
         Object.assign(navPractice.style, inactiveStyle);
         if (navBasic) Object.assign(navBasic.style, inactiveStyle);
+        if (navChallenge) Object.assign(navChallenge.style, inactiveStyle);
         if (navMistakes) Object.assign(navMistakes.style, inactiveStyle);
         if (navHistory) Object.assign(navHistory.style, inactiveStyle);
         if (navSettings) Object.assign(navSettings.style, inactiveStyle);
@@ -95,6 +98,8 @@ const router = {
             Object.assign(navPractice.style, activeStyle);
         } else if (this.currentPage === 'basic-training') {
             if (navBasic) Object.assign(navBasic.style, activeStyle);
+        } else if (this.currentPage === 'challenge') {
+            if (navChallenge) Object.assign(navChallenge.style, activeStyle);
         } else if (this.currentPage === 'mistakes') {
             if (navMistakes) Object.assign(navMistakes.style, activeStyle);
         } else if (this.currentPage === 'history') {
