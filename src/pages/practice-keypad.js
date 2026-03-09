@@ -291,6 +291,13 @@ const PracticeKeypadPage = {
             </div>
         `;
 
+        // 自动朗读题目
+        if (!this.hasSubmitted && SpeechManager.isEnabled()) {
+            setTimeout(() => {
+                SpeechManager.speakExpression(current.display + '等于多少');
+            }, 300);
+        }
+
         // 更新答案显示
         this.elements.answerDisplay.textContent = this.currentAnswer || '';
 

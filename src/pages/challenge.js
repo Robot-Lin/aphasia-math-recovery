@@ -13,7 +13,8 @@ const ChallengePage = {
         currentQuestion: null,
         isProcessing: false,
         highestLevel: 1,    // 历史最高等级
-        sessionStartTime: null
+        sessionStartTime: null,
+        hasStarted: false   // 是否已开始挑战
     },
 
     // 难度配置
@@ -27,10 +28,29 @@ const ChallengePage = {
     },
 
     init() {
-        this.state.sessionStartTime = Date.now();
         this.loadProgress();
+        // 重置状态
+        this.state.totalCorrect = 0;
+        this.state.totalWrong = 0;
+        this.state.streak = 0;
+        this.state.level = 1;
+        this.state.hasStarted = false;
+
+        // 显示开场页面
+        this.renderIntro();
+    },
+
+    // 开始挑战
+    startChallenge() {
+        this.state.sessionStartTime = Date.now();
+        this.state.hasStarted = true;
         this.generateQuestion();
         this.render();
+
+        // 播放开场语音
+        if (SpeechManager.isEnabled()) {
+            SpeechManager.speak('挑战开始！准备好迎接算数挑战了吗？');
+        }
     },
 
     // 加载历史进度
@@ -67,6 +87,231 @@ const ChallengePage = {
         } else {
             this.state.currentQuestion = { a, b, answer: a + b };
         }
+    },
+
+    // 渲染开场页面
+    renderIntro() {
+        const container = document.getElementById('page-container');
+        if (!container) return;
+
+        container.innerHTML = '';
+
+        const page = document.createElement('div');
+        page.style.cssText = `
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            min-height: 600px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        `;
+
+        // 开场动画容器
+        const introCard = document.createElement('div');
+        introCard.className = 'glass';
+        introCard.style.cssText = `
+            width: 100%;
+            max-width: 600px;
+            border-radius: 32px;
+            padding: 60px 40px;
+            text-align: center;
+            background: linear-gradient(180deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.9) 100%);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            animation: challengeIntroIn 800ms cubic-bezier(0.34, 1.56, 0.64, 1);
+        `;
+
+        // 添加动画样式
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes challengeIntroIn {
+                0% { opacity: 0; transform: scale(0.8) translateY(30px); }
+                100% { opacity: 1; transform: scale(1) translateY(0); }
+            }
+            @keyframes trophyPulse {
+                0%, 100% { transform: scale(1); }
+                50% { transform: scale(1.1); }
+            }
+            @keyframes starFloat {
+                0%, 100% { transform: translateY(0) rotate(0deg); }
+                50% { transform: translateY(-10px) rotate(5deg); }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // 最高等级徽章
+        const levelColors = ['#34C759', '#30D158', '#007AFF', '#5856D6', '#AF52DE', '#FF2D55'];
+        const highestColor = levelColors[this.state.highestLevel - 1] || '#34C759';
+
+        introCard.innerHTML = `
+            <div style="position: relative; margin-bottom: 40px;">
+                <!-- 背景装饰星星 -->
+                <div style="
+                    position: absolute;
+                    top: -20px; left: 10%;
+                    font-size: 24px;
+                    animation: starFloat 2s ease-in-out infinite;
+                    opacity: 0.6;
+                ">✨</div>
+                <div style="
+                    position: absolute;
+                    top: 10px; right: 15%;
+                    font-size: 20px;
+                    animation: starFloat 2.5s ease-in-out infinite 0.5s;
+                    opacity: 0.5;
+                ">⭐</div>
+                <div style="
+                    position: absolute;
+                    bottom: -10px; left: 20%;
+                    font-size: 18px;
+                    animation: starFloat 2.2s ease-in-out infinite 1s;
+                    opacity: 0.4;
+                ">✦</div>
+
+                <!-- 奖杯图标 -->
+                <div style="
+                    width: 120px;
+                    height: 120px;
+                    margin: 0 auto;
+                    background: linear-gradient(135deg, ${highestColor} 0%, ${this.adjustColor(highestColor, -30)} 100%);
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 60px;
+                    box-shadow: 0 8px 32px ${highestColor}50;
+                    animation: trophyPulse 2s ease-in-out infinite;
+                ">🏆</div>
+
+                <!-- 最高等级显示 -->
+                <div style="
+                    position: absolute;
+                    bottom: -5px;
+                    right: calc(50% - 70px);
+                    background: white;
+                    padding: 6px 16px;
+                    border-radius: 20px;
+                    font-size: 14px;
+                    font-weight: 700;
+                    color: ${highestColor};
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                ">最高 L${this.state.highestLevel}</div>
+            </div>
+
+            <h2 style="
+                font-size: 36px;
+                font-weight: 800;
+                color: #1C1C1E;
+                margin-bottom: 12px;
+                letter-spacing: -0.5px;
+            ">挑战模式</h2>
+
+            <p style="
+                font-size: 18px;
+                color: #8E8E93;
+                margin-bottom: 32px;
+                line-height: 1.6;
+            ">不断突破自我，挑战算术极限<br>连续答对 5 题即可升级难度</p>
+
+            <!-- 难度等级预览 -->
+            <div style="
+                display: flex;
+                justify-content: center;
+                gap: 8px;
+                margin-bottom: 40px;
+                flex-wrap: wrap;
+            ">
+                ${Object.entries(this.difficultyConfig).map(([level, config]) => {
+                    const color = levelColors[level - 1];
+                    const isUnlocked = level <= this.state.highestLevel;
+                    return `
+                        <div style="
+                            padding: 12px 16px;
+                            border-radius: 16px;
+                            background: ${isUnlocked ? color + '15' : '#F2F2F7'};
+                            border: 2px solid ${isUnlocked ? color : '#E5E5EA'};
+                            text-align: center;
+                            min-width: 70px;
+                            opacity: ${isUnlocked ? 1 : 0.5};
+                        ">
+                            <div style="
+                                font-size: 12px;
+                                font-weight: 700;
+                                color: ${isUnlocked ? color : '#C7C7CC'};
+                                margin-bottom: 4px;
+                            ">L${level}</div>
+                            <div style="
+                                font-size: 11px;
+                                color: ${isUnlocked ? '#3C3C43' : '#C7C7CC'};
+                            ">${config.name}</div>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+
+            <!-- 开始挑战按钮 -->
+            <button id="challenge-start-btn" style="
+                padding: 20px 60px;
+                background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%);
+                color: white;
+                border: none;
+                border-radius: 16px;
+                font-size: 20px;
+                font-weight: 700;
+                cursor: pointer;
+                box-shadow: 0 8px 32px rgba(0, 122, 255, 0.4);
+                transition: all 300ms ease;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            ">
+                <span style="font-size: 28px;">🚀</span>
+                <span>开始挑战</span>
+            </button>
+
+            <p style="
+                font-size: 13px;
+                color: #C7C7CC;
+                margin-top: 20px;
+            ">准备好迎接挑战了吗？</p>
+        `;
+
+        page.appendChild(introCard);
+        container.appendChild(page);
+
+        // 绑定开始按钮事件
+        setTimeout(() => {
+            const startBtn = document.getElementById('challenge-start-btn');
+            if (startBtn) {
+                startBtn.addEventListener('click', () => this.startChallenge());
+                startBtn.addEventListener('mouseenter', () => {
+                    startBtn.style.transform = 'scale(1.05)';
+                    startBtn.style.boxShadow = '0 12px 40px rgba(0, 122, 255, 0.5)';
+                });
+                startBtn.addEventListener('mouseleave', () => {
+                    startBtn.style.transform = 'scale(1)';
+                    startBtn.style.boxShadow = '0 8px 32px rgba(0, 122, 255, 0.4)';
+                });
+            }
+        }, 100);
+
+        // 开场语音
+        if (SpeechManager.isEnabled()) {
+            setTimeout(() => {
+                SpeechManager.speak('欢迎来到挑战模式！准备好突破自己的极限了吗？');
+            }, 500);
+        }
+    },
+
+    // 颜色调整辅助函数
+    adjustColor(color, amount) {
+        // 简单的颜色变暗函数
+        const num = parseInt(color.replace('#', ''), 16);
+        const r = Math.max(0, Math.min(255, (num >> 16) + amount));
+        const g = Math.max(0, Math.min(255, ((num >> 8) & 0x00FF) + amount));
+        const b = Math.max(0, Math.min(255, (num & 0x0000FF) + amount));
+        return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
     },
 
     render() {

@@ -204,6 +204,13 @@ const PracticeChoicePage = {
             </div>
         `;
 
+        // 自动朗读题目
+        if (!this.hasSelected && SpeechManager.isEnabled()) {
+            setTimeout(() => {
+                SpeechManager.speakExpression(current.display + '等于多少');
+            }, 300);
+        }
+
         // 更新选项按钮
         this.elements.optionsGrid.innerHTML = '';
         this.currentOptions.forEach((option, index) => {
