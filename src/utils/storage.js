@@ -244,6 +244,25 @@ const Storage = {
     },
 
     /**
+     * 获取统计摘要（用于首页）
+     * @returns {Object}
+     */
+    getStatsSummary() {
+        const userData = this.getUserData();
+        const stats = userData.stats;
+        const todayMistakes = this.getTodayReviewMistakes();
+
+        return {
+            practiceCount: stats.practiceCount,
+            reviewCount: todayMistakes.length,
+            totalQuestions: stats.totalQuestions,
+            accuracy: stats.totalQuestions > 0
+                ? Math.round((stats.correctCount / stats.totalQuestions) * 100)
+                : 0
+        };
+    },
+
+    /**
      * 获取进步曲线数据（最近N天）
      * @param {number} days - 天数（默认7天）
      * @returns {Array}
