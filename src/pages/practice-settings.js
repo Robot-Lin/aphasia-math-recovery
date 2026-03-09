@@ -118,11 +118,6 @@ const PracticeSettingsPage = {
         this.elements.countSection.appendChild(this.elements.countGrid);
         content.appendChild(this.elements.countSection);
 
-        // 5. 配置说明
-        this.elements.infoCard = this.createInfoCard();
-        this.updateInfoCard();
-        content.appendChild(this.elements.infoCard);
-
         // 开始按钮
         const buttonWrapper = document.createElement('div');
         buttonWrapper.style.cssText = 'padding: 16px 8px 8px 8px;';
@@ -175,17 +170,6 @@ const PracticeSettingsPage = {
         return grid;
     },
 
-    createInfoCard() {
-        const card = document.createElement('div');
-        card.style.cssText = `
-            background: rgba(0, 122, 255, 0.06);
-            border-radius: 16px;
-            padding: 16px 20px;
-            border: 1px solid rgba(0, 122, 255, 0.15);
-        `;
-        return card;
-    },
-
     // 更新模式按钮（局部更新）
     updateModeButtons() {
         this.elements.modeGrid.innerHTML = '';
@@ -209,14 +193,14 @@ const PracticeSettingsPage = {
         this.elements.diffGrid.innerHTML = '';
 
         const diffs = [
-            { id: 'beginner', icon: '🌱', label: '初级' },
-            { id: 'intermediate', icon: '🌿', label: '中级' },
-            { id: 'advanced', icon: '🌳', label: '高级' }
+            { id: 'beginner', icon: '🌱', label: '初级', desc: '数字 1-20' },
+            { id: 'intermediate', icon: '🌿', label: '中级', desc: '数字 10-100' },
+            { id: 'advanced', icon: '🌳', label: '高级', desc: '数字 100-500' }
         ];
 
         diffs.forEach(diff => {
             const isActive = this.config.difficulty === diff.id;
-            const btn = this.createOptionButton(diff.icon, diff.label, '', isActive, () => {
+            const btn = this.createOptionButton(diff.icon, diff.label, diff.desc, isActive, () => {
                 this.selectDifficulty(diff.id);
             });
             this.elements.diffGrid.appendChild(btn);
@@ -254,44 +238,6 @@ const PracticeSettingsPage = {
             });
             this.elements.countGrid.appendChild(btn);
         });
-    },
-
-    // 更新信息卡片（局部更新）
-    updateInfoCard() {
-        const typeNames = {
-            addition: '加法', subtraction: '减法',
-            multiplication: '乘法', division: '除法'
-        };
-        const diffNames = { beginner: '初级', intermediate: '中级', advanced: '高级' };
-
-        const ranges = {
-            addition: { beginner: '1-20', intermediate: '10-100', advanced: '100-500' },
-            subtraction: { beginner: '1-20', intermediate: '10-100', advanced: '100-500' },
-            multiplication: { beginner: '1-9', intermediate: '2-12', advanced: '10-20' },
-            division: { beginner: '1-9', intermediate: '2-12', advanced: '2-20' }
-        };
-
-        const selectedTypes = this.config.types.map(t => typeNames[t]).join('、');
-
-        let html = `
-            <div style="font-size: 13px; color: #007AFF; font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
-                <span>ℹ️</span> 当前配置说明
-            </div>
-            <div style="font-size: 14px; color: #1C1C1E; line-height: 1.6;">
-                <div>✓ 运算类型：${selectedTypes}</div>
-                <div>✓ 难度等级：${diffNames[this.config.difficulty]}</div>
-                <div>✓ 答题模式：${this.config.mode === 'keypad' ? '键盘输入' : '选择题'}</div>
-                <div>✓ 题目数量：${this.config.count} 题</div>
-            </div>
-        `;
-
-        // 显示每种运算的范围
-        this.config.types.forEach(type => {
-            const range = ranges[type]?.[this.config.difficulty];
-            html += `<div style="font-size: 13px; color: #8E8E93; margin-left: 12px; margin-top: 4px;">• ${typeNames[type]}范围：${range}</div>`;
-        });
-
-        this.elements.infoCard.innerHTML = html;
     },
 
     createOptionButton(icon, label, desc, isActive, onClick) {
@@ -378,13 +324,11 @@ const PracticeSettingsPage = {
     selectMode(mode) {
         this.config.mode = mode;
         this.updateModeButtons();
-        this.updateInfoCard();
     },
 
     selectDifficulty(difficulty) {
         this.config.difficulty = difficulty;
         this.updateDifficultyButtons();
-        this.updateInfoCard();
     },
 
     toggleType(type) {
@@ -401,13 +345,11 @@ const PracticeSettingsPage = {
         }
 
         this.updateTypeButtons();
-        this.updateInfoCard();
     },
 
     selectCount(count) {
         this.config.count = count;
         this.updateCountButtons();
-        this.updateInfoCard();
     },
 
     startPractice() {
