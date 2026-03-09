@@ -73,9 +73,6 @@ const HomePage = {
         }
 
         container.appendChild(page);
-
-        // 更新侧边栏认知辅助状态
-        setTimeout(() => this.updateCognitiveAidSidebar(), 0);
     },
 
     createWelcomeSection() {
@@ -1027,46 +1024,6 @@ const HomePage = {
         }
 
         return next.slice(0, 2); // 只显示前2个
-    },
-
-    /**
-     * 切换认知辅助快速开关
-     */
-    toggleCognitiveAidQuick() {
-        const settings = Storage.getCognitiveAidSettings();
-        const newState = !settings.enabled;
-
-        Storage.setCognitiveAidEnabled(newState);
-        this.updateCognitiveAidSidebar();
-
-        // 显示提示
-        this.showToast(newState ? '认知辅助已开启' : '认知辅助已关闭');
-    },
-
-    /**
-     * 更新侧边栏认知辅助状态显示
-     */
-    updateCognitiveAidSidebar() {
-        const settings = Storage.getCognitiveAidSettings();
-        const enabled = settings.enabled;
-
-        const indicator = document.getElementById('cognitive-aid-indicator');
-        const status = document.getElementById('cognitive-aid-status');
-        const container = document.getElementById('cognitive-aid-quick-toggle');
-
-        if (indicator) {
-            indicator.style.background = enabled ? '#34C759' : '#C7C7CC';
-            indicator.style.boxShadow = enabled ? '0 0 0 2px rgba(52, 199, 89, 0.3)' : 'none';
-        }
-
-        if (status) {
-            status.textContent = enabled ? '已开启' : '已关闭';
-        }
-
-        if (container) {
-            container.style.background = enabled ? 'rgba(0, 122, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)';
-            container.style.borderColor = enabled ? 'rgba(0, 122, 255, 0.15)' : 'rgba(0, 0, 0, 0.08)';
-        }
     },
 
     /**
