@@ -18,7 +18,8 @@ const router = {
         'practice-keypad': () => PracticeKeypadPage.init(),
         'practice-choice': () => PracticeChoicePage.init(),
         'result': () => ResultPage.init(),
-        'mistakes': () => MistakesPage.init()
+        'mistakes': () => MistakesPage.init(),
+        'history': () => HistoryPage.init()
     },
 
     /**
@@ -43,6 +44,7 @@ const router = {
         const navHome = document.getElementById('nav-home');
         const navPractice = document.getElementById('nav-practice');
         const navMistakes = document.getElementById('nav-mistakes');
+        const navHistory = document.getElementById('nav-history');
 
         if (!navHome || !navPractice) return;
 
@@ -59,24 +61,21 @@ const router = {
             boxShadow: '0 2px 8px rgba(0, 122, 255, 0.3)'
         };
 
+        // 先重置所有为inactive
+        Object.assign(navHome.style, inactiveStyle);
+        Object.assign(navPractice.style, inactiveStyle);
+        if (navMistakes) Object.assign(navMistakes.style, inactiveStyle);
+        if (navHistory) Object.assign(navHistory.style, inactiveStyle);
+
         // 根据当前页面设置样式
         if (this.currentPage === 'home') {
             Object.assign(navHome.style, activeStyle);
-            Object.assign(navPractice.style, inactiveStyle);
-            if (navMistakes) Object.assign(navMistakes.style, inactiveStyle);
         } else if (['practice-settings', 'practice-keypad', 'practice-choice'].includes(this.currentPage)) {
-            Object.assign(navHome.style, inactiveStyle);
             Object.assign(navPractice.style, activeStyle);
-            if (navMistakes) Object.assign(navMistakes.style, inactiveStyle);
         } else if (this.currentPage === 'mistakes') {
-            Object.assign(navHome.style, inactiveStyle);
-            Object.assign(navPractice.style, inactiveStyle);
             if (navMistakes) Object.assign(navMistakes.style, activeStyle);
-        } else {
-            // 其他页面（如 result）默认都不高亮
-            Object.assign(navHome.style, inactiveStyle);
-            Object.assign(navPractice.style, inactiveStyle);
-            if (navMistakes) Object.assign(navMistakes.style, inactiveStyle);
+        } else if (this.currentPage === 'history') {
+            if (navHistory) Object.assign(navHistory.style, activeStyle);
         }
     },
 
