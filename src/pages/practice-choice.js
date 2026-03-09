@@ -474,6 +474,9 @@ const PracticeChoicePage = {
     },
 
     getScore() {
+        return this.answers.filter(a => a.isCorrect).length * 10;
+    },
+
     bindKeyboard() {
         document.onkeydown = (e) => {
             if (this.hasSelected) {
