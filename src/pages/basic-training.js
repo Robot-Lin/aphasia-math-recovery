@@ -199,34 +199,48 @@ const BasicTrainingPage = {
             </div>
 
             <!-- 等级选择按钮 -->
-            <div style="display: flex; gap: 8px;">
+            <div style="display: flex; gap: 10px;">
                 ${type.levels.map((lvl, idx) => {
                     const levelNum = idx + 1;
                     const isUnlocked = levelNum <= currentLevel;
+                    const isRecommended = levelNum === currentLevel;
                     return `
                         <button
                             onclick="BasicTrainingPage.startTraining('${typeKey}', ${levelNum})"
+                            class="${isUnlocked ? 'level-btn-unlocked' : 'level-btn-locked'}"
                             style="
                                 flex: 1;
-                                padding: 12px 8px;
-                                border-radius: 12px;
-                                border: 2px solid ${isUnlocked ? type.color : '#E5E5EA'};
+                                padding: 14px 8px;
+                                border-radius: 14px;
+                                border: ${isUnlocked ? 'none' : '2px solid #E5E5EA'};
                                 background: ${isUnlocked ? type.color : '#F2F2F7'};
                                 color: ${isUnlocked ? 'white' : '#C7C7CC'};
-                                font-size: 14px;
-                                font-weight: 600;
+                                font-size: 15px;
+                                font-weight: 700;
                                 cursor: ${isUnlocked ? 'pointer' : 'not-allowed'};
                                 transition: all 200ms ease;
-                                ${isUnlocked ? `box-shadow: 0 4px 12px ${type.color}30;` : ''}
+                                box-shadow: ${isUnlocked ? `0 4px 14px ${type.color}40, inset 0 -2px 0 rgba(0,0,0,0.1)` : 'none'};
+                                position: relative;
+                                overflow: hidden;
                             "
                             ${!isUnlocked ? 'disabled' : ''}
+                            onmouseenter="this.style.transform='translateY(-2px)'; this.style.boxShadow='${isUnlocked ? `0 6px 20px ${type.color}50, inset 0 -2px 0 rgba(0,0,0,0.1)` : 'none'}';"
+                            onmouseleave="this.style.transform='translateY(0)'; this.style.boxShadow='${isUnlocked ? `0 4px 14px ${type.color}40, inset 0 -2px 0 rgba(0,0,0,0.1)` : 'none'}';"
                         >
-                            <div style="font-size: 11px; opacity: 0.9; margin-bottom: 2px;">${lvl.label}</div>
-                            <div style="font-size: 10px; opacity: 0.7;">${lvl.desc}</div>
+                            ${isRecommended && isUnlocked ? `<div style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: rgba(255,255,255,0.5);"></div>` : ''}
+                            <div style="font-size: 13px; font-weight: 800; margin-bottom: 4px; letter-spacing: 0.5px;">${lvl.label}</div>
+                            <div style="font-size: 11px; font-weight: 500; opacity: 0.85;">${lvl.desc}</div>
+                            ${isRecommended && isUnlocked ? `<div style="margin-top: 6px; font-size: 10px; background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 10px; font-weight: 600;">推荐</div>` : ''}
                         </button>
                     `;
                 }).join('')}
             </div>
+
+            ${currentLevel < 3 ? `
+            <div style="margin-top: 12px; text-align: center; font-size: 12px; color: #8E8E93;">
+                完成当前等级可解锁下一级
+            </div>
+            ` : ''}
         `;
 
         // 悬停效果
