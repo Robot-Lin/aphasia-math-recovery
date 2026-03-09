@@ -412,6 +412,18 @@ const PracticeKeypadPage = {
 
         if (this.isCorrect) {
             this.streak++;
+            // 错题模式：记录答对
+            const isMistakeMode = sessionStorage.getItem('mistake_mode') === 'true';
+            if (isMistakeMode && typeof Storage !== 'undefined') {
+                const mistakeId = sessionStorage.getItem('mistake_id');
+                if (mistakeId) {
+                    const removed = Storage.recordMistakeCorrect(mistakeId);
+                    if (removed) {
+                        // 已答对3次，从错题本移除
+                        console.log('错题已掌握，从错题本移除');
+                    }
+                }
+            }
         } else {
             this.streak = 0;
             if (typeof Storage !== 'undefined') {
@@ -455,6 +467,15 @@ const PracticeKeypadPage = {
     },
 
     finishPractice() {
+        // 错题模式处理
+        const isMistakeMode = sessionStorage.getItem('mistake_mode') === 'true';
+        if (isMistakeMode) {
+            sessionStorage.removeItem('mistake_mode');
+            sessionStorage.removeItem('mistake_id');
+            router.navigate('mistakes');
+            return;
+        }
+
         if (typeof SoundManager !== 'undefined') {
             SoundManager.playComplete();
         }

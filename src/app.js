@@ -17,7 +17,8 @@ const router = {
         'practice-settings': () => PracticeSettingsPage.init(),
         'practice-keypad': () => PracticeKeypadPage.init(),
         'practice-choice': () => PracticeChoicePage.init(),
-        'result': () => ResultPage.init()
+        'result': () => ResultPage.init(),
+        'mistakes': () => MistakesPage.init()
     },
 
     /**
@@ -41,6 +42,7 @@ const router = {
     updateNavStyles() {
         const navHome = document.getElementById('nav-home');
         const navPractice = document.getElementById('nav-practice');
+        const navMistakes = document.getElementById('nav-mistakes');
 
         if (!navHome || !navPractice) return;
 
@@ -61,13 +63,20 @@ const router = {
         if (this.currentPage === 'home') {
             Object.assign(navHome.style, activeStyle);
             Object.assign(navPractice.style, inactiveStyle);
+            if (navMistakes) Object.assign(navMistakes.style, inactiveStyle);
         } else if (['practice-settings', 'practice-keypad', 'practice-choice'].includes(this.currentPage)) {
             Object.assign(navHome.style, inactiveStyle);
             Object.assign(navPractice.style, activeStyle);
-        } else {
-            // 其他页面（如 result）默认都不高亮，或者保持原样
+            if (navMistakes) Object.assign(navMistakes.style, inactiveStyle);
+        } else if (this.currentPage === 'mistakes') {
             Object.assign(navHome.style, inactiveStyle);
             Object.assign(navPractice.style, inactiveStyle);
+            if (navMistakes) Object.assign(navMistakes.style, activeStyle);
+        } else {
+            // 其他页面（如 result）默认都不高亮
+            Object.assign(navHome.style, inactiveStyle);
+            Object.assign(navPractice.style, inactiveStyle);
+            if (navMistakes) Object.assign(navMistakes.style, inactiveStyle);
         }
     },
 
