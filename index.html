@@ -230,6 +230,32 @@
                     <span style="font-size: 18px;">⚙️</span>
                     <span>设置</span>
                 </button>
+
+                <!-- 认知辅助快速开关 -->
+                <div id="cognitive-aid-quick-toggle" style="
+                    margin-top: 8px;
+                    padding: 12px 14px;
+                    background: rgba(0, 122, 255, 0.08);
+                    border-radius: 12px;
+                    border: 1px solid rgba(0, 122, 255, 0.15);
+                    cursor: pointer;
+                    transition: all 200ms ease;
+                " onclick="HomePage.toggleCognitiveAidQuick()">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span id="cognitive-aid-icon" style="font-size: 18px;">🧠</span>
+                        <div style="flex: 1;">
+                            <div style="font-size: 13px; font-weight: 600; color: #007AFF;">认知辅助</div>
+                            <div id="cognitive-aid-status" style="font-size: 11px; color: #007AFF; opacity: 0.8;">已开启</div>
+                        </div>
+                        <div id="cognitive-aid-indicator" style="
+                            width: 8px;
+                            height: 8px;
+                            background: #34C759;
+                            border-radius: 50%;
+                            box-shadow: 0 0 0 2px rgba(52, 199, 89, 0.3);
+                        "></div>
+                    </div>
+                </div>
             </nav>
 
             <!-- 用户信息 -->

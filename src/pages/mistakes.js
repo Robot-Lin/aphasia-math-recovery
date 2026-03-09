@@ -179,9 +179,12 @@ const MistakesPage = {
 
     getDifficultyDistribution() {
         const difficulties = [
-            { id: 'beginner', name: '初级', color: '#34C759' },
-            { id: 'intermediate', name: '中级', color: '#FF9500' },
-            { id: 'advanced', name: '高级', color: '#FF3B30' }
+            { id: 'level1', name: '入门', color: '#34C759' },
+            { id: 'level2', name: '进阶', color: '#30D158' },
+            { id: 'level3', name: '熟练', color: '#007AFF' },
+            { id: 'level4', name: '高手', color: '#5856D6' },
+            { id: 'level5', name: '专家', color: '#AF52DE' },
+            { id: 'level6', name: '大师', color: '#FF2D55' }
         ];
 
         const total = this.mistakes.length;
@@ -336,9 +339,9 @@ const MistakesPage = {
             division: '除法'
         };
         const diffNames = {
-            beginner: '初级',
-            intermediate: '中级',
-            advanced: '高级'
+            level1: '入门', level2: '进阶', level3: '熟练',
+            level4: '高手', level5: '专家', level6: '大师',
+            beginner: '初级', intermediate: '中级', advanced: '高级'
         };
 
         const isReviewToday = mistake.nextReviewDate <= new Date().toISOString().split('T')[0];

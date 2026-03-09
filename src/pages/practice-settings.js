@@ -5,10 +5,10 @@
 
 const PracticeSettingsPage = {
     config: {
-        mode: 'keypad',
-        difficulty: 'beginner',
-        types: ['addition'],
-        count: 5
+        mode: 'choice',
+        difficulty: 'level1',
+        types: ['addition', 'subtraction'],
+        count: 10
     },
 
     // DOM 引用缓存
@@ -22,10 +22,10 @@ const PracticeSettingsPage = {
 
     resetConfig() {
         this.config = {
-            mode: 'keypad',
-            difficulty: 'beginner',
-            types: ['addition'],
-            count: 5
+            mode: 'choice',
+            difficulty: 'level1',
+            types: ['addition', 'subtraction'],
+            count: 10
         };
     },
 
@@ -40,7 +40,7 @@ const PracticeSettingsPage = {
         const page = document.createElement('div');
         page.className = 'page-enter';
         page.style.cssText = `
-            max-width: 640px;
+            max-width: 900px;
             margin: 0 auto;
             padding: 40px 20px;
         `;
@@ -59,48 +59,49 @@ const PracticeSettingsPage = {
         card.className = 'glass card-hover';
         card.style.cssText = `
             border-radius: 24px;
-            padding: 8px;
+            padding: 24px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
         `;
 
-        // 卡片头部
-        const cardHeader = document.createElement('div');
-        cardHeader.style.cssText = `
-            background: linear-gradient(135deg, #007AFF 0%, #0051D5 100%);
-            border-radius: 20px;
-            padding: 20px 24px;
-            margin: 8px 8px 16px 8px;
-            color: white;
-        `;
-        cardHeader.innerHTML = `
-            <div style="display: flex; align-items: center; gap: 12px;">
-                <span style="font-size: 24px;">⚙️</span>
-                <span style="font-size: 20px; font-weight: 700;">当前配置</span>
-            </div>
-        `;
-        card.appendChild(cardHeader);
-
-        // 设置内容区域
+        // 设置内容区域 - 左右两栏布局
         const content = document.createElement('div');
-        content.style.cssText = 'padding: 8px 16px 16px 16px; display: flex; flex-direction: column; gap: 24px;';
+        content.style.cssText = 'padding: 8px 16px 16px 16px;';
+
+        // 创建左右两栏容器
+        const mainGrid = document.createElement('div');
+        mainGrid.style.cssText = `
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        `;
+
+        // 左栏：答题模式 + 难度等级
+        const leftColumn = document.createElement('div');
+        leftColumn.style.cssText = 'display: flex; flex-direction: column; gap: 20px;';
 
         // 1. 答题模式
         this.elements.modeSection = this.createSection('答题模式');
         this.elements.modeGrid = this.createGrid(2);
         this.updateModeButtons();
         this.elements.modeSection.appendChild(this.elements.modeGrid);
-        content.appendChild(this.elements.modeSection);
+        leftColumn.appendChild(this.elements.modeSection);
 
         // 2. 难度选择
         this.elements.diffSection = this.createSection('难度等级');
+        this.elements.diffSection.style.cssText += 'min-width: 0;';
         this.elements.diffGrid = this.createGrid(3);
         this.updateDifficultyButtons();
         this.elements.diffSection.appendChild(this.elements.diffGrid);
-        content.appendChild(this.elements.diffSection);
+        leftColumn.appendChild(this.elements.diffSection);
+
+        // 右栏：运算类型 + 题目数量
+        const rightColumn = document.createElement('div');
+        rightColumn.style.cssText = 'display: flex; flex-direction: column; gap: 20px;';
 
         // 3. 运算类型
         this.elements.typeSection = this.createSection('运算类型', '可多选');
-        this.elements.typeGrid = this.createGrid(4);
+        this.elements.typeGrid = this.createGrid(2);
         this.updateTypeButtons();
         this.elements.typeSection.appendChild(this.elements.typeGrid);
 
@@ -109,14 +110,19 @@ const PracticeSettingsPage = {
         this.elements.typeError.style.cssText = 'color: #FF3B30; font-size: 13px; margin-top: 8px; display: none;';
         this.elements.typeError.textContent = '请至少选择一种运算类型';
         this.elements.typeSection.appendChild(this.elements.typeError);
-        content.appendChild(this.elements.typeSection);
+        rightColumn.appendChild(this.elements.typeSection);
 
         // 4. 题量选择
         this.elements.countSection = this.createSection('题目数量');
         this.elements.countGrid = this.createGrid(4);
         this.updateCountButtons();
         this.elements.countSection.appendChild(this.elements.countGrid);
-        content.appendChild(this.elements.countSection);
+        rightColumn.appendChild(this.elements.countSection);
+
+        // 添加到主网格
+        mainGrid.appendChild(leftColumn);
+        mainGrid.appendChild(rightColumn);
+        content.appendChild(mainGrid);
 
         // 开始按钮
         const buttonWrapper = document.createElement('div');
@@ -188,14 +194,17 @@ const PracticeSettingsPage = {
         });
     },
 
-    // 更新难度按钮（局部更新）
+    // 更新难度按钮（局部更新）- 使用挑战模式相同的6级难度
     updateDifficultyButtons() {
         this.elements.diffGrid.innerHTML = '';
 
         const diffs = [
-            { id: 'beginner', icon: '🌱', label: '初级', desc: '数字 1-20' },
-            { id: 'intermediate', icon: '🌿', label: '中级', desc: '数字 10-100' },
-            { id: 'advanced', icon: '🌳', label: '高级', desc: '数字 100-500' }
+            { id: 'level1', icon: '🌱', label: '入门', desc: '个位数相加' },
+            { id: 'level2', icon: '🌿', label: '进阶', desc: '个位+两位' },
+            { id: 'level3', icon: '🍃', label: '熟练', desc: '个位+三位' },
+            { id: 'level4', icon: '🌳', label: '高手', desc: '两位数相加' },
+            { id: 'level5', icon: '🏔️', label: '专家', desc: '两位+三位' },
+            { id: 'level6', icon: '⭐', label: '大师', desc: '三位数相加' }
         ];
 
         diffs.forEach(diff => {

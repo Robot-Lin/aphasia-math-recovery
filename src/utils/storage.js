@@ -50,7 +50,13 @@ const Storage = {
                 badgesSection: true,
                 reviewAlert: true,
                 tipsSection: true,
-                welcomeSection: true
+                welcomeSection: true,
+                cognitiveAid: {
+                    enabled: true,      // 总开关
+                    visualIcons: true,  // 实物图标辅助
+                    numberLine: true,   // 数轴可视化
+                    stepHint: true      // 分步提示
+                }
             }
         };
     },
@@ -432,6 +438,57 @@ const Storage = {
             id: mistakeId,
             masteredAt: new Date().toISOString()
         });
+        this.saveUserData(userData);
+    },
+
+    /**
+     * 获取认知辅助设置
+     * @returns {Object}
+     */
+    getCognitiveAidSettings() {
+        const userData = this.getUserData();
+        return userData.displaySettings?.cognitiveAid || {
+            enabled: true,
+            visualIcons: true,
+            numberLine: true,
+            stepHint: true
+        };
+    },
+
+    /**
+     * 设置认知辅助总开关
+     * @param {boolean} enabled - 是否启用
+     */
+    setCognitiveAidEnabled(enabled) {
+        const userData = this.getUserData();
+        if (!userData.displaySettings.cognitiveAid) {
+            userData.displaySettings.cognitiveAid = {
+                enabled: true,
+                visualIcons: true,
+                numberLine: true,
+                stepHint: true
+            };
+        }
+        userData.displaySettings.cognitiveAid.enabled = enabled;
+        this.saveUserData(userData);
+    },
+
+    /**
+     * 设置认知辅助具体功能
+     * @param {string} key - 功能键名
+     * @param {boolean} value - 开关值
+     */
+    setCognitiveAidFeature(key, value) {
+        const userData = this.getUserData();
+        if (!userData.displaySettings.cognitiveAid) {
+            userData.displaySettings.cognitiveAid = {
+                enabled: true,
+                visualIcons: true,
+                numberLine: true,
+                stepHint: true
+            };
+        }
+        userData.displaySettings.cognitiveAid[key] = value;
         this.saveUserData(userData);
     },
 

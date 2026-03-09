@@ -48,6 +48,8 @@ const SettingsPage = {
         leftColumn.appendChild(this.createSoundSettings());
         leftColumn.appendChild(this.createSectionTitle('首页显示'));
         leftColumn.appendChild(this.createDisplaySettings());
+        leftColumn.appendChild(this.createSectionTitle('认知辅助'));
+        leftColumn.appendChild(this.createCognitiveAidSettings());
         settingsGrid.appendChild(leftColumn);
 
         // 右侧列
@@ -388,6 +390,201 @@ const SettingsPage = {
                 </div>
             </div>
         `;
+
+        return card;
+    },
+
+    createCognitiveAidSettings() {
+        const card = document.createElement('div');
+        card.className = 'glass';
+        card.style.cssText = `
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+        `;
+
+        // 获取认知辅助设置
+        const cognitiveAid = Storage.getCognitiveAidSettings();
+
+        // 总开关
+        const masterItem = document.createElement('div');
+        masterItem.style.cssText = `
+            display: flex;
+            align-items: center;
+            padding: 14px 16px;
+            background: rgba(0, 122, 255, 0.03);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+        `;
+
+        const masterEnabled = cognitiveAid.enabled;
+        masterItem.innerHTML = `
+            <div style="
+                width: 32px;
+                height: 32px;
+                background: rgba(0, 122, 255, 0.1);
+                border-radius: 8px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin-right: 12px;
+                font-size: 16px;
+            ">🧠</div>
+            <div style="flex: 1; min-width: 0;">
+                <div style="font-size: 15px; font-weight: 700; color: #1C1C1E;">认知辅助总开关</div>
+                <div style="font-size: 12px; color: #8E8E93; margin-top: 1px;">开启后可在练习中获得视觉辅助</div>
+            </div>
+            <div class="toggle-switch cognitive-master-toggle ${masterEnabled ? 'active' : ''}" data-key="enabled" style="
+                width: 51px;
+                height: 31px;
+                background: ${masterEnabled ? '#34C759' : '#E5E5EA'};
+                border-radius: 15.5px;
+                position: relative;
+                cursor: pointer;
+                transition: background 200ms ease;
+            ">
+                <div style="
+                    width: 27px;
+                    height: 27px;
+                    background: white;
+                    border-radius: 50%;
+                    position: absolute;
+                    top: 2px;
+                    left: ${masterEnabled ? '22px' : '2px'};
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+                    transition: left 200ms ease;
+                "></div>
+            </div>
+        `;
+        card.appendChild(masterItem);
+
+        // 子功能开关
+        const features = [
+            {
+                id: 'cognitive-icons',
+                icon: '🍎',
+                title: '实物图标辅助',
+                desc: '用苹果等图标表示数字',
+                key: 'visualIcons',
+                defaultValue: true
+            },
+            {
+                id: 'cognitive-numberline',
+                icon: '➡️',
+                title: '数轴可视化',
+                desc: '显示数字在数轴上的位置',
+                key: 'numberLine',
+                defaultValue: true
+            },
+            {
+                id: 'cognitive-steps',
+                icon: '🪜',
+                title: '分步提示',
+                desc: '复杂题目分步骤引导',
+                key: 'stepHint',
+                defaultValue: true
+            }
+        ];
+
+        features.forEach((feature, index) => {
+            const item = document.createElement('div');
+            item.className = 'cognitive-feature-item';
+            item.style.cssText = `
+                display: flex;
+                align-items: center;
+                padding: 12px 16px;
+                ${index !== features.length - 1 ? 'border-bottom: 1px solid rgba(0, 0, 0, 0.06);' : ''}
+                opacity: ${masterEnabled ? 1 : 0.5};
+                pointer-events: ${masterEnabled ? 'auto' : 'none'};
+                transition: opacity 200ms ease;
+            `;
+
+            const isEnabled = cognitiveAid[feature.key] !== undefined
+                ? cognitiveAid[feature.key]
+                : feature.defaultValue;
+
+            item.innerHTML = `
+                <div style="
+                    width: 32px;
+                    height: 32px;
+                    background: rgba(175, 82, 222, 0.1);
+                    border-radius: 8px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    margin-right: 12px;
+                    font-size: 16px;
+                ">${feature.icon}</div>
+                <div style="flex: 1; min-width: 0;">
+                    <div style="font-size: 15px; font-weight: 600; color: #1C1C1E;">${feature.title}</div>
+                    <div style="font-size: 12px; color: #8E8E93; margin-top: 1px;">${feature.desc}</div>
+                </div>
+                <div class="toggle-switch cognitive-feature-toggle ${isEnabled ? 'active' : ''}" data-key="${feature.key}" style="
+                    width: 51px;
+                    height: 31px;
+                    background: ${isEnabled ? '#34C759' : '#E5E5EA'};
+                    border-radius: 15.5px;
+                    position: relative;
+                    cursor: pointer;
+                    transition: background 200ms ease;
+                ">
+                    <div style="
+                        width: 27px;
+                        height: 27px;
+                        background: white;
+                        border-radius: 50%;
+                        position: absolute;
+                        top: 2px;
+                        left: ${isEnabled ? '22px' : '2px'};
+                        box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+                        transition: left 200ms ease;
+                    "></div>
+                </div>
+            `;
+
+            card.appendChild(item);
+        });
+
+        // 绑定总开关事件
+        setTimeout(() => {
+            const masterToggle = masterItem.querySelector('.cognitive-master-toggle');
+            if (masterToggle) {
+                masterToggle.onclick = () => {
+                    const isActive = masterToggle.classList.contains('active');
+                    const newState = !isActive;
+
+                    // 更新样式
+                    masterToggle.classList.toggle('active', newState);
+                    masterToggle.style.background = newState ? '#34C759' : '#E5E5EA';
+                    masterToggle.querySelector('div').style.left = newState ? '22px' : '2px';
+
+                    // 保存设置
+                    Storage.setCognitiveAidEnabled(newState);
+
+                    // 更新子功能透明度
+                    card.querySelectorAll('.cognitive-feature-item').forEach(item => {
+                        item.style.opacity = newState ? 1 : 0.5;
+                        item.style.pointerEvents = newState ? 'auto' : 'none';
+                    });
+                };
+            }
+
+            // 绑定子功能开关事件
+            card.querySelectorAll('.cognitive-feature-toggle').forEach(toggle => {
+                toggle.onclick = () => {
+                    const key = toggle.dataset.key;
+                    const isActive = toggle.classList.contains('active');
+                    const newState = !isActive;
+
+                    // 更新样式
+                    toggle.classList.toggle('active', newState);
+                    toggle.style.background = newState ? '#34C759' : '#E5E5EA';
+                    toggle.querySelector('div').style.left = newState ? '22px' : '2px';
+
+                    // 保存设置
+                    Storage.setCognitiveAidFeature(key, newState);
+                };
+            });
+        }, 0);
 
         return card;
     },

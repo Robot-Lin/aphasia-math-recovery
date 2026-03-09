@@ -107,7 +107,11 @@ const PracticeKeypadPage = {
         const progress = ((this.currentIndex + 1) / this.questions.length) * 100;
 
         const typeNames = { addition: '加法', subtraction: '减法', multiplication: '乘法', division: '除法' };
-        const diffNames = { beginner: '初级', intermediate: '中级', advanced: '高级' };
+        const diffNames = {
+            level1: '入门', level2: '进阶', level3: '熟练',
+            level4: '高手', level5: '专家', level6: '大师',
+            beginner: '初级', intermediate: '中级', advanced: '高级'
+        };
 
         const header = document.createElement('div');
         header.className = 'glass';
@@ -156,6 +160,14 @@ const PracticeKeypadPage = {
             padding: 40px 32px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         `;
+
+        // 认知辅助区域
+        this.elements.cognitiveAid = document.createElement('div');
+        this.elements.cognitiveAid.style.cssText = `
+            margin-bottom: 24px;
+            min-height: 60px;
+        `;
+        card.appendChild(this.elements.cognitiveAid);
 
         // 题目显示
         this.elements.questionDisplay = document.createElement('div');
@@ -283,6 +295,9 @@ const PracticeKeypadPage = {
     // 局部更新显示
     updateDisplay() {
         const current = this.questions[this.currentIndex];
+
+        // 更新认知辅助
+        this.updateCognitiveAid(current);
 
         // 更新题目
         this.elements.questionDisplay.innerHTML = `
@@ -559,5 +574,301 @@ const PracticeKeypadPage = {
         if (card) {
             card.style.animation = 'pageEnter 400ms cubic-bezier(0.34, 1.56, 0.64, 1)';
         }
+    },
+
+    /**
+     * 更新认知辅助显示
+     */
+    updateCognitiveAid(question) {
+        if (!this.elements.cognitiveAid) return;
+
+        const settings = Storage.getCognitiveAidSettings();
+        if (!settings.enabled) {
+            this.elements.cognitiveAid.innerHTML = '';
+            this.elements.cognitiveAid.style.display = 'none';
+            return;
+        }
+
+        this.elements.cognitiveAid.style.display = 'block';
+
+        let aidHTML = '';
+
+        // 1. 实物图标辅助（仅加法和减法）
+        if (settings.visualIcons && (question.type === 'addition' || question.type === 'subtraction')) {
+            aidHTML += this.createVisualIconsAid(question);
+        }
+
+        // 2. 数轴可视化（仅加法和减法，数字不太大时）
+        if (settings.numberLine && (question.type === 'addition' || question.type === 'subtraction')) {
+            const maxNum = Math.max(question.a || 0, question.b || 0, question.answer || 0);
+            if (maxNum <= 20) {
+                aidHTML += this.createNumberLineAid(question);
+            }
+        }
+
+        // 3. 分步提示
+        if (settings.stepHint && !this.hasSubmitted) {
+            aidHTML += this.createStepHint(question);
+        }
+
+        this.elements.cognitiveAid.innerHTML = aidHTML;
+    },
+
+    /**
+     * 创建实物图标辅助
+     */
+    createVisualIconsAid(question) {
+        const icon = '🍎';
+        const maxDisplay = 10;
+
+        let html = '<div style="display: flex; flex-direction: column; align-items: center; gap: 12px; margin-bottom: 16px;">';
+
+        if (question.type === 'addition') {
+            const a = question.a || 0;
+            const b = question.b || 0;
+
+            html += '<div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap; justify-content: center;">';
+
+            if (a <= maxDisplay) {
+                html += '<div style="display: flex; gap: 4px; flex-wrap: wrap; max-width: 120px; justify-content: center;">';
+                html += icon.repeat(a).split('').map(() => `<span style="font-size: 20px;">${icon}</span>`).join('');
+                html += '</div>';
+            } else {
+                html += `<div style="font-size: 18px; color: #007AFF; font-weight: 600;">${a}个</div>`;
+            }
+
+            html += '<span style="font-size: 24px; color: #8E8E93;">+</span>';
+
+            if (b <= maxDisplay) {
+                html += '<div style="display: flex; gap: 4px; flex-wrap: wrap; max-width: 120px; justify-content: center;">';
+                html += icon.repeat(b).split('').map(() => `<span style="font-size: 20px;">${icon}</span>`).join('');
+                html += '</div>';
+            } else {
+                html += `<div style="font-size: 18px; color: #007AFF; font-weight: 600;">${b}个</div>`;
+            }
+
+            html += '</div>';
+        } else if (question.type === 'subtraction') {
+            const a = question.a || 0;
+            const b = question.b || 0;
+
+            html += '<div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">';
+
+            if (a <= maxDisplay) {
+                html += '<div style="display: flex; gap: 4px; flex-wrap: wrap; max-width: 240px; justify-content: center;">';
+                for (let i = 0; i < a; i++) {
+                    if (i < b) {
+                        html += `<span style="font-size: 20px; opacity: 0.3; text-decoration: line-through;">${icon}</span>`;
+                    } else {
+                        html += `<span style="font-size: 20px;">${icon}</span>`;
+                    }
+                }
+                html += '</div>';
+            } else {
+                html += `<div style="font-size: 18px; color: #007AFF; font-weight: 600;">共${a}个，减去${b}个</div>`;
+            }
+
+            html += `<div style="font-size: 14px; color: #8E8E93;">剩下 ${a - b} 个</div>`;
+            html += '</div>';
+        }
+
+        html += '</div>';
+        return html;
+    },
+
+    /**
+     * 创建数轴可视化
+     */
+    createNumberLineAid(question) {
+        const a = question.a || 0;
+        const b = question.b || 0;
+        const answer = question.answer || 0;
+
+        const maxNum = Math.max(a, b, answer) + 2;
+        const minNum = 0;
+        const range = maxNum - minNum;
+
+        let html = '<div style="width: 100%; max-width: 400px; margin: 0 auto 16px;">';
+        html += '<div style="position: relative; height: 60px; margin-top: 10px;">';
+
+        html += `<div style="
+            position: absolute;
+            top: 30px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #E5E5EA;
+        "></div>`;
+
+        for (let i = minNum; i <= maxNum; i++) {
+            const left = ((i - minNum) / range) * 100;
+            const isActive = i === a || i === answer;
+
+            html += `<div style="
+                position: absolute;
+                left: ${left}%;
+                top: 26px;
+                width: 10px;
+                height: 10px;
+                background: ${isActive ? '#007AFF' : '#C7C7CC'};
+                border-radius: 50%;
+                transform: translateX(-50%);
+                z-index: 1;
+            "></div>`;
+
+            if (i % 2 === 0 || i === a || i === answer) {
+                html += `<div style="
+                    position: absolute;
+                    left: ${left}%;
+                    top: 40px;
+                    transform: translateX(-50%);
+                    font-size: 12px;
+                    color: ${isActive ? '#007AFF' : '#8E8E93'};
+                    font-weight: ${isActive ? '600' : '400'};
+                ">${i}</div>`;
+            }
+        }
+
+        if (question.type === 'addition' && a <= 20 && b <= 10) {
+            const startLeft = ((a - minNum) / range) * 100;
+            const endLeft = ((answer - minNum) / range) * 100;
+            const arrowWidth = endLeft - startLeft;
+
+            html += `<div style="
+                position: absolute;
+                top: 18px;
+                left: ${startLeft}%;
+                width: ${arrowWidth}%;
+                height: 20px;
+            ">
+                <div style="
+                    position: absolute;
+                    top: 50%;
+                    left: 0;
+                    right: 0;
+                    height: 2px;
+                    background: linear-gradient(90deg, #34C759, #30D158);
+                "></div>
+                <div style="
+                    position: absolute;
+                    top: 50%;
+                    right: 0;
+                    transform: translateY(-50%);
+                    width: 0;
+                    height: 0;
+                    border-left: 6px solid #30D158;
+                    border-top: 4px solid transparent;
+                    border-bottom: 4px solid transparent;
+                "></div>
+                <div style="
+                    position: absolute;
+                    top: -5px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    font-size: 11px;
+                    color: #34C759;
+                    font-weight: 600;
+                    background: rgba(52, 199, 89, 0.1);
+                    padding: 2px 6px;
+                    border-radius: 4px;
+                ">+${b}</div>
+            </div>`;
+        }
+
+        if (question.type === 'subtraction' && a <= 20 && b <= 10) {
+            const startLeft = ((a - minNum) / range) * 100;
+            const endLeft = ((answer - minNum) / range) * 100;
+            const arrowWidth = startLeft - endLeft;
+
+            html += `<div style="
+                position: absolute;
+                top: 18px;
+                left: ${endLeft}%;
+                width: ${arrowWidth}%;
+                height: 20px;
+            ">
+                <div style="
+                    position: absolute;
+                    top: 50%;
+                    left: 0;
+                    right: 0;
+                    height: 2px;
+                    background: linear-gradient(90deg, #FF9500, #FF6B00);
+                "></div>
+                <div style="
+                    position: absolute;
+                    top: 50%;
+                    left: 0;
+                    transform: translateY(-50%);
+                    width: 0;
+                    height: 0;
+                    border-right: 6px solid #FF6B00;
+                    border-top: 4px solid transparent;
+                    border-bottom: 4px solid transparent;
+                "></div>
+                <div style="
+                    position: absolute;
+                    top: -5px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    font-size: 11px;
+                    color: #FF9500;
+                    font-weight: 600;
+                    background: rgba(255, 149, 0, 0.1);
+                    padding: 2px 6px;
+                    border-radius: 4px;
+                ">-${b}</div>
+            </div>`;
+        }
+
+        html += '</div>';
+        html += '</div>';
+
+        return html;
+    },
+
+    /**
+     * 创建分步提示
+     */
+    createStepHint(question) {
+        const a = question.a || 0;
+        const b = question.b || 0;
+
+        let hint = '';
+        if (question.type === 'addition') {
+            if (b <= 5) {
+                hint = `从 ${a} 开始，往后数 ${b} 个数`;
+            } else if (a > b) {
+                hint = `可以先算 ${b} + ${a}，结果是一样的`;
+            } else {
+                hint = `想想 ${a} 再加上几个等于 10？`;
+            }
+        } else if (question.type === 'subtraction') {
+            if (b <= 5) {
+                hint = `从 ${a} 开始，往前数 ${b} 个数`;
+            } else if (a - b === 10) {
+                hint = `这是一个凑十的计算`;
+            } else {
+                hint = `想想 ${a} 减去多少等于 10？`;
+            }
+        } else if (question.type === 'multiplication') {
+            hint = `这是 ${a} 的乘法，想想 ${a} 的乘法表`;
+        } else if (question.type === 'division') {
+            hint = `想想几乘以 ${b} 等于 ${a}？`;
+        }
+
+        if (!hint) return '';
+
+        return `<div style="
+            background: rgba(0, 122, 255, 0.06);
+            border-radius: 12px;
+            padding: 12px 16px;
+            text-align: center;
+            font-size: 14px;
+            color: #007AFF;
+            border: 1px solid rgba(0, 122, 255, 0.1);
+        ">
+            <span style="margin-right: 6px;">💡</span>${hint}
+        </div>`;
     }
 };

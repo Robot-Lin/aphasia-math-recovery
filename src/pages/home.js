@@ -73,6 +73,9 @@ const HomePage = {
         }
 
         container.appendChild(page);
+
+        // 更新侧边栏认知辅助状态
+        setTimeout(() => this.updateCognitiveAidSidebar(), 0);
     },
 
     createWelcomeSection() {
@@ -150,8 +153,23 @@ const HomePage = {
             box-shadow: 0 8px 32px rgba(0, 122, 255, 0.3);
         `;
 
+        // 获取数据
+        const summary = Storage.getStatsSummary();
+        const userData = Storage.getUserData();
+        const lastPractice = this.getLastPracticeInfo(userData);
+        const recommended = this.getRecommendedPractice(userData);
+
+        // 主内容区
         const content = document.createElement('div');
         content.style.cssText = `
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        `;
+
+        // 头部区域：欢迎语 + 主按钮
+        const headerArea = document.createElement('div');
+        headerArea.style.cssText = `
             display: flex;
             flex-direction: row;
             align-items: center;
@@ -161,17 +179,24 @@ const HomePage = {
 
         // 文字区域
         const textArea = document.createElement('div');
+        const welcomeText = lastPractice.type
+            ? `上次练习：${lastPractice.type} · ${lastPractice.difficulty}`
+            : '准备好开始今天的练习了吗？';
+        const subText = lastPractice.type
+            ? `共练习 ${lastPractice.count} 题，正确率 ${lastPractice.accuracy}%`
+            : '从简单的加法开始，一步步找回自信';
+
         textArea.innerHTML = `
             <h3 style="font-size: 22px; font-weight: 700; color: white; margin-bottom: 8px;">
-                准备好开始今天的练习了吗？
+                ${welcomeText}
             </h3>
             <p style="font-size: 15px; color: rgba(255, 255, 255, 0.85);">
-                从简单的加法开始，一步步找回自信
+                ${subText}
             </p>
         `;
-        content.appendChild(textArea);
+        headerArea.appendChild(textArea);
 
-        // 开始按钮
+        // 开始练习按钮
         const startBtn = document.createElement('button');
         startBtn.className = 'btn-press';
         startBtn.style.cssText = `
@@ -187,6 +212,7 @@ const HomePage = {
             display: flex;
             align-items: center;
             gap: 8px;
+            white-space: nowrap;
         `;
         startBtn.innerHTML = '<span style="font-size: 20px;">🚀</span><span>开始练习</span>';
         startBtn.onclick = () => router.navigate('practice-settings');
@@ -201,10 +227,258 @@ const HomePage = {
             startBtn.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.15)';
         });
 
-        content.appendChild(startBtn);
+        headerArea.appendChild(startBtn);
+        content.appendChild(headerArea);
+
+        // 快捷入口网格
+        const quickGrid = document.createElement('div');
+        quickGrid.style.cssText = `
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        `;
+
+        // 快捷入口项
+        const quickItems = [
+            {
+                icon: '📚',
+                label: '复习错题',
+                count: summary.reviewCount,
+                showBadge: summary.reviewCount > 0,
+                onClick: () => router.navigate('mistakes'),
+                disabled: summary.reviewCount === 0
+            },
+            {
+                icon: lastPractice.typeIcon || '✏️',
+                label: '继续练习',
+                subLabel: lastPractice.type || '上次记录',
+                onClick: () => this.continueLastPractice(lastPractice),
+                disabled: !lastPractice.type
+            },
+            {
+                icon: recommended.icon || '💡',
+                label: '智能推荐',
+                subLabel: recommended.text,
+                onClick: () => this.startRecommendedPractice(recommended)
+            }
+        ];
+
+        quickItems.forEach(item => {
+            const itemEl = document.createElement('button');
+            itemEl.className = 'btn-press';
+            itemEl.style.cssText = `
+                background: rgba(255, 255, 255, 0.15);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                border-radius: 12px;
+                padding: 16px;
+                cursor: ${item.disabled ? 'default' : 'pointer'};
+                opacity: ${item.disabled ? 0.5 : 1};
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 8px;
+                transition: all 200ms ease;
+            `;
+
+            const countBadge = item.showBadge
+                ? `<span style="
+                    position: absolute;
+                    top: -4px;
+                    right: -4px;
+                    background: #FF3B30;
+                    color: white;
+                    font-size: 12px;
+                    font-weight: 700;
+                    padding: 2px 8px;
+                    border-radius: 10px;
+                    box-shadow: 0 2px 8px rgba(255, 59, 48, 0.4);
+                ">${item.count}</span>`
+                : '';
+
+            itemEl.innerHTML = `
+                <div style="position: relative;">
+                    <span style="font-size: 28px;">${item.icon}</span>
+                    ${countBadge}
+                </div>
+                <span style="font-size: 14px; font-weight: 600; color: white;">${item.label}</span>
+                ${item.subLabel ? `<span style="font-size: 12px; color: rgba(255, 255, 255, 0.7);">${item.subLabel}</span>` : ''}
+            `;
+
+            if (!item.disabled) {
+                itemEl.onclick = item.onClick;
+                itemEl.addEventListener('mouseenter', () => {
+                    itemEl.style.background = 'rgba(255, 255, 255, 0.25)';
+                    itemEl.style.transform = 'scale(1.02)';
+                });
+                itemEl.addEventListener('mouseleave', () => {
+                    itemEl.style.background = 'rgba(255, 255, 255, 0.15)';
+                    itemEl.style.transform = 'scale(1)';
+                });
+            }
+
+            quickGrid.appendChild(itemEl);
+        });
+
+        content.appendChild(quickGrid);
         card.appendChild(content);
 
         return card;
+    },
+
+    /**
+     * 获取最近练习信息
+     */
+    getLastPracticeInfo(userData) {
+        const typeStats = userData.typeStats || {};
+        const lastPracticeDate = userData.stats?.lastPracticeDate;
+
+        // 找出最近练习的类型
+        let lastType = null;
+        let lastTypeTotal = 0;
+        const typeNames = {
+            addition: { name: '加法', icon: '➕' },
+            subtraction: { name: '减法', icon: '➖' },
+            multiplication: { name: '乘法', icon: '✖️' },
+            division: { name: '除法', icon: '➗' }
+        };
+
+        // 找做题最多的类型作为"最近练习"
+        Object.entries(typeStats).forEach(([type, stats]) => {
+            if (stats.total > lastTypeTotal) {
+                lastTypeTotal = stats.total;
+                lastType = type;
+            }
+        });
+
+        if (!lastType || lastTypeTotal === 0) {
+            return { type: null, difficulty: null, count: 0, accuracy: 0 };
+        }
+
+        const stats = typeStats[lastType];
+        const accuracy = stats.total > 0 ? Math.round((stats.correct / stats.total) * 100) : 0;
+
+        // 获取该类型的最高难度等级
+        const skillProgress = userData.skillProgress?.[lastType] || {};
+        let maxDifficulty = 'level1';
+        const difficultyLevels = ['level6', 'level5', 'level4', 'level3', 'level2', 'level1'];
+        const diffNames = {
+            level1: '入门', level2: '进阶', level3: '熟练',
+            level4: '高手', level5: '专家', level6: '大师'
+        };
+
+        for (const level of difficultyLevels) {
+            if (skillProgress[level] > 0) {
+                maxDifficulty = level;
+                break;
+            }
+        }
+
+        return {
+            type: typeNames[lastType]?.name || lastType,
+            typeIcon: typeNames[lastType]?.icon || '✏️',
+            difficulty: diffNames[maxDifficulty] || '入门',
+            count: lastTypeTotal,
+            accuracy: accuracy,
+            typeKey: lastType
+        };
+    },
+
+    /**
+     * 获取智能推荐
+     */
+    getRecommendedPractice(userData) {
+        const typeStats = userData.typeStats || {};
+        const mistakes = userData.mistakes || [];
+
+        // 如果有待复习错题，推荐复习
+        const todayMistakes = mistakes.filter(m => m.nextReviewDate <= new Date().toISOString().split('T')[0]);
+        if (todayMistakes.length > 0) {
+            return { text: '错题复习', icon: '📖', action: 'mistakes' };
+        }
+
+        // 找出正确率最低的类型
+        let lowestAccuracy = 100;
+        let recommendType = 'addition';
+        const typeNames = { addition: '加法', subtraction: '减法', multiplication: '乘法', division: '除法' };
+
+        Object.entries(typeStats).forEach(([type, stats]) => {
+            if (stats.total >= 5) {
+                const accuracy = (stats.correct / stats.total) * 100;
+                if (accuracy < lowestAccuracy) {
+                    lowestAccuracy = accuracy;
+                    recommendType = type;
+                }
+            }
+        });
+
+        return {
+            text: typeNames[recommendType] || '加法',
+            icon: '💡',
+            action: 'practice',
+            type: recommendType
+        };
+    },
+
+    /**
+     * 继续上次练习
+     */
+    continueLastPractice(lastPractice) {
+        if (!lastPractice.typeKey) return;
+
+        // 直接跳转到练习设置，并预填充上次配置
+        const config = {
+            mode: 'choice',
+            difficulty: 'level1',
+            types: [lastPractice.typeKey],
+            count: 10
+        };
+
+        sessionStorage.setItem('practice_config', JSON.stringify(config));
+
+        // 生成题目
+        const questions = QuestionGenerator.generate({
+            type: lastPractice.typeKey,
+            difficulty: 'level1',
+            count: 10
+        });
+
+        sessionStorage.setItem('practice_questions', JSON.stringify(questions));
+        sessionStorage.setItem('practice_current', '0');
+        sessionStorage.setItem('practice_answers', JSON.stringify([]));
+        sessionStorage.setItem('practice_start_time', Date.now().toString());
+
+        router.navigate('practice-choice');
+    },
+
+    /**
+     * 开始智能推荐的练习
+     */
+    startRecommendedPractice(recommended) {
+        if (recommended.action === 'mistakes') {
+            router.navigate('mistakes');
+        } else {
+            const config = {
+                mode: 'choice',
+                difficulty: 'level1',
+                types: [recommended.type],
+                count: 10
+            };
+
+            sessionStorage.setItem('practice_config', JSON.stringify(config));
+
+            const questions = QuestionGenerator.generate({
+                type: recommended.type,
+                difficulty: 'level1',
+                count: 10
+            });
+
+            sessionStorage.setItem('practice_questions', JSON.stringify(questions));
+            sessionStorage.setItem('practice_current', '0');
+            sessionStorage.setItem('practice_answers', JSON.stringify([]));
+            sessionStorage.setItem('practice_start_time', Date.now().toString());
+
+            router.navigate('practice-choice');
+        }
     },
 
     createRadarChart() {
@@ -753,5 +1027,73 @@ const HomePage = {
         }
 
         return next.slice(0, 2); // 只显示前2个
+    },
+
+    /**
+     * 切换认知辅助快速开关
+     */
+    toggleCognitiveAidQuick() {
+        const settings = Storage.getCognitiveAidSettings();
+        const newState = !settings.enabled;
+
+        Storage.setCognitiveAidEnabled(newState);
+        this.updateCognitiveAidSidebar();
+
+        // 显示提示
+        this.showToast(newState ? '认知辅助已开启' : '认知辅助已关闭');
+    },
+
+    /**
+     * 更新侧边栏认知辅助状态显示
+     */
+    updateCognitiveAidSidebar() {
+        const settings = Storage.getCognitiveAidSettings();
+        const enabled = settings.enabled;
+
+        const indicator = document.getElementById('cognitive-aid-indicator');
+        const status = document.getElementById('cognitive-aid-status');
+        const container = document.getElementById('cognitive-aid-quick-toggle');
+
+        if (indicator) {
+            indicator.style.background = enabled ? '#34C759' : '#C7C7CC';
+            indicator.style.boxShadow = enabled ? '0 0 0 2px rgba(52, 199, 89, 0.3)' : 'none';
+        }
+
+        if (status) {
+            status.textContent = enabled ? '已开启' : '已关闭';
+        }
+
+        if (container) {
+            container.style.background = enabled ? 'rgba(0, 122, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)';
+            container.style.borderColor = enabled ? 'rgba(0, 122, 255, 0.15)' : 'rgba(0, 0, 0, 0.08)';
+        }
+    },
+
+    /**
+     * 显示提示消息
+     */
+    showToast(message) {
+        const toast = document.createElement('div');
+        toast.style.cssText = `
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 24px;
+            font-size: 14px;
+            font-weight: 500;
+            z-index: 1000;
+            animation: fadeInUp 300ms ease;
+        `;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+            toast.style.animation = 'fadeOut 300ms ease';
+            setTimeout(() => toast.remove(), 300);
+        }, 2000);
     }
 };
