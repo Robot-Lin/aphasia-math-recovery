@@ -38,6 +38,10 @@ const HomePage = {
         this.elements.quickStartCard = this.createQuickStartCard();
         page.appendChild(this.elements.quickStartCard);
 
+        // 能力雷达图
+        this.elements.radarChart = this.createRadarChart();
+        page.appendChild(this.elements.radarChart);
+
         // 复习提醒（有条件显示）
         if (summary.reviewCount > 0) {
             this.elements.reviewAlert = this.createReviewAlert(summary.reviewCount);
@@ -193,6 +197,145 @@ const HomePage = {
         card.appendChild(content);
 
         return card;
+    },
+
+    createRadarChart() {
+        // 获取各项能力的掌握程度
+        const userData = Storage.getUserData();
+        const skillProgress = userData.skillProgress || {};
+
+        // 计算各项技能得分 (0-100)
+        const skills = {
+            addition: this.calculateSkillScore(skillProgress.addition),
+            subtraction: this.calculateSkillScore(skillProgress.subtraction),
+            multiplication: this.calculateSkillScore(skillProgress.multiplicationFacts),
+            division: this.calculateSkillScore(skillProgress.division)
+        };
+
+        const card = document.createElement('div');
+        card.className = 'glass';
+        card.style.cssText = `
+            border-radius: 24px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            cursor: pointer;
+            transition: transform 200ms ease;
+        `;
+        card.onclick = () => router.navigate('basic-training');
+        card.onmouseenter = () => card.style.transform = 'scale(1.01)';
+        card.onmouseleave = () => card.style.transform = 'scale(1)';
+
+        // 雷达图 SVG - 使用更大的画布和viewBox防止裁切
+        const svgSize = 280;
+        const padding = 50;
+        const viewBoxSize = svgSize + padding * 2;
+        const center = viewBoxSize / 2;
+        const radius = 100;
+        const angleStep = (Math.PI * 2) / 4;
+
+        // 计算四个顶点的坐标
+        const points = [
+            { x: center, y: center - radius, label: '加法', value: skills.addition, color: '#34C759' },
+            { x: center + radius, y: center, label: '乘法', value: skills.multiplication, color: '#007AFF' },
+            { x: center, y: center + radius, label: '减法', value: skills.subtraction, color: '#FF9500' },
+            { x: center - radius, y: center, label: '除法', value: skills.division, color: '#AF52DE' }
+        ];
+
+        // 生成技能多边形
+        const polygonPoints = points.map((p, i) => {
+            const value = p.value / 100;
+            const angle = -Math.PI / 2 + i * angleStep;
+            const x = center + radius * value * Math.cos(angle);
+            const y = center + radius * value * Math.sin(angle);
+            return `${x},${y}`;
+        }).join(' ');
+
+        // 生成背景网格
+        const gridLevels = [0.25, 0.5, 0.75, 1];
+        const gridPolygons = gridLevels.map(level => {
+            const gridPoints = points.map((p, i) => {
+                const angle = -Math.PI / 2 + i * angleStep;
+                const x = center + radius * level * Math.cos(angle);
+                const y = center + radius * level * Math.sin(angle);
+                return `${x},${y}`;
+            }).join(' ');
+            return `<polygon points="${gridPoints}" fill="none" stroke="#E5E5EA" stroke-width="1" />`;
+        }).join('');
+
+        // 生成轴线
+        const axes = points.map((p, i) => {
+            const angle = -Math.PI / 2 + i * angleStep;
+            const x = center + radius * Math.cos(angle);
+            const y = center + radius * Math.sin(angle);
+            return `<line x1="${center}" y1="${center}" x2="${x}" y2="${y}" stroke="#E5E5EA" stroke-width="1" />`;
+        }).join('');
+
+        // 生成标签
+        const labels = points.map((p, i) => {
+            const angle = -Math.PI / 2 + i * angleStep;
+            const labelRadius = radius + 35;
+            const x = center + labelRadius * Math.cos(angle);
+            const y = center + labelRadius * Math.sin(angle);
+            return `
+                <text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="middle"
+                    style="font-size: 14px; font-weight: 600; fill: ${p.color};">
+                    ${p.label}
+                </text>
+                <text x="${x}" y="${y + 16}" text-anchor="middle" dominant-baseline="middle"
+                    style="font-size: 12px; fill: #8E8E93;">
+                    ${p.value}%
+                </text>
+            `;
+        }).join('');
+
+        const averageScore = Math.round((skills.addition + skills.subtraction + skills.multiplication + skills.division) / 4);
+
+        card.innerHTML = `
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+                <div>
+                    <h3 style="font-size: 18px; font-weight: 700; color: #1C1C1E; margin: 0;">能力雷达</h3>
+                    <p style="font-size: 13px; color: #8E8E93; margin: 4px 0 0 0;">点击进行基础训练</p>
+                </div>
+                <div style="text-align: right;">
+                    <div style="font-size: 28px; font-weight: 700; color: #007AFF;">${averageScore}%</div>
+                    <div style="font-size: 12px; color: #8E8E93;">综合得分</div>
+                </div>
+            </div>
+            <div style="display: flex; justify-content: center;">
+                <svg width="${svgSize}" height="${svgSize}" viewBox="0 0 ${viewBoxSize} ${viewBoxSize}">
+                    ${gridPolygons}
+                    ${axes}
+                    <polygon points="${polygonPoints}" fill="rgba(0, 122, 255, 0.2)" stroke="#007AFF" stroke-width="2" />
+                    ${points.map((p, i) => {
+                        const value = p.value / 100;
+                        const angle = -Math.PI / 2 + i * angleStep;
+                        const x = center + radius * value * Math.cos(angle);
+                        const y = center + radius * value * Math.sin(angle);
+                        return `<circle cx="${x}" cy="${y}" r="5" fill="${p.color}" />`;
+                    }).join('')}
+                    ${labels}
+                </svg>
+            </div>
+            <div style="display: flex; justify-content: center; gap: 16px; margin-top: 12px;">
+                ${points.map(p => `
+                    <div style="display: flex; align-items: center; gap: 4px;">
+                        <div style="width: 8px; height: 8px; border-radius: 50%; background: ${p.color};"></div>
+                        <span style="font-size: 12px; color: #8E8E93;">${p.label}</span>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+
+        return card;
+    },
+
+    calculateSkillScore(skillData) {
+        if (!skillData || !skillData.mastered) return 0;
+        const mastered = skillData.mastered.length;
+        // 根据等级估算总题数
+        const totalByLevel = skillData.level === 1 ? 15 : (skillData.level === 2 ? 40 : 100);
+        return Math.min(100, Math.round((mastered / totalByLevel) * 100));
     },
 
     createReviewAlert(count) {

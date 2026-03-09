@@ -19,7 +19,9 @@ const router = {
         'practice-choice': () => PracticeChoicePage.init(),
         'result': () => ResultPage.init(),
         'mistakes': () => MistakesPage.init(),
-        'history': () => HistoryPage.init()
+        'history': () => HistoryPage.init(),
+        'settings': () => SettingsPage.init(),
+        'basic-training': () => BasicTrainingPage.init()
     },
 
     /**
@@ -58,8 +60,10 @@ const router = {
     updateNavStyles() {
         const navHome = document.getElementById('nav-home');
         const navPractice = document.getElementById('nav-practice');
+        const navBasic = document.getElementById('nav-basic');
         const navMistakes = document.getElementById('nav-mistakes');
         const navHistory = document.getElementById('nav-history');
+        const navSettings = document.getElementById('nav-settings');
 
         if (!navHome || !navPractice) return;
 
@@ -79,18 +83,24 @@ const router = {
         // 先重置所有为inactive
         Object.assign(navHome.style, inactiveStyle);
         Object.assign(navPractice.style, inactiveStyle);
+        if (navBasic) Object.assign(navBasic.style, inactiveStyle);
         if (navMistakes) Object.assign(navMistakes.style, inactiveStyle);
         if (navHistory) Object.assign(navHistory.style, inactiveStyle);
+        if (navSettings) Object.assign(navSettings.style, inactiveStyle);
 
         // 根据当前页面设置样式
         if (this.currentPage === 'home') {
             Object.assign(navHome.style, activeStyle);
         } else if (['practice-settings', 'practice-keypad', 'practice-choice'].includes(this.currentPage)) {
             Object.assign(navPractice.style, activeStyle);
+        } else if (this.currentPage === 'basic-training') {
+            if (navBasic) Object.assign(navBasic.style, activeStyle);
         } else if (this.currentPage === 'mistakes') {
             if (navMistakes) Object.assign(navMistakes.style, activeStyle);
         } else if (this.currentPage === 'history') {
             if (navHistory) Object.assign(navHistory.style, activeStyle);
+        } else if (this.currentPage === 'settings') {
+            if (navSettings) Object.assign(navSettings.style, activeStyle);
         }
     },
 
@@ -110,6 +120,11 @@ function initApp() {
         // 检查是否有用户数据，没有则初始化
         const userData = Storage.getUserData();
         console.log('用户数据已加载:', userData.name);
+
+        // 加载音效设置
+        if (window.SoundManager) {
+            SoundManager.loadSettings();
+        }
 
         // 加载首页
         router.navigate('home');

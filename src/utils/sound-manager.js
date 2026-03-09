@@ -15,9 +15,38 @@ const SoundManager = {
     audioContext: null,
 
     /**
+     * 从设置加载状态
+     */
+    loadSettings() {
+        try {
+            const settings = JSON.parse(localStorage.getItem('aphasia_math_settings') || '{}');
+            // 如果设置了 soundKeypress 或 soundFeedback，任一关闭都视为音效关闭
+            if (settings.soundKeypress === false && settings.soundFeedback === false) {
+                this.enabled = false;
+            } else if (settings.soundKeypress !== undefined || settings.soundFeedback !== undefined) {
+                this.enabled = settings.soundKeypress !== false || settings.soundFeedback !== false;
+            }
+        } catch {
+            this.enabled = true;
+        }
+    },
+
+    /**
+     * 设置音效开关
+     */
+    setEnabled(enabled) {
+        this.enabled = enabled;
+    },
+
+    /**
      * 初始化音频上下文
      */
     init() {
+        // 首次使用时加载设置
+        if (!this.audioContext) {
+            this.loadSettings();
+        }
+
         // 用户首次交互时初始化
         if (!this.audioContext) {
             this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
