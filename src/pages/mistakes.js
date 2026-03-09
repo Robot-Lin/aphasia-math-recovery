@@ -25,17 +25,17 @@ const MistakesPage = {
 
         const page = document.createElement('div');
         page.style.cssText = `
-            max-width: 700px;
+            max-width: 1400px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 16px 24px;
         `;
 
         // 页面标题
         const header = document.createElement('div');
-        header.style.cssText = 'text-align: center; margin-bottom: 32px;';
+        header.style.cssText = 'text-align: center; margin-bottom: 24px;';
         header.innerHTML = `
-            <h2 style="font-size: 32px; font-weight: 700; color: #1C1C1E; margin-bottom: 8px;">错题本</h2>
-            <p style="font-size: 17px; color: #8E8E93;">复习错题，巩固记忆</p>
+            <h2 style="font-size: 28px; font-weight: 700; color: #1C1C1E; margin-bottom: 6px;">错题本</h2>
+            <p style="font-size: 15px; color: #8E8E93;">复习错题，巩固记忆</p>
         `;
         page.appendChild(header);
 
@@ -46,20 +46,35 @@ const MistakesPage = {
             return;
         }
 
+        // 主内容区：左侧分析面板 + 右侧错题列表
+        const mainContent = document.createElement('div');
+        mainContent.style.cssText = `
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 20px;
+            align-items: start;
+        `;
+
+        // 左侧：分析面板
+        const leftPanel = document.createElement('div');
+        leftPanel.style.cssText = 'display: flex; flex-direction: column; gap: 12px;';
+
         // 数据洞察卡片
-        this.elements.insightCard = this.createInsightCard();
-        page.appendChild(this.elements.insightCard);
+        leftPanel.appendChild(this.createInsightCard());
 
         // 批量复习按钮（今日有错题时显示）
         const todayMistakes = this.getTodayReviewMistakes();
         if (todayMistakes.length > 0) {
-            this.elements.batchReviewBtn = this.createBatchReviewButton(todayMistakes.length);
-            page.appendChild(this.elements.batchReviewBtn);
+            leftPanel.appendChild(this.createBatchReviewButton(todayMistakes.length));
         }
 
-        // 错题列表
+        mainContent.appendChild(leftPanel);
+
+        // 右侧：错题列表
         this.elements.mistakesList = this.createMistakesList();
-        page.appendChild(this.elements.mistakesList);
+        mainContent.appendChild(this.elements.mistakesList);
+
+        page.appendChild(mainContent);
 
         container.appendChild(page);
     },
@@ -73,10 +88,9 @@ const MistakesPage = {
         const card = document.createElement('div');
         card.className = 'glass';
         card.style.cssText = `
-            border-radius: 20px;
-            padding: 24px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+            border-radius: 16px;
+            padding: 16px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
         `;
 
         // 统计数据
@@ -85,38 +99,38 @@ const MistakesPage = {
         const totalWrong = this.mistakes.reduce((sum, m) => sum + m.wrongCount, 0);
 
         card.innerHTML = `
-            <h3 style="font-size: 18px; font-weight: 700; color: #1C1C1E; margin-bottom: 20px;">
+            <h3 style="font-size: 16px; font-weight: 700; color: #1C1C1E; margin-bottom: 16px;">
                 📊 错题分析
             </h3>
 
             <!-- 概览统计 -->
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px;">
-                <div style="text-align: center; padding: 16px; background: rgba(0, 122, 255, 0.06); border-radius: 12px;">
-                    <div style="font-size: 28px; font-weight: 700; color: #007AFF;">${this.mistakes.length}</div>
-                    <div style="font-size: 13px; color: #8E8E93; margin-top: 4px;">错题总数</div>
+            <div style="display: flex; gap: 8px; margin-bottom: 20px;">
+                <div style="flex: 1; text-align: center; padding: 12px 8px; background: rgba(0, 122, 255, 0.06); border-radius: 10px;">
+                    <div style="font-size: 24px; font-weight: 700; color: #007AFF;">${this.mistakes.length}</div>
+                    <div style="font-size: 12px; color: #8E8E93; margin-top: 2px;">错题总数</div>
                 </div>
-                <div style="text-align: center; padding: 16px; background: rgba(255, 59, 48, 0.06); border-radius: 12px;">
-                    <div style="font-size: 28px; font-weight: 700; color: #FF3B30;">${totalWrong}</div>
-                    <div style="font-size: 13px; color: #8E8E93; margin-top: 4px;">累计错误</div>
+                <div style="flex: 1; text-align: center; padding: 12px 8px; background: rgba(255, 59, 48, 0.06); border-radius: 10px;">
+                    <div style="font-size: 24px; font-weight: 700; color: #FF3B30;">${totalWrong}</div>
+                    <div style="font-size: 12px; color: #8E8E93; margin-top: 2px;">累计错误</div>
                 </div>
-                <div style="text-align: center; padding: 16px; background: rgba(255, 149, 0, 0.06); border-radius: 12px;">
-                    <div style="font-size: 28px; font-weight: 700; color: #FF9500;">${this.getTodayReviewMistakes().length}</div>
-                    <div style="font-size: 13px; color: #8E8E93; margin-top: 4px;">今日待复习</div>
+                <div style="flex: 1; text-align: center; padding: 12px 8px; background: rgba(255, 149, 0, 0.06); border-radius: 10px;">
+                    <div style="font-size: 24px; font-weight: 700; color: #FF9500;">${this.getTodayReviewMistakes().length}</div>
+                    <div style="font-size: 12px; color: #8E8E93; margin-top: 2px;">今日复习</div>
                 </div>
             </div>
 
             <!-- 运算类型分布 -->
-            <div style="margin-bottom: 20px;">
-                <div style="font-size: 14px; font-weight: 600; color: #3C3C43; margin-bottom: 12px;">运算类型分布</div>
-                <div style="display: flex; gap: 8px; height: 8px; border-radius: 4px; overflow: hidden; margin-bottom: 8px;">
+            <div style="margin-bottom: 16px;">
+                <div style="font-size: 13px; font-weight: 600; color: #3C3C43; margin-bottom: 10px;">类型分布</div>
+                <div style="display: flex; gap: 4px; height: 6px; border-radius: 3px; overflow: hidden; margin-bottom: 8px;">
                     ${typeDistribution.map(type => `
                         <div style="width: ${type.percent}%; background: ${type.color};" title="${type.name}: ${type.count}道"></div>
                     `).join('')}
                 </div>
-                <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+                <div style="display: flex; flex-wrap: wrap; gap: 8px 12px;">
                     ${typeDistribution.map(type => `
-                        <div style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: #3C3C43;">
-                            <span style="width: 8px; height: 8px; background: ${type.color}; border-radius: 2px;"></span>
+                        <div style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: #3C3C43;">
+                            <span style="width: 6px; height: 6px; background: ${type.color}; border-radius: 2px;"></span>
                             <span>${type.name}</span>
                             <span style="font-weight: 600; color: #1C1C1E;">${type.count}</span>
                         </div>
@@ -126,15 +140,15 @@ const MistakesPage = {
 
             <!-- 难度分布 -->
             <div>
-                <div style="font-size: 14px; font-weight: 600; color: #3C3C43; margin-bottom: 12px;">难度分布</div>
-                <div style="display: flex; flex-direction: column; gap: 10px;">
+                <div style="font-size: 13px; font-weight: 600; color: #3C3C43; margin-bottom: 10px;">难度分布</div>
+                <div style="display: flex; flex-direction: column; gap: 8px;">
                     ${difficultyDistribution.map(diff => `
-                        <div style="display: flex; align-items: center; gap: 12px;">
-                            <span style="font-size: 13px; color: #8E8E93; width: 40px;">${diff.name}</span>
-                            <div style="flex: 1; height: 8px; background: rgba(0, 0, 0, 0.06); border-radius: 4px; overflow: hidden;">
-                                <div style="width: ${diff.percent}%; height: 100%; background: ${diff.color}; border-radius: 4px; transition: width 400ms ease;"></div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="font-size: 12px; color: #8E8E93; width: 36px;">${diff.name}</span>
+                            <div style="flex: 1; height: 6px; background: rgba(0, 0, 0, 0.06); border-radius: 3px; overflow: hidden;">
+                                <div style="width: ${diff.percent}%; height: 100%; background: ${diff.color}; border-radius: 3px; transition: width 400ms ease;"></div>
                             </div>
-                            <span style="font-size: 13px; font-weight: 600; color: #1C1C1E; width: 30px; text-align: right;">${diff.count}</span>
+                            <span style="font-size: 12px; font-weight: 600; color: #1C1C1E; width: 24px; text-align: right;">${diff.count}</span>
                         </div>
                     `).join('')}
                 </div>
@@ -183,7 +197,6 @@ const MistakesPage = {
 
     createBatchReviewButton(count) {
         const wrapper = document.createElement('div');
-        wrapper.style.cssText = 'margin-bottom: 20px;';
 
         const btn = document.createElement('button');
         btn.className = 'btn-press';
@@ -191,9 +204,9 @@ const MistakesPage = {
             width: 100%;
             background: linear-gradient(135deg, #FF9500 0%, #FF6B00 100%);
             color: white;
-            padding: 18px 24px;
-            border-radius: 14px;
-            font-size: 17px;
+            padding: 14px 16px;
+            border-radius: 12px;
+            font-size: 15px;
             font-weight: 600;
             border: none;
             cursor: pointer;
@@ -201,11 +214,11 @@ const MistakesPage = {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 8px;
         `;
         btn.innerHTML = `
-            <span style="font-size: 20px;">📚</span>
-            <span>批量复习今日错题 (${count}道)</span>
+            <span style="font-size: 18px;">📚</span>
+            <span>复习今日错题 (${count}道)</span>
         `;
         btn.onclick = () => this.startBatchReview();
 
