@@ -34,6 +34,16 @@ const HomePage = {
         this.elements.statsGrid = this.createStatsGrid(summary);
         page.appendChild(this.elements.statsGrid);
 
+        // 快速开始卡片
+        this.elements.quickStartCard = this.createQuickStartCard();
+        page.appendChild(this.elements.quickStartCard);
+
+        // 复习提醒（有条件显示）
+        if (summary.reviewCount > 0) {
+            this.elements.reviewAlert = this.createReviewAlert(summary.reviewCount);
+            page.appendChild(this.elements.reviewAlert);
+        }
+
         // 进步曲线图
         if (summary.practiceCount > 0) {
             this.elements.progressChart = this.createProgressChart();
@@ -44,16 +54,6 @@ const HomePage = {
         if (achievements.badges.length > 0) {
             this.elements.badgesSection = this.createBadgesSection(achievements);
             page.appendChild(this.elements.badgesSection);
-        }
-
-        // 快速开始卡片
-        this.elements.quickStartCard = this.createQuickStartCard();
-        page.appendChild(this.elements.quickStartCard);
-
-        // 复习提醒（有条件显示）
-        if (summary.reviewCount > 0) {
-            this.elements.reviewAlert = this.createReviewAlert(summary.reviewCount);
-            page.appendChild(this.elements.reviewAlert);
         }
 
         // 使用提示
