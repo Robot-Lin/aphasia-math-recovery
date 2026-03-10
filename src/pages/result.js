@@ -29,6 +29,7 @@ const ResultPage = {
         }
 
         const page = document.createElement('div');
+        page.className = 'result-page';
         page.style.cssText = `
             max-width: 600px;
             margin: 0 auto;
@@ -97,6 +98,7 @@ const ResultPage = {
         const isPerfect = accuracy === 100;
 
         const header = document.createElement('div');
+        header.className = 'result-header';
         header.style.cssText = 'text-align: center; margin-bottom: 32px;';
         header.innerHTML = `
             <div style="font-size: 48px; margin-bottom: 16px;">${isPerfect ? '🎉' : '✅'}</div>
@@ -117,7 +119,7 @@ const ResultPage = {
         const offset = circumference - (accuracy / 100) * circumference;
 
         const card = document.createElement('div');
-        card.className = 'glass';
+        card.className = 'glass result-card';
         card.style.cssText = `
             border-radius: 24px;
             padding: 8px;
@@ -146,6 +148,7 @@ const ResultPage = {
 
         // 正确率圆环图
         const ringContainer = document.createElement('div');
+        ringContainer.className = 'result-ring';
         ringContainer.style.cssText = `
             display: flex;
             justify-content: center;
@@ -190,6 +193,7 @@ const ResultPage = {
 
         // 统计网格
         const statsGrid = document.createElement('div');
+        statsGrid.className = 'result-stats-grid';
         statsGrid.style.cssText = `
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -249,7 +253,9 @@ const ResultPage = {
 
         // 操作按钮
         const buttonWrapper = document.createElement('div');
+        buttonWrapper.className = 'result-buttons';
         buttonWrapper.style.cssText = 'display: flex; flex-direction: column; gap: 12px;';
+        buttonWrapper.id = 'result-fixed-buttons';
 
         // 再练一次按钮
         const againBtn = document.createElement('button');

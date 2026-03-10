@@ -18,6 +18,7 @@ const SettingsPage = {
         container.innerHTML = '';
 
         const page = document.createElement('div');
+        page.className = 'settings-page';
         page.style.cssText = `
             max-width: 1000px;
             margin: 0 auto;
@@ -26,6 +27,7 @@ const SettingsPage = {
 
         // 页面标题
         const header = document.createElement('div');
+        header.className = 'settings-header';
         header.style.cssText = 'text-align: center; margin-bottom: 24px;';
         header.innerHTML = `
             <h2 style="font-size: 28px; font-weight: 700; color: #1C1C1E; margin-bottom: 8px;">设置</h2>
@@ -35,6 +37,7 @@ const SettingsPage = {
 
         // 设置内容网格
         const settingsGrid = document.createElement('div');
+        settingsGrid.className = 'settings-grid';
         settingsGrid.style.cssText = `
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -66,6 +69,7 @@ const SettingsPage = {
 
     createSectionTitle(title) {
         const el = document.createElement('div');
+        el.className = 'settings-section-title';
         el.style.cssText = `
             font-size: 12px;
             font-weight: 600;
@@ -80,7 +84,7 @@ const SettingsPage = {
 
     createSoundSettings() {
         const card = document.createElement('div');
-        card.className = 'glass';
+        card.className = 'glass settings-card';
         card.style.cssText = `
             border-radius: 16px;
             overflow: hidden;
@@ -113,6 +117,7 @@ const SettingsPage = {
 
         settings.forEach((setting, index) => {
             const item = document.createElement('div');
+            item.className = 'setting-item';
             item.style.cssText = `
                 display: flex;
                 align-items: center;
@@ -123,7 +128,7 @@ const SettingsPage = {
             const isEnabled = this.getSetting(setting.key, true);
 
             item.innerHTML = `
-                <div style="
+                <div class="setting-icon" style="
                     width: 32px;
                     height: 32px;
                     background: rgba(0, 122, 255, 0.1);
@@ -135,7 +140,7 @@ const SettingsPage = {
                     font-size: 16px;
                 ">${setting.icon}</div>
                 <div style="flex: 1; min-width: 0;">
-                    <div style="font-size: 15px; font-weight: 600; color: #1C1C1E;">${setting.title}</div>
+                    <div class="setting-title" style="font-size: 15px; font-weight: 600; color: #1C1C1E;">${setting.title}</div>
                     <div style="font-size: 12px; color: #8E8E93; margin-top: 1px;">${setting.desc}</div>
                 </div>
                 <div class="toggle-switch ${isEnabled ? 'active' : ''}" data-key="${setting.key}" style="
@@ -169,7 +174,7 @@ const SettingsPage = {
 
     createDisplaySettings() {
         const card = document.createElement('div');
-        card.className = 'glass';
+        card.className = 'glass settings-card';
         card.style.cssText = `
             border-radius: 16px;
             overflow: hidden;
@@ -233,6 +238,7 @@ const SettingsPage = {
 
         settings.forEach((setting, index) => {
             const item = document.createElement('div');
+            item.className = 'setting-item';
             item.style.cssText = `
                 display: flex;
                 align-items: center;
@@ -245,7 +251,7 @@ const SettingsPage = {
                 : setting.defaultValue;
 
             item.innerHTML = `
-                <div style="
+                <div class="setting-icon" style="
                     width: 32px;
                     height: 32px;
                     background: rgba(175, 82, 222, 0.1);
@@ -257,7 +263,7 @@ const SettingsPage = {
                     font-size: 16px;
                 ">${setting.icon}</div>
                 <div style="flex: 1; min-width: 0;">
-                    <div style="font-size: 15px; font-weight: 600; color: #1C1C1E;">${setting.title}</div>
+                    <div class="setting-title" style="font-size: 15px; font-weight: 600; color: #1C1C1E;">${setting.title}</div>
                     <div style="font-size: 12px; color: #8E8E93; margin-top: 1px;">${setting.desc}</div>
                 </div>
                 <div class="toggle-switch display-toggle ${isEnabled ? 'active' : ''}" data-key="${setting.key}" style="
@@ -291,7 +297,7 @@ const SettingsPage = {
 
     createDataManagement() {
         const card = document.createElement('div');
-        card.className = 'glass';
+        card.className = 'glass settings-card';
         card.style.cssText = `
             border-radius: 16px;
             overflow: hidden;
@@ -319,6 +325,7 @@ const SettingsPage = {
 
         actions.forEach((action, index) => {
             const item = document.createElement('div');
+            item.className = 'setting-item';
             item.style.cssText = `
                 display: flex;
                 align-items: center;
@@ -329,7 +336,7 @@ const SettingsPage = {
             `;
 
             item.innerHTML = `
-                <div style="
+                <div class="setting-icon" style="
                     width: 32px;
                     height: 32px;
                     background: ${action.color}15;
@@ -341,7 +348,7 @@ const SettingsPage = {
                     font-size: 16px;
                 ">${action.icon}</div>
                 <div style="flex: 1; min-width: 0;">
-                    <div style="font-size: 15px; font-weight: 600; color: ${action.color};">${action.title}</div>
+                    <div class="setting-title" style="font-size: 15px; font-weight: 600; color: ${action.color};">${action.title}</div>
                     <div style="font-size: 12px; color: #8E8E93; margin-top: 1px;">${action.desc}</div>
                 </div>
                 <div style="color: #C7C7CC; font-size: 14px;">›</div>
@@ -359,7 +366,7 @@ const SettingsPage = {
 
     createAboutSection() {
         const card = document.createElement('div');
-        card.className = 'glass';
+        card.className = 'glass settings-card';
         card.style.cssText = `
             border-radius: 16px;
             padding: 20px;
@@ -493,6 +500,7 @@ const SettingsPage = {
 
     showClearConfirm() {
         const modal = document.createElement('div');
+        modal.className = 'settings-modal';
         modal.style.cssText = `
             position: fixed;
             inset: 0;
@@ -506,7 +514,7 @@ const SettingsPage = {
         `;
 
         modal.innerHTML = `
-            <div class="glass" style="
+            <div class="glass modal-content" style="
                 max-width: 360px;
                 width: 100%;
                 border-radius: 20px;

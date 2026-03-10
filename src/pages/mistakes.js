@@ -24,6 +24,7 @@ const MistakesPage = {
         container.innerHTML = '';
 
         const page = document.createElement('div');
+        page.className = 'mistakes-page';
         page.style.cssText = `
             max-width: 1400px;
             margin: 0 auto;
@@ -32,6 +33,7 @@ const MistakesPage = {
 
         // 页面标题
         const header = document.createElement('div');
+        header.className = 'mistakes-header';
         header.style.cssText = 'text-align: center; margin-bottom: 24px;';
         header.innerHTML = `
             <h2 style="font-size: 28px; font-weight: 700; color: #1C1C1E; margin-bottom: 6px;">错题本</h2>
@@ -48,6 +50,7 @@ const MistakesPage = {
 
         // 主内容区：左侧分析面板 + 右侧错题列表
         const mainContent = document.createElement('div');
+        mainContent.className = 'mistakes-content';
         mainContent.style.cssText = `
             display: grid;
             grid-template-columns: 320px 1fr;
@@ -86,7 +89,7 @@ const MistakesPage = {
 
     createInsightCard() {
         const card = document.createElement('div');
-        card.className = 'glass';
+        card.className = 'glass mistakes-insight-card';
         card.style.cssText = `
             border-radius: 16px;
             padding: 16px;
@@ -347,7 +350,7 @@ const MistakesPage = {
         const isReviewToday = mistake.nextReviewDate <= new Date().toISOString().split('T')[0];
 
         const item = document.createElement('div');
-        item.className = 'glass card-hover';
+        item.className = 'glass card-hover mistake-item';
         item.style.cssText = `
             border-radius: 16px;
             padding: 20px;
@@ -362,7 +365,7 @@ const MistakesPage = {
         const progressWidth = (mistake.correctCount / 3) * 100;
 
         item.innerHTML = `
-            <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;">
+            <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;" class="meta-row">
                 <div style="flex: 1;">
                     <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
                         <span style="
@@ -375,10 +378,10 @@ const MistakesPage = {
                         ">${diffNames[mistake.difficulty]}${typeNames[mistake.type]}</span>
                         ${isReviewToday ? '<span style="font-size: 12px; color: #FF9500; font-weight: 500;">今日复习</span>' : ''}
                     </div>
-                    <div style="font-size: 24px; font-weight: 700; color: #1C1C1E; margin-bottom: 8px;">
+                    <div style="font-size: 24px; font-weight: 700; color: #1C1C1E; margin-bottom: 8px;" class="question">
                         ${mistake.question} = ?
                     </div>
-                    <div style="display: flex; align-items: center; gap: 16px; font-size: 14px;">
+                    <div style="display: flex; align-items: center; gap: 16px; font-size: 14px;" class="answers">
                         <span style="color: #FF3B30;">你的答案: ${mistake.userAnswer}</span>
                         <span style="color: #34C759;">正确答案: ${mistake.correctAnswer}</span>
                     </div>
@@ -388,7 +391,7 @@ const MistakesPage = {
                     <div style="font-size: 20px; font-weight: 700; color: #007AFF;">${mistake.correctCount}/3</div>
                 </div>
             </div>
-            <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(0, 0, 0, 0.06);">
+            <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(0, 0, 0, 0.06);" class="progress-area">
                 <div style="display: flex; align-items: center; justify-content: space-between;">
                     <div style="flex: 1; margin-right: 16px;">
                         <div style="height: 4px; background: rgba(0, 0, 0, 0.06); border-radius: 2px; overflow: hidden;">
@@ -402,7 +405,7 @@ const MistakesPage = {
                         </div>
                     </div>
                     <button onclick="MistakesPage.practiceMistake('${mistake.id}')"
-                        class="btn-press"
+                        class="btn-press review-btn"
                         style="
                             background: ${isReviewToday ? '#FF9500' : '#007AFF'};
                             color: white;

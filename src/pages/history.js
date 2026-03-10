@@ -26,6 +26,7 @@ const HistoryPage = {
         container.innerHTML = '';
 
         const page = document.createElement('div');
+        page.className = 'history-page';
         page.style.cssText = `
             max-width: 700px;
             margin: 0 auto;
@@ -34,6 +35,7 @@ const HistoryPage = {
 
         // 页面标题
         const header = document.createElement('div');
+        header.className = 'history-header';
         header.style.cssText = 'text-align: center; margin-bottom: 32px;';
         header.innerHTML = `
             <h2 style="font-size: 32px; font-weight: 700; color: #1C1C1E; margin-bottom: 8px;">历史记录</h2>
@@ -93,7 +95,7 @@ const HistoryPage = {
 
     createStatsCard() {
         const card = document.createElement('div');
-        card.className = 'glass';
+        card.className = 'glass history-stats-card';
         card.style.cssText = `
             border-radius: 20px;
             padding: 24px;
@@ -116,21 +118,21 @@ const HistoryPage = {
             <h3 style="font-size: 18px; font-weight: 700; color: #1C1C1E; margin-bottom: 20px;">
                 📈 学习概览
             </h3>
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
-                <div style="text-align: center; padding: 16px; background: rgba(0, 122, 255, 0.06); border-radius: 12px;">
-                    <div style="font-size: 28px; font-weight: 700; color: #007AFF;">${totalDays}</div>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;" class="stats-grid">
+                <div style="text-align: center; padding: 16px; background: rgba(0, 122, 255, 0.06); border-radius: 12px;" class="stat-box">
+                    <div style="font-size: 28px; font-weight: 700; color: #007AFF;" class="stat-value">${totalDays}</div>
                     <div style="font-size: 13px; color: #8E8E93; margin-top: 4px;">练习天数</div>
                 </div>
-                <div style="text-align: center; padding: 16px; background: rgba(52, 199, 89, 0.06); border-radius: 12px;">
-                    <div style="font-size: 28px; font-weight: 700; color: #34C759;">${totalQuestions}</div>
+                <div style="text-align: center; padding: 16px; background: rgba(52, 199, 89, 0.06); border-radius: 12px;" class="stat-box">
+                    <div style="font-size: 28px; font-weight: 700; color: #34C759;" class="stat-value">${totalQuestions}</div>
                     <div style="font-size: 13px; color: #8E8E93; margin-top: 4px;">总题数</div>
                 </div>
-                <div style="text-align: center; padding: 16px; background: rgba(175, 82, 222, 0.06); border-radius: 12px;">
-                    <div style="font-size: 28px; font-weight: 700; color: #AF52DE;">${avgAccuracy}%</div>
+                <div style="text-align: center; padding: 16px; background: rgba(175, 82, 222, 0.06); border-radius: 12px;" class="stat-box">
+                    <div style="font-size: 28px; font-weight: 700; color: #AF52DE;" class="stat-value">${avgAccuracy}%</div>
                     <div style="font-size: 13px; color: #8E8E93; margin-top: 4px;">平均正确率</div>
                 </div>
-                <div style="text-align: center; padding: 16px; background: rgba(255, 149, 0, 0.06); border-radius: 12px;">
-                    <div style="font-size: 28px; font-weight: 700; color: #FF9500;">${streakDays}</div>
+                <div style="text-align: center; padding: 16px; background: rgba(255, 149, 0, 0.06); border-radius: 12px;" class="stat-box">
+                    <div style="font-size: 28px; font-weight: 700; color: #FF9500;" class="stat-value">${streakDays}</div>
                     <div style="font-size: 13px; color: #8E8E93; margin-top: 4px;">连续练习</div>
                 </div>
             </div>
@@ -265,7 +267,7 @@ const HistoryPage = {
         }
 
         const item = document.createElement('div');
-        item.className = 'glass card-hover';
+        item.className = 'glass card-hover history-item';
         item.style.cssText = `
             border-radius: 16px;
             padding: 20px;
@@ -280,7 +282,7 @@ const HistoryPage = {
         else if (accuracy < 80) accuracyColor = '#FF9500'; // 橙色
 
         item.innerHTML = `
-            <div style="display: flex; align-items: center; gap: 16px;">
+            <div style="display: flex; align-items: center; gap: 16px;" class="info-row">
                 <!-- 日期 -->
                 <div style="
                     min-width: 64px;
@@ -288,8 +290,8 @@ const HistoryPage = {
                     padding: 12px 8px;
                     background: ${isToday ? 'rgba(0, 122, 255, 0.08)' : 'rgba(120, 120, 128, 0.06)'};
                     border-radius: 12px;
-                ">
-                    <div style="font-size: 20px; font-weight: 700; color: ${isToday ? '#007AFF' : '#1C1C1E'};">
+                " class="date-box">
+                    <div style="font-size: 20px; font-weight: 700; color: ${isToday ? '#007AFF' : '#1C1C1E'};" class="date-day">
                         ${date.getDate()}
                     </div>
                     <div style="font-size: 11px; color: #8E8E93; margin-top: 2px;">
@@ -299,7 +301,7 @@ const HistoryPage = {
 
                 <!-- 统计信息 -->
                 <div style="flex: 1;">
-                    <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 8px;">
+                    <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 8px;" class="info-row">
                         <span style="font-size: 15px; color: #3C3C43;">
                             完成 <strong style="color: #1C1C1E;">${record.total}</strong> 题
                         </span>
@@ -322,7 +324,7 @@ const HistoryPage = {
 
                 <!-- 正确率 -->
                 <div style="text-align: center; min-width: 60px;">
-                    <div style="font-size: 24px; font-weight: 700; color: ${accuracyColor};">${accuracy}%</div>
+                    <div style="font-size: 24px; font-weight: 700; color: ${accuracyColor};" class="accuracy">${accuracy}%</div>
                     <div style="font-size: 12px; color: #8E8E93; margin-top: 2px;">
                         ${record.correct}/${record.total}
                     </div>
@@ -359,7 +361,7 @@ const HistoryPage = {
         else if (accuracy < 80) accuracyColor = '#FF9500';
 
         modal.innerHTML = `
-            <div class="glass" style="
+            <div class="glass modal-content" style="
                 max-width: 400px;
                 width: 100%;
                 border-radius: 24px;
