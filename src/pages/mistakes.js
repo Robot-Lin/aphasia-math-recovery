@@ -136,22 +136,31 @@ const MistakesPage = {
                 </div>
             </div>
 
-            <!-- 运算类型分布 -->
-            <div style="margin-bottom: 16px;">
-                <div style="font-size: 13px; font-weight: 600; color: #3C3C43; margin-bottom: 10px;">类型分布</div>
-                <div style="display: flex; gap: 4px; height: 6px; border-radius: 3px; overflow: hidden; margin-bottom: 8px;">
-                    ${typeDistribution.map(type => `
-                        <div style="width: ${type.percent}%; background: ${type.color};" title="${type.name}: ${type.count}道"></div>
-                    `).join('')}
-                </div>
-                <div style="display: flex; flex-wrap: wrap; gap: 8px 12px;">
-                    ${typeDistribution.map(type => `
-                        <div style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: #3C3C43;">
-                            <span style="width: 6px; height: 6px; background: ${type.color}; border-radius: 2px;"></span>
-                            <span>${type.name}</span>
-                            <span style="font-weight: 600; color: #1C1C1E;">${type.count}</span>
-                        </div>
-                    `).join('')}
+            <!-- 运算类型分布 - 环形图 + 卡片 -->
+            <div style="margin-bottom: 20px;">
+                <div style="font-size: 13px; font-weight: 600; color: #3C3C43; margin-bottom: 12px;">类型分布</div>
+
+                <!-- 环形图 + 中心数字 -->
+                <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
+                    ${this.createDonutChart(typeDistribution)}
+                    <!-- 类型卡片列表 -->
+                    <div style="flex: 1; display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
+                        ${typeDistribution.filter(t => t.count > 0).map(type => `
+                            <div style="
+                                background: ${type.color}10;
+                                border-radius: 10px;
+                                padding: 10px 12px;
+                                border-left: 3px solid ${type.color};
+                            ">
+                                <div style="display: flex; align-items: center; gap: 4px; margin-bottom: 2px;">
+                                    <span style="font-size: 14px;">${type.icon}</span>
+                                    <span style="font-size: 11px; color: #8E8E93;">${type.name}</span>
+                                </div>
+                                <div style="font-size: 18px; font-weight: 700; color: ${type.color};">${type.count}</div>
+                                <div style="font-size: 10px; color: #8E8E93;">${type.percent}%</div>
+                            </div>
+                        `).join('')}
+                    </div>
                 </div>
             </div>
 
@@ -177,10 +186,10 @@ const MistakesPage = {
 
     getTypeDistribution() {
         const types = [
-            { id: 'addition', name: '加法', color: '#34C759' },
-            { id: 'subtraction', name: '减法', color: '#FF9500' },
-            { id: 'multiplication', name: '乘法', color: '#007AFF' },
-            { id: 'division', name: '除法', color: '#AF52DE' }
+            { id: 'addition', name: '加法', icon: '➕', color: '#34C759' },
+            { id: 'subtraction', name: '减法', icon: '➖', color: '#FF9500' },
+            { id: 'multiplication', name: '乘法', icon: '✖️', color: '#007AFF' },
+            { id: 'division', name: '除法', icon: '➗', color: '#AF52DE' }
         ];
 
         const total = this.mistakes.length;
@@ -189,7 +198,7 @@ const MistakesPage = {
             return {
                 ...type,
                 count,
-                percent: total > 0 ? (count / total) * 100 : 0
+                percent: total > 0 ? Math.round((count / total) * 100) : 0
             };
         }).filter(t => t.count > 0);
     },
@@ -213,6 +222,64 @@ const MistakesPage = {
                 percent: total > 0 ? (count / total) * 100 : 0
             };
         });
+    },
+
+    createDonutChart(typeDistribution) {
+        const total = typeDistribution.reduce((sum, t) => sum + t.count, 0);
+        if (total === 0) {
+            return `<div style="width: 80px; height: 80px; border-radius: 50%; background: rgba(0,0,0,0.06); display: flex; align-items: center; justify-content: center;">
+                <span style="font-size: 20px; color: #8E8E93;">0</span>
+            </div>`;
+        }
+
+        // 计算每个类型的角度
+        let currentAngle = 0;
+        const segments = typeDistribution.map(type => {
+            const angle = (type.count / total) * 360;
+            const startAngle = currentAngle;
+            const endAngle = currentAngle + angle;
+            currentAngle += angle;
+            return { ...type, startAngle, endAngle };
+        });
+
+        // 生成 SVG 路径
+        const size = 80;
+        const center = size / 2;
+        const radius = 32;
+        const strokeWidth = 12;
+
+        const paths = segments.map(seg => {
+            const startRad = (seg.startAngle - 90) * Math.PI / 180;
+            const endRad = (seg.endAngle - 90) * Math.PI / 180;
+
+            const x1 = center + radius * Math.cos(startRad);
+            const y1 = center + radius * Math.sin(startRad);
+            const x2 = center + radius * Math.cos(endRad);
+            const y2 = center + radius * Math.sin(endRad);
+
+            const largeArc = seg.endAngle - seg.startAngle > 180 ? 1 : 0;
+
+            return `<path d="M ${x1} ${y1} A ${radius} ${radius} 0 ${largeArc} 1 ${x2} ${y2}"
+                fill="none" stroke="${seg.color}" stroke-width="${strokeWidth}" stroke-linecap="round" />`;
+        }).join('');
+
+        return `
+            <div style="position: relative; width: ${size}px; height: ${size}px;">
+                <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="transform: rotate(-90deg);">
+                    ${paths}
+                </svg>
+                <div style="
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    text-align: center;
+                ">
+                    <div style="font-size: 20px; font-weight: 700; color: #1C1C1E;">${total}</div>
+                    <div style="font-size: 10px; color: #8E8E93;">题</div>
+                </div>
+            </div>
+        `;
     },
 
     createBatchReviewButton(count) {

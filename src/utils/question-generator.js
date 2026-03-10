@@ -391,6 +391,11 @@ const QuestionGenerator = {
         // 打乱顺序
         return this.shuffle(questions);
     },
+
+    /**
+     * 检查答案是否正确
+     */
+    checkAnswer(userAnswer, correctAnswer) {
         const user = parseInt(userAnswer, 10);
         const correct = parseInt(correctAnswer, 10);
         return !isNaN(user) && user === correct;
