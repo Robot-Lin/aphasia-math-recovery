@@ -714,12 +714,12 @@ const ChallengePage = {
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: ${isMobile ? '8px' : '10px'};">
                 <div style="font-size: ${isMobile ? '12px' : '14px'}; font-weight: 600; color: #1C1C1E;">连续答对</div>
                 <div style="font-size: ${isMobile ? '11px' : '13px'}; color: #8E8E93;">
-                    ${this.state.streak}/5
+                    ${this.state.streak}/8
                 </div>
             </div>
             <div style="height: ${isMobile ? '8px' : '10px'}; background: #E5E5EA; border-radius: 5px; overflow: hidden;">
                 <div style="
-                    width: ${progress};
+                    width: ${progress}%;
                     height: 100%;
                     background: linear-gradient(90deg, #34C759 0%, #30D158 100%);
                     border-radius: 5px;
