@@ -58,6 +58,13 @@ const BasicTrainingPage = {
     },
 
     init() {
+        // 防止重复初始化
+        if (this._isSwitching) {
+            console.log('init blocked: already switching');
+            return;
+        }
+        this._isSwitching = true;
+
         // 清除所有定时器
         this._clearAllTimers();
         // 停止可能正在播放的语音
@@ -77,6 +84,11 @@ const BasicTrainingPage = {
         this.state.currentIndex = 0;
         this.state.items = [];
         this.renderSelection();
+
+        // 延迟释放锁
+        setTimeout(() => {
+            this._isSwitching = false;
+        }, 300);
     },
 
     // 清除所有定时器
@@ -107,6 +119,13 @@ const BasicTrainingPage = {
 
     // 开始训练
     startTraining(type, level) {
+        // 防止重复进入
+        if (this._isSwitching) {
+            console.log('startTraining blocked: already switching');
+            return;
+        }
+        this._isSwitching = true;
+
         console.log(`startTraining called: type=${type}, level=${level}`);
 
         // 清除所有定时器
@@ -152,6 +171,11 @@ const BasicTrainingPage = {
         } catch (e) {
             console.error('渲染失败:', e);
         }
+
+        // 延迟释放锁
+        setTimeout(() => {
+            this._isSwitching = false;
+        }, 300);
     },
 
     // 渲染选择页面
@@ -283,7 +307,7 @@ const BasicTrainingPage = {
                     const isRecommended = levelNum === currentLevel;
                     return `
                         <button
-                            onclick="BasicTrainingPage.startTraining('${typeKey}', ${levelNum})"
+                            onclick="if(BasicTrainingPage._isSwitching)return;BasicTrainingPage.startTraining('${typeKey}', ${levelNum})"
                             class="${isUnlocked ? 'level-btn-unlocked' : 'level-btn-locked'}"
                             style="
                                 flex: 1;
@@ -301,7 +325,7 @@ const BasicTrainingPage = {
                                 overflow: hidden;
                             "
                             ${!isUnlocked ? 'disabled' : ''}
-                            onmouseenter="this.style.transform='translateY(-2px)'; this.style.boxShadow='${isUnlocked ? `0 6px 20px ${type.color}50, inset 0 -2px 0 rgba(0,0,0,0.1)` : 'none'}';"
+                            onmouseenter="if(this.disabled)return;this.style.transform='translateY(-2px)'; this.style.boxShadow='${isUnlocked ? `0 6px 20px ${type.color}50, inset 0 -2px 0 rgba(0,0,0,0.1)` : 'none'}';"
                             onmouseleave="this.style.transform='translateY(0)'; this.style.boxShadow='${isUnlocked ? `0 4px 14px ${type.color}40, inset 0 -2px 0 rgba(0,0,0,0.1)` : 'none'}';"
                         >
                             ${isRecommended && isUnlocked ? `<div style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: rgba(255,255,255,0.5);"></div>` : ''}
@@ -319,16 +343,6 @@ const BasicTrainingPage = {
             </div>
             ` : ''}
         `;
-
-        // 悬停效果
-        card.addEventListener('mouseenter', () => {
-            card.style.transform = 'translateY(-4px)';
-            card.style.boxShadow = '0 12px 40px rgba(0, 0, 0, 0.12)';
-        });
-        card.addEventListener('mouseleave', () => {
-            card.style.transform = 'translateY(0)';
-            card.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.08)';
-        });
 
         return card;
     },
@@ -588,6 +602,13 @@ const BasicTrainingPage = {
 
     // 返回选择页面
     backToSelection() {
+        // 防止重复切换
+        if (this._isSwitching) {
+            console.log('backToSelection blocked: already switching');
+            return;
+        }
+        this._isSwitching = true;
+
         // 清除所有定时器
         this._clearAllTimers();
         // 停止语音
@@ -600,6 +621,11 @@ const BasicTrainingPage = {
         this.state.isProcessing = false;
         this.state.showAnswer = false;
         this.renderSelection();
+
+        // 延迟释放锁
+        setTimeout(() => {
+            this._isSwitching = false;
+        }, 300);
     },
 
     createTypeSelector() {
