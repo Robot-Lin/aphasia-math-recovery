@@ -1014,7 +1014,7 @@ const BasicTrainingPage = {
 
             <div id="fillblank-options" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; max-width: 360px; margin: 0 auto;">
                 ${this.generateOptions(current.answer).map(opt => `
-                    <button onclick="BasicTrainingPage.selectAnswer(${opt}, ${current.answer})" style="
+                    <button onclick="if(BasicTrainingPage.state.isProcessing)return;BasicTrainingPage.selectAnswer(${opt}, ${current.answer})" style="
                         padding: 20px;
                         background: ${typeConfig.color}15;
                         color: ${typeConfig.color};
