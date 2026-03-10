@@ -612,12 +612,12 @@
             /* 选择页面网格改为单列 */
             .basic-training-grid {
                 grid-template-columns: 1fr !important;
-                gap: 16px !important;
+                gap: 12px !important;
             }
 
-            /* 训练类型卡片 */
+            /* 训练类型卡片 - 压缩内边距 */
             .basic-training-card {
-                padding: 20px !important;
+                padding: 16px !important;
             }
 
             /* 等级按钮网格改为 3 列 */
@@ -634,7 +634,7 @@
             /* 训练页面主布局改为单列 */
             .basic-training-layout {
                 grid-template-columns: 1fr !important;
-                gap: 16px !important;
+                gap: 12px !important;
             }
 
             /* 控制面板移到训练卡片下方 */
@@ -642,71 +642,151 @@
                 order: 2 !important;
             }
 
-            /* 训练卡片 */
+            /* 训练卡片 - 大幅压缩纵向空间 */
             .basic-training-main-card {
                 order: 1 !important;
-                padding: 20px !important;
+                padding: 20px 16px !important;
+                min-height: auto !important;
             }
 
-            /* 题目显示区域 */
+            /* 题目显示区域 - 压缩字号 */
             .basic-training-question {
-                font-size: 48px !important;
+                font-size: 42px !important;
+                margin-bottom: 16px !important;
+            }
+
+            /* 闪卡模式的答案字体 */
+            .basic-training-main-card [style*="font-size: 64px"] {
+                font-size: 36px !important;
             }
 
             /* 答案输入框 */
             .basic-training-input {
-                font-size: 36px !important;
-                padding: 16px !important;
+                font-size: 32px !important;
+                padding: 12px !important;
             }
 
-            /* 控制按钮 */
+            /* 控制按钮 - 更紧凑 */
             .basic-training-btn {
-                padding: 14px !important;
-                font-size: 16px !important;
+                padding: 12px !important;
+                font-size: 15px !important;
+            }
+
+            /* 填空选项网格 - 利用横向空间改为 3 列 */
+            #fillblank-options {
+                grid-template-columns: repeat(3, 1fr) !important;
+                gap: 10px !important;
+                max-width: 100% !important;
+            }
+
+            #fillblank-options button {
+                padding: 16px 8px !important;
+                font-size: 18px !important;
+                height: auto !important;
+                min-height: 56px;
+            }
+
+            /* 按钮组横向排列 */
+            .basic-training-main-card [style*="display: flex; gap: 16px"] {
+                flex-direction: row !important;
+                flex-wrap: wrap;
+                gap: 8px !important;
+            }
+
+            /* 朗读按钮更紧凑 */
+            .basic-training-main-card button[style*="display: inline-flex"] {
+                padding: 8px 16px !important;
+                font-size: 13px !important;
+            }
+
+            /* 进度指示器 */
+            .basic-training-main-card [style*="background: rgba(0,0,0,0.04)"] {
+                padding: 4px 12px !important;
+                font-size: 12px !important;
+            }
+
+            /* 提示文字 */
+            .basic-training-main-card [style*="font-size: 17px"] {
+                font-size: 14px !important;
+                margin-bottom: 12px !important;
             }
         }
 
         @media (max-width: 480px) {
             /* 选择页面标题 */
             .basic-training-header h2 {
-                font-size: 28px !important;
+                font-size: 24px !important;
             }
 
             /* 训练类型卡片 */
             .basic-training-card {
-                padding: 16px !important;
+                padding: 12px !important;
             }
 
             .basic-training-card > div:first-child > div:first-child {
-                width: 48px !important;
-                height: 48px !important;
-                font-size: 24px !important;
+                width: 40px !important;
+                height: 40px !important;
+                font-size: 20px !important;
             }
 
             /* 等级按钮改为 3 列但更紧凑 */
             .basic-training-levels button {
-                padding: 10px 6px !important;
+                padding: 8px 4px !important;
+                min-height: 60px;
             }
 
             .basic-training-levels button > div:first-child {
-                font-size: 12px !important;
+                font-size: 11px !important;
             }
 
             .basic-training-levels button > div:nth-child(2) {
-                font-size: 10px !important;
+                font-size: 9px !important;
             }
 
             /* 训练页面标题 */
             .basic-training-layout h2 {
-                font-size: 20px !important;
+                font-size: 18px !important;
+            }
+
+            /* 训练卡片更紧凑 */
+            .basic-training-main-card {
+                padding: 16px 12px !important;
             }
 
             /* 题目显示 */
             .basic-training-question {
-                font-size: 36px !important;
+                font-size: 32px !important;
             }
 
-            /* 答案输入 */
+            /* 闪卡模式答案 */
+            .basic-training-main-card [style*="font-size: 64px"] {
+                font-size: 28px !important;
+            }
+
+            /* 填空选项改为 3 列 */
+            #fillblank-options {
+                grid-template-columns: repeat(3, 1fr) !important;
+                gap: 8px !important;
+            }
+
+            #fillblank-options button {
+                padding: 12px 4px !important;
+                font-size: 16px !important;
+                min-height: 48px;
+            }
+
+            /* 控制按钮组 */
+            .basic-training-main-card [style*="display: flex; gap: 16px"] {
+                gap: 8px !important;
+            }
+
+            /* 显示答案按钮 */
+            #btn-show-answer, #btn-correct, #btn-incorrect {
+                padding: 14px 24px !important;
+                font-size: 16px !important;
+            }
+
+            /* 答案输入框 */
             .basic-training-input {
                 font-size: 28px !important;
                 padding: 12px !important;
@@ -824,61 +904,75 @@
             }
         }
 
-        /* 错题本移动端适配 */
+        /* 错题本移动端适配 - 大幅压缩纵向空间 */
         @media (max-width: 768px) {
             /* 错题本页面容器 */
             .mistakes-page {
-                padding: 16px !important;
+                padding: 12px 16px !important;
+            }
+
+            .mistakes-header {
+                margin-bottom: 16px !important;
             }
 
             .mistakes-header h2 {
-                font-size: 24px !important;
+                font-size: 22px !important;
+                margin-bottom: 4px !important;
+            }
+
+            .mistakes-header p {
+                font-size: 13px !important;
             }
 
             /* 主内容区改为单列 */
             .mistakes-content {
                 grid-template-columns: 1fr !important;
-                gap: 16px !important;
+                gap: 12px !important;
             }
 
-            /* 左侧面板统计卡片 */
+            /* 左侧面板统计卡片 - 压缩 */
             .mistakes-insight-card {
-                padding: 14px !important;
-            }
-
-            /* 统计概览数字缩小 */
-            .mistakes-insight-card .stat-number {
-                font-size: 20px !important;
-            }
-
-            /* 错题列表项 */
-            .mistake-item {
-                padding: 16px !important;
-            }
-
-            .mistake-item .question {
-                font-size: 20px !important;
-            }
-
-            /* 重练按钮增大 */
-            .mistake-item .review-btn {
-                padding: 10px 18px !important;
-                font-size: 15px !important;
-                min-height: 44px;
-            }
-
-            /* 进度条区域 */
-            .mistake-item .progress-area {
-                margin-top: 12px !important;
-                padding-top: 12px !important;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .mistakes-page {
                 padding: 12px !important;
             }
 
+            .mistakes-insight-card h3 {
+                font-size: 14px !important;
+                margin-bottom: 12px !important;
+            }
+
+            /* 统计概览改为横向 */
+            .mistakes-insight-card > div[style*="display: flex"] {
+                gap: 6px !important;
+                margin-bottom: 16px !important;
+            }
+
+            .mistakes-insight-card > div > div {
+                padding: 10px 4px !important;
+            }
+
+            /* 统计概览数字缩小 */
+            .mistakes-insight-card .stat-number,
+            .mistakes-insight-card > div > div > div:first-child {
+                font-size: 18px !important;
+            }
+
+            /* 类型分布和难度分布压缩 */
+            .mistakes-insight-card [style*="margin-bottom: 16px"],
+            .mistakes-insight-card > div[style*="margin-bottom"] {
+                margin-bottom: 12px !important;
+            }
+
+            .mistakes-insight-card [style*="gap: 8px"] {
+                gap: 4px !important;
+            }
+
+            /* 批量复习按钮 */
+            .mistakes-page button[style*="background: linear-gradient"] {
+                padding: 12px !important;
+                font-size: 14px !important;
+            }
+
+            /* 错题列表项 - 紧凑 */
             .mistake-item {
                 padding: 14px !important;
             }
@@ -887,14 +981,92 @@
                 font-size: 18px !important;
             }
 
-            /* 标签和答案换行优化 */
+            /* 元信息行 */
             .mistake-item .meta-row {
                 flex-wrap: wrap;
-                gap: 8px !important;
+                gap: 6px !important;
+                font-size: 12px !important;
+            }
+
+            /* 重练按钮 */
+            .mistake-item .review-btn,
+            .mistake-item button {
+                padding: 8px 14px !important;
+                font-size: 13px !important;
+                min-height: 40px;
+            }
+
+            /* 进度条区域 */
+            .mistake-item .progress-area,
+            .mistake-item [style*="border-top"] {
+                margin-top: 10px !important;
+                padding-top: 10px !important;
+            }
+
+            /* 复习弹窗 - 紧凑 */
+            .mistake-review-modal > div {
+                padding: 20px !important;
+                max-width: calc(100vw - 32px) !important;
+            }
+
+            .mistake-review-modal h3 {
+                font-size: 20px !important;
+            }
+
+            /* 做题模式优化 - 横向利用 */
+            .mistake-review-modal [style*="display: grid"] {
+                grid-template-columns: repeat(3, 1fr) !important;
+                gap: 10px !important;
+            }
+
+            .mistake-review-modal button {
+                padding: 16px 8px !important;
+                font-size: 18px !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .mistakes-page {
+                padding: 10px 12px !important;
+            }
+
+            .mistakes-header h2 {
+                font-size: 20px !important;
+            }
+
+            .mistake-item {
+                padding: 12px !important;
+            }
+
+            .mistake-item .question {
+                font-size: 16px !important;
+            }
+
+            /* 标签和答案换行优化 */
+            .mistake-item .meta-row {
+                gap: 4px !important;
             }
 
             .mistake-item .answers {
-                font-size: 13px !important;
+                font-size: 12px !important;
+            }
+
+            /* 统计卡片 2x2 网格 */
+            .mistakes-insight-card > div[style*="display: flex"] {
+                display: grid !important;
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 6px !important;
+            }
+
+            /* 做题模式 3 列 */
+            .mistake-review-modal [style*="display: grid"] {
+                grid-template-columns: repeat(3, 1fr) !important;
+                gap: 8px !important;
+            }
+
+            .mistake-review-modal button {
+                padding: 14px 4px !important;
+                font-size: 16px !important;
             }
         }
 
@@ -1047,101 +1219,196 @@
                 margin: 12px 0 6px 8px !important;
             }
 
-            /* 挑战模式移动端适配 */
+            /* 挑战模式移动端适配 - 大幅压缩纵向空间 */
             @media (max-width: 768px) {
-                /* 挑战模式开场页面 */
-                #page-container > div > div[class*="glass"] {
-                    padding: 32px 20px !important;
-                    border-radius: 24px !important;
+                /* 挑战模式页面容器 */
+                .challenge-page > div {
+                    padding: 12px 16px !important;
                 }
 
-                /* 挑战模式标题 */
-                #page-container h2 {
-                    font-size: 28px !important;
+                /* 页面标题 - 更紧凑 */
+                .challenge-page h2 {
+                    font-size: 24px !important;
+                    margin-bottom: 4px !important;
                 }
 
-                /* 难度等级预览改为网格布局 */
-                #page-container > div > div > div:last-child > div {
-                    display: grid !important;
+                .challenge-page p {
+                    font-size: 14px !important;
+                    margin-bottom: 12px !important;
+                }
+
+                /* 难度信息卡片 - 横向排列 */
+                .challenge-page .glass {
+                    padding: 12px 16px !important;
+                    margin-bottom: 12px !important;
+                }
+
+                /* 等级图标缩小 */
+                .challenge-page [style*="width: 56px"] {
+                    width: 44px !important;
+                    height: 44px !important;
+                    font-size: 18px !important;
+                    border-radius: 12px !important;
+                }
+
+                /* 连续答对进度条 */
+                .challenge-page [style*="padding: 20px"] {
+                    padding: 12px 16px !important;
+                }
+
+                /* 进度条高度 */
+                .challenge-page [style*="height: 12px"] {
+                    height: 8px !important;
+                }
+
+                /* 题目卡片 - 大幅压缩 */
+                .challenge-page [style*="border-radius: 24px"] {
+                    padding: 20px 16px !important;
+                    min-height: auto !important;
+                }
+
+                /* 题目数字 */
+                .challenge-page [style*="font-size: 48px"],
+                .challenge-page [style*="font-size: 56px"] {
+                    font-size: 32px !important;
+                }
+
+                /* 选项按钮网格 - 改为 3 列利用横向空间 */
+                .challenge-options {
                     grid-template-columns: repeat(3, 1fr) !important;
-                    gap: 8px !important;
-                    max-width: 100% !important;
+                    gap: 10px !important;
                 }
 
-                /* 难度等级卡片 */
-                #page-container > div > div > div:last-child > div > div {
-                    min-width: auto !important;
-                    padding: 10px 8px !important;
+                .challenge-options button {
+                    padding: 16px 8px !important;
+                    font-size: 20px !important;
+                    min-height: 56px;
                 }
 
-                /* 挑战模式题目卡片 */
-                #page-container > div > div > div[style*="border-radius: 24px"] {
-                    padding: 24px 16px !important;
+                /* 统计信息卡片 */
+                .challenge-stats {
+                    grid-template-columns: repeat(2, 1fr) !important;
+                    gap: 10px !important;
                 }
 
-                /* 挑战题目数字 */
-                #page-container [style*="font-size: 48px"],
-                #page-container [style*="font-size: 56px"] {
+                /* 统计卡片内部 */
+                .challenge-stats > div {
+                    padding: 12px !important;
+                }
+
+                /* 开场页面 */
+                .challenge-intro {
+                    padding: 24px 20px !important;
+                }
+
+                .challenge-intro [style*="width: 120px"] {
+                    width: 72px !important;
+                    height: 72px !important;
                     font-size: 36px !important;
                 }
 
-                /* 选项按钮网格 */
-                #page-container > div > div > div[style*="display: grid"] {
-                    grid-template-columns: repeat(2, 1fr) !important;
-                    gap: 12px !important;
+                /* 难度等级预览 - 横向滚动或网格 */
+                .challenge-levels {
+                    display: grid !important;
+                    grid-template-columns: repeat(3, 1fr) !important;
+                    gap: 6px !important;
                 }
 
-                /* 选项按钮 */
-                #page-container button[style*="padding: 20px"] {
-                    padding: 16px !important;
-                    font-size: 20px !important;
+                .challenge-levels > div {
+                    padding: 8px 4px !important;
+                    min-width: auto !important;
                 }
 
-                /* 进度条和等级信息 */
-                #page-container > div > div > div:first-child > div {
-                    flex-wrap: wrap !important;
-                    gap: 8px !important;
+                /* 语音按钮更紧凑 */
+                .challenge-page button[style*="display: inline-flex"] {
+                    padding: 6px 12px !important;
+                    font-size: 12px !important;
                 }
             }
 
             @media (max-width: 480px) {
-                /* 挑战模式开场页面更小屏幕 */
-                #page-container > div > div[class*="glass"] {
-                    padding: 24px 16px !important;
+                /* 挑战模式更激进的压缩 */
+                .challenge-page > div {
+                    padding: 8px 12px !important;
                 }
 
-                /* 奖杯图标缩小 */
-                #page-container [style*="width: 120px"] {
-                    width: 80px !important;
-                    height: 80px !important;
-                    font-size: 40px !important;
+                /* 标题更小 */
+                .challenge-page h2 {
+                    font-size: 20px !important;
                 }
 
-                /* 最高等级标签 */
-                #page-container [style*="position: absolute"] {
-                    font-size: 12px !important;
-                    padding: 4px 10px !important;
+                /* 难度卡片更紧凑 */
+                .challenge-page .glass {
+                    padding: 10px 12px !important;
+                    margin-bottom: 8px !important;
                 }
 
-                /* 难度等级改为 2 列 */
-                #page-container > div > div > div:last-child > div {
-                    grid-template-columns: repeat(2, 1fr) !important;
+                /* 等级描述隐藏，只显示等级名 */
+                .challenge-page [style*="font-size: 14px; color: #8E8E93"] {
+                    font-size: 11px !important;
                 }
 
-                /* 开始挑战按钮 */
-                #challenge-start-btn {
-                    padding: 16px 40px !important;
-                    font-size: 18px !important;
+                /* 进度条文字 */
+                .challenge-page [style*="margin-top: 8px"] {
+                    font-size: 11px !important;
+                    margin-top: 6px !important;
+                }
+
+                /* 题目卡片 */
+                .challenge-page [style*="border-radius: 24px"] {
+                    padding: 16px 12px !important;
                 }
 
                 /* 题目数字更小 */
-                #page-container [style*="font-size: 36px"] {
+                .challenge-page [style*="font-size: 32px"] {
                     font-size: 28px !important;
                 }
 
-                /* 选项按钮单列 */
-                #page-container > div > div > div[style*="display: grid"] {
-                    grid-template-columns: 1fr !important;
+                /* 选项按钮网格 - 3列 */
+                .challenge-options {
+                    grid-template-columns: repeat(3, 1fr) !important;
+                    gap: 8px !important;
+                }
+
+                .challenge-options button {
+                    padding: 12px 4px !important;
+                    font-size: 18px !important;
+                    min-height: 48px;
+                }
+
+                /* 开场页面 */
+                .challenge-intro {
+                    padding: 20px 16px !important;
+                }
+
+                .challenge-intro [style*="width: 72px"] {
+                    width: 56px !important;
+                    height: 56px !important;
+                    font-size: 28px !important;
+                }
+
+                /* 难度等级 2 列 */
+                .challenge-levels {
+                    grid-template-columns: repeat(2, 1fr) !important;
+                }
+
+                /* 开始按钮 */
+                #challenge-start-btn {
+                    padding: 14px 32px !important;
+                    font-size: 16px !important;
+                }
+
+                /* 统计信息 2 列紧凑 */
+                .challenge-stats {
+                    gap: 8px !important;
+                }
+
+                .challenge-stats > div {
+                    padding: 10px 8px !important;
+                }
+
+                .challenge-stats [style*="font-size: 24px"] {
+                    font-size: 20px !important;
                 }
             }
         }

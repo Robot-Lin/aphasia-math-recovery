@@ -105,7 +105,7 @@ const ChallengePage = {
 
         // 开场动画容器
         const introCard = document.createElement('div');
-        introCard.className = 'glass';
+        introCard.className = 'glass challenge-intro';
         introCard.style.cssText = `
             width: 100%;
             max-width: 600px;
@@ -210,7 +210,7 @@ const ChallengePage = {
             ">不断突破自我，挑战算术极限<br>连续答对 5 题即可升级难度</p>
 
             <!-- 难度等级预览 -->
-            <div style="
+            <div class="challenge-levels" style="
                 display: flex;
                 justify-content: center;
                 gap: 8px;
@@ -310,6 +310,7 @@ const ChallengePage = {
         container.innerHTML = '';
 
         const page = document.createElement('div');
+        page.className = 'challenge-page';
         page.style.cssText = `
             max-width: 1200px;
             margin: 0 auto;
@@ -336,6 +337,7 @@ const ChallengePage = {
 
     createHeader() {
         const header = document.createElement('div');
+        header.className = 'challenge-header';
         header.style.cssText = 'text-align: center; margin-bottom: 24px;';
         header.innerHTML = `
             <h2 style="font-size: 32px; font-weight: 700; color: #1C1C1E; margin-bottom: 8px;">🏆 挑战模式</h2>
@@ -430,7 +432,7 @@ const ChallengePage = {
 
     createChallengeCard() {
         const card = document.createElement('div');
-        card.className = 'glass';
+        card.className = 'glass challenge-card';
         card.style.cssText = `
             border-radius: 24px;
             padding: 48px;
@@ -474,7 +476,7 @@ const ChallengePage = {
                 </button>
             </div>
 
-            <div id="challenge-options" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; max-width: 400px; margin: 0 auto;">
+            <div id="challenge-options" class="challenge-options" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; max-width: 400px; margin: 0 auto;">
                 ${this.generateOptions(q.answer).map(opt => `
                     <button onclick="ChallengePage.selectAnswer(${opt})" style="
                         padding: 24px;
@@ -515,7 +517,7 @@ const ChallengePage = {
 
     createStatsCard() {
         const card = document.createElement('div');
-        card.className = 'glass';
+        card.className = 'glass challenge-stats';
         card.style.cssText = `
             border-radius: 16px;
             padding: 20px;
