@@ -33,6 +33,12 @@ const PracticeSettingsPage = {
         const container = document.getElementById('page-container');
         if (!container) return;
 
+        // 清理可能存在的旧按钮（防止重复）
+        const oldButton = document.getElementById('practice-fixed-button');
+        if (oldButton) {
+            oldButton.remove();
+        }
+
         // 清空容器
         container.innerHTML = '';
 
@@ -126,11 +132,10 @@ const PracticeSettingsPage = {
         mainGrid.appendChild(rightColumn);
         content.appendChild(mainGrid);
 
-        // 开始按钮 - 创建固定底部的按钮
+        // 开始按钮
         const buttonWrapper = document.createElement('div');
         buttonWrapper.className = 'practice-button-wrapper';
         buttonWrapper.id = 'practice-fixed-button';
-        buttonWrapper.style.cssText = 'padding: 16px 8px 8px 8px;';
 
         const startBtn = DesignSystem.createPrimaryButton('开始练习', () => this.startPractice(), {
             icon: '🚀',
@@ -144,8 +149,15 @@ const PracticeSettingsPage = {
         hint.textContent = '按 Enter 键快速开始';
         buttonWrapper.appendChild(hint);
 
-        // 将按钮直接添加到 body，确保相对于视口固定
-        document.body.appendChild(buttonWrapper);
+        // 根据屏幕宽度决定按钮位置：移动端固定底部，桌面端在卡片内
+        if (window.innerWidth <= 768) {
+            // 移动端：添加到 body，固定底部
+            document.body.appendChild(buttonWrapper);
+        } else {
+            // 桌面端：添加到卡片内
+            buttonWrapper.style.cssText = 'padding: 16px 8px 8px 8px;';
+            content.appendChild(buttonWrapper);
+        }
 
         // 缓存引用，用于后续清理
         this.elements.fixedButton = buttonWrapper;

@@ -355,7 +355,21 @@
                 font-size: 18px !important;
             }
 
-            /* 开始练习按钮区域 - 固定底部 */
+        /* 智能练习设置页 - 桌面端按钮样式（默认） */
+        .practice-button-wrapper {
+            position: relative;
+            padding: 16px 8px 8px 8px;
+        }
+
+        .practice-start-btn {
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            /* 开始练习按钮区域 - 仅在移动端固定底部 */
             .practice-button-wrapper {
                 position: fixed !important;
                 bottom: 0 !important;
@@ -1031,6 +1045,104 @@
             .settings-section-title {
                 font-size: 11px !important;
                 margin: 12px 0 6px 8px !important;
+            }
+
+            /* 挑战模式移动端适配 */
+            @media (max-width: 768px) {
+                /* 挑战模式开场页面 */
+                #page-container > div > div[class*="glass"] {
+                    padding: 32px 20px !important;
+                    border-radius: 24px !important;
+                }
+
+                /* 挑战模式标题 */
+                #page-container h2 {
+                    font-size: 28px !important;
+                }
+
+                /* 难度等级预览改为网格布局 */
+                #page-container > div > div > div:last-child > div {
+                    display: grid !important;
+                    grid-template-columns: repeat(3, 1fr) !important;
+                    gap: 8px !important;
+                    max-width: 100% !important;
+                }
+
+                /* 难度等级卡片 */
+                #page-container > div > div > div:last-child > div > div {
+                    min-width: auto !important;
+                    padding: 10px 8px !important;
+                }
+
+                /* 挑战模式题目卡片 */
+                #page-container > div > div > div[style*="border-radius: 24px"] {
+                    padding: 24px 16px !important;
+                }
+
+                /* 挑战题目数字 */
+                #page-container [style*="font-size: 48px"],
+                #page-container [style*="font-size: 56px"] {
+                    font-size: 36px !important;
+                }
+
+                /* 选项按钮网格 */
+                #page-container > div > div > div[style*="display: grid"] {
+                    grid-template-columns: repeat(2, 1fr) !important;
+                    gap: 12px !important;
+                }
+
+                /* 选项按钮 */
+                #page-container button[style*="padding: 20px"] {
+                    padding: 16px !important;
+                    font-size: 20px !important;
+                }
+
+                /* 进度条和等级信息 */
+                #page-container > div > div > div:first-child > div {
+                    flex-wrap: wrap !important;
+                    gap: 8px !important;
+                }
+            }
+
+            @media (max-width: 480px) {
+                /* 挑战模式开场页面更小屏幕 */
+                #page-container > div > div[class*="glass"] {
+                    padding: 24px 16px !important;
+                }
+
+                /* 奖杯图标缩小 */
+                #page-container [style*="width: 120px"] {
+                    width: 80px !important;
+                    height: 80px !important;
+                    font-size: 40px !important;
+                }
+
+                /* 最高等级标签 */
+                #page-container [style*="position: absolute"] {
+                    font-size: 12px !important;
+                    padding: 4px 10px !important;
+                }
+
+                /* 难度等级改为 2 列 */
+                #page-container > div > div > div:last-child > div {
+                    grid-template-columns: repeat(2, 1fr) !important;
+                }
+
+                /* 开始挑战按钮 */
+                #challenge-start-btn {
+                    padding: 16px 40px !important;
+                    font-size: 18px !important;
+                }
+
+                /* 题目数字更小 */
+                #page-container [style*="font-size: 36px"] {
+                    font-size: 28px !important;
+                }
+
+                /* 选项按钮单列 */
+                #page-container > div > div > div[style*="display: grid"] {
+                    grid-template-columns: 1fr !important;
+                }
             }
         }
     </style>
