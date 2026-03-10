@@ -246,81 +246,166 @@
         @media (max-width: 768px) {
             /* 设置页容器 */
             .practice-settings-content {
-                padding: 8px !important;
+                padding: 4px !important;
             }
 
-            /* 主网格从 2 列改为 1 列 */
+            /* 主网格从 2 列改为 1 列，减小间距 */
             .practice-settings-grid {
                 grid-template-columns: 1fr !important;
-                gap: 16px !important;
+                gap: 8px !important;
+                margin-bottom: 12px !important;
             }
 
             /* 设置页卡片内边距减小 */
             .practice-settings-card {
-                padding: 16px !important;
+                padding: 12px !important;
             }
 
-            /* 难度选择改为 3 列但缩小间距 */
+            /* 设置项标题减小 */
+            .practice-settings-grid label {
+                font-size: 13px !important;
+                margin-bottom: 6px !important;
+            }
+
+            /* 难度选择改为 3 列，压缩按钮 */
             .diff-grid {
                 grid-template-columns: repeat(3, 1fr) !important;
-                gap: 8px !important;
+                gap: 6px !important;
             }
 
             /* 运算类型保持 2 列 */
             .type-grid {
                 grid-template-columns: repeat(2, 1fr) !important;
-                gap: 8px !important;
+                gap: 6px !important;
             }
 
-            /* 题目数量改为 4 列但缩小 */
+            /* 题目数量改为 4 列 */
             .count-grid {
                 grid-template-columns: repeat(4, 1fr) !important;
-                gap: 8px !important;
+                gap: 6px !important;
             }
 
-            /* 设置页按钮触摸友好 */
+            /* 答题模式 2 列 */
+            .mode-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 6px !important;
+            }
+
+            /* 设置页按钮压缩 */
             .mode-grid button,
             .diff-grid button,
             .type-grid button,
             .count-grid button {
-                padding: 14px 6px !important;
-                min-height: 60px !important;
+                padding: 8px 4px !important;
+                min-height: 44px !important;
+                border-radius: 10px !important;
             }
 
-            /* 开始练习按钮全宽 */
+            /* 按钮内文字减小 */
+            .mode-grid button span:first-child,
+            .diff-grid button span:first-child,
+            .type-grid button span:first-child {
+                font-size: 20px !important;
+            }
+
+            .mode-grid button span:nth-child(2),
+            .diff-grid button span:nth-child(2),
+            .type-grid button span:nth-child(2) {
+                font-size: 12px !important;
+            }
+
+            /* 描述文字隐藏或减小 */
+            .mode-grid button span:last-child,
+            .diff-grid button span:last-child {
+                font-size: 10px !important;
+                display: none !important; /* 隐藏描述节省空间 */
+            }
+
+            /* 题目数量按钮 */
+            .count-grid button span:first-child {
+                font-size: 18px !important;
+            }
+
+            /* 开始练习按钮区域 - 固定底部 */
+            .practice-settings-content > div:last-child {
+                position: fixed !important;
+                bottom: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                background: white !important;
+                padding: 12px 16px !important;
+                box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1) !important;
+                z-index: 50 !important;
+                margin: 0 !important;
+            }
+
+            /* 开始按钮全宽 */
             .practice-start-btn {
                 width: 100% !important;
+            }
+
+            /* 给底部留出空间 */
+            .practice-settings-card {
+                padding-bottom: 80px !important;
+            }
+
+            /* 提示文字调整 */
+            .practice-settings-content > div:last-child p {
+                margin: 4px 0 0 0 !important;
+                font-size: 11px !important;
             }
         }
 
         @media (max-width: 480px) {
             /* 设置页卡片进一步减小 */
             .practice-settings-card {
-                padding: 12px !important;
+                padding: 10px !important;
+                padding-bottom: 80px !important;
             }
 
             /* 设置页标题字号减小 */
             .practice-settings-content h1 {
-                font-size: 24px !important;
+                font-size: 22px !important;
+                margin-bottom: 4px !important;
             }
 
-            /* 难度选择改为 2 列 */
+            /* 难度选择改为 3 列，更紧凑 */
             .diff-grid {
-                grid-template-columns: repeat(2, 1fr) !important;
+                grid-template-columns: repeat(3, 1fr) !important;
+                gap: 4px !important;
             }
 
-            /* 题目数量改为 2 列 */
+            /* 题目数量保持 4 列但更小 */
             .count-grid {
-                grid-template-columns: repeat(2, 1fr) !important;
+                grid-template-columns: repeat(4, 1fr) !important;
+                gap: 4px !important;
             }
 
-            /* 按钮进一步调整 */
+            /* 按钮进一步压缩 */
             .mode-grid button,
             .diff-grid button,
             .type-grid button,
             .count-grid button {
-                padding: 12px 4px !important;
-                min-height: 54px !important;
+                padding: 6px 2px !important;
+                min-height: 40px !important;
+                border-radius: 8px !important;
+            }
+
+            /* 按钮内图标更小 */
+            .mode-grid button span:first-child,
+            .diff-grid button span:first-child,
+            .type-grid button span:first-child {
+                font-size: 18px !important;
+            }
+
+            .mode-grid button span:nth-child(2),
+            .diff-grid button span:nth-child(2),
+            .type-grid button span:nth-child(2) {
+                font-size: 11px !important;
+            }
+
+            .count-grid button span:first-child {
+                font-size: 16px !important;
             }
         }
     </style>
