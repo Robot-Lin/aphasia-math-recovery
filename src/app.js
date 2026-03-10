@@ -31,6 +31,12 @@ const router = {
      */
     navigate(page) {
         try {
+            // 清理智能练习设置页的固定按钮
+            const fixedBtn = document.getElementById('practice-fixed-button');
+            if (fixedBtn) {
+                fixedBtn.remove();
+            }
+
             if (this.routes[page]) {
                 this.currentPage = page;
                 this.updateNavStyles();
