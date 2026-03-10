@@ -128,6 +128,7 @@ const PracticeSettingsPage = {
 
         // 开始按钮
         const buttonWrapper = document.createElement('div');
+        buttonWrapper.className = 'practice-button-wrapper';
         buttonWrapper.style.cssText = 'padding: 16px 8px 8px 8px;';
 
         const startBtn = DesignSystem.createPrimaryButton('开始练习', () => this.startPractice(), {
