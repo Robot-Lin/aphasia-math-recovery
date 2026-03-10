@@ -64,6 +64,7 @@ const PracticeKeypadPage = {
         container.innerHTML = '';
 
         const page = document.createElement('div');
+        page.className = 'practice-page';
         page.style.cssText = `
             max-width: 900px;
             margin: 0 auto;
@@ -80,6 +81,7 @@ const PracticeKeypadPage = {
 
         // 结束按钮
         const endBtn = document.createElement('button');
+        endBtn.className = 'practice-end-btn';
         endBtn.style.cssText = `
             display: block;
             margin: 24px auto 0;
@@ -114,7 +116,7 @@ const PracticeKeypadPage = {
         };
 
         const header = document.createElement('div');
-        header.className = 'glass';
+        header.className = 'glass practice-header';
         header.style.cssText = `
             border-radius: 20px;
             padding: 20px 24px;
@@ -123,28 +125,28 @@ const PracticeKeypadPage = {
         `;
 
         header.innerHTML = `
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap;">
                 <div style="display: flex; align-items: center; gap: 12px;">
-                    <span style="font-size: 17px; color: #3C3C43;">
+                    <span class="question-number" style="font-size: 17px; color: #3C3C43;">
                         第 <span style="font-size: 22px; font-weight: 700; color: #007AFF;">${this.currentIndex + 1}</span> / ${this.questions.length} 题
                     </span>
-                    <span style="padding: 4px 12px; background: rgba(0, 122, 255, 0.1); border-radius: 100px; font-size: 13px; font-weight: 600; color: #007AFF;">
+                    <span class="type-badge" style="padding: 4px 12px; background: rgba(0, 122, 255, 0.1); border-radius: 100px; font-size: 13px; font-weight: 600; color: #007AFF; white-space: nowrap;">
                         ${diffNames[current.difficulty]}${typeNames[current.type]}
                     </span>
                 </div>
-                <div style="display: flex; align-items: center; gap: 12px;">
+                <div class="score-area" style="display: flex; align-items: center; gap: 12px;">
                     ${this.streak > 2 ? `
-                    <div style="display: flex; align-items: center; gap: 4px; padding: 4px 10px; background: rgba(255, 149, 0, 0.12); border-radius: 100px;">
+                    <div class="streak-badge" style="display: flex; align-items: center; gap: 4px; padding: 4px 10px; background: rgba(255, 149, 0, 0.12); border-radius: 100px;">
                         <span style="font-size: 16px;">🔥</span>
                         <span style="font-weight: 700; color: #FF9500;">${this.streak}</span>
                     </div>
                     ` : ''}
-                    <span style="font-size: 17px; color: #3C3C43;">
+                    <span class="score-text" style="font-size: 17px; color: #3C3C43; white-space: nowrap;">
                         得分: <span style="font-weight: 700; color: #007AFF;">${this.getScore()}</span>
                     </span>
                 </div>
             </div>
-            <div style="height: 6px; background: rgba(0, 0, 0, 0.06); border-radius: 3px; overflow: hidden;">
+            <div class="progress-bar" style="height: 6px; background: rgba(0, 0, 0, 0.06); border-radius: 3px; overflow: hidden;">
                 <div style="height: 100%; background: linear-gradient(90deg, #007AFF 0%, #34C759 100%); border-radius: 3px; width: ${progress}%; transition: width 400ms cubic-bezier(0.4, 0.0, 0.2, 1);"></div>
             </div>
         `;
@@ -154,7 +156,7 @@ const PracticeKeypadPage = {
 
     createQuestionCard() {
         const card = document.createElement('div');
-        card.className = 'glass';
+        card.className = 'glass practice-question-card';
         card.style.cssText = `
             border-radius: 28px;
             padding: 40px 32px;
