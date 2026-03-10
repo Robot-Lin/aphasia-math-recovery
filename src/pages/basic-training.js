@@ -60,12 +60,20 @@ const BasicTrainingPage = {
     init() {
         // 停止可能正在播放的语音
         if (typeof SpeechManager !== 'undefined') {
-            SpeechManager.stop();
+            try {
+                SpeechManager.stop();
+            } catch (e) {
+                console.warn('停止语音失败:', e);
+            }
         }
         // 重置渲染ID，防止残留语音调用
         this._currentRenderId = Date.now();
-        // 重置状态，显示选择页面
+        // 强制重置所有状态，避免来回切换导致的死锁
         this.state.hasStarted = false;
+        this.state.isProcessing = false;
+        this.state.showAnswer = false;
+        this.state.currentIndex = 0;
+        this.state.items = [];
         this.renderSelection();
     },
 
@@ -89,6 +97,7 @@ const BasicTrainingPage = {
         this.state.hasStarted = true;
         this.state.currentIndex = 0;
         this.state.showAnswer = false;
+        // 强制重置 isProcessing，避免死锁
         this.state.isProcessing = false;
 
         try {
@@ -553,8 +562,11 @@ const BasicTrainingPage = {
         if (typeof SpeechManager !== 'undefined') {
             SpeechManager.stop();
         }
+        // 强制重置所有状态
         this._currentRenderId = Date.now();
         this.state.hasStarted = false;
+        this.state.isProcessing = false;
+        this.state.showAnswer = false;
         this.renderSelection();
     },
 

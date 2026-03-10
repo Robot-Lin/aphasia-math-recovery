@@ -111,13 +111,26 @@ const SpeechManager = {
             // 事件回调
             if (options.onstart) utterance.onstart = options.onstart;
             if (options.onend) utterance.onend = options.onend;
-            if (options.onerror) utterance.onerror = options.onerror;
 
-            // 添加默认错误处理，防止未捕获的异常
-            utterance.onerror = utterance.onerror || ((e) => {
-                console.warn('语音播放错误:', e);
+            // 添加默认错误处理，防止未捕获的异常（同时保留用户传入的回调）
+            const userOnError = options.onerror;
+            utterance.onerror = (e) => {
+                // 忽略 'interrupted' 和 'canceled' 错误（这些是正常的中断情况）
+                if (e.error === 'interrupted' || e.error === 'canceled') {
+                    console.log('语音播放被中断:', e.error);
+                } else {
+                    console.warn('语音播放错误:', e.error);
+                }
                 this.currentUtterance = null;
-            });
+                // 执行用户指定的错误回调
+                if (userOnError) {
+                    try {
+                        userOnError(e);
+                    } catch (err) {
+                        console.error('语音错误回调异常:', err);
+                    }
+                }
+            };
 
             this.currentUtterance = utterance;
             this.synthesis.speak(utterance);
