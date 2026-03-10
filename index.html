@@ -377,9 +377,9 @@
                 display: block;
             }
 
-            /* 给底部留出足够空间 - 防止重叠 */
+            /* 给底部留出足够空间 - 防止内容被固定按钮遮挡 */
             .practice-settings-card {
-                padding-bottom: 100px !important;
+                padding-bottom: 0 !important;
             }
 
             /* 提示文字调整 */
@@ -388,15 +388,14 @@
                 font-size: 11px !important;
             }
 
-            /* 确保内容区域可滚动到底部 */
+            /* 确保内容区域可滚动 */
             .practice-settings-content {
-                padding-bottom: 20px !important;
+                padding-bottom: 0 !important;
             }
 
-            /* 页面容器底部留出空间 */
-            #page-container .practice-page,
-            #page-container > div {
-                padding-bottom: 80px !important;
+            /* 页面容器底部留出空间 - 防止内容被固定按钮遮挡 */
+            #page-container {
+                padding-bottom: 100px !important;
             }
         }
 
@@ -404,6 +403,11 @@
             /* 设置页卡片进一步减小 */
             .practice-settings-card {
                 padding: 10px !important;
+                padding-bottom: 0 !important;
+            }
+
+            /* 页面容器底部留白 */
+            #page-container {
                 padding-bottom: 90px !important;
             }
 
