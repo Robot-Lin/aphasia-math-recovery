@@ -109,26 +109,26 @@
                 transform: translateX(-100%);
                 transition: transform 300ms ease;
                 width: 280px !important;
-                pointer-events: none; /* 隐藏时不接收点击事件 */
+                pointer-events: none;
             }
             aside.show {
                 transform: translateX(0);
-                pointer-events: auto; /* 显示时恢复点击 */
+                pointer-events: auto;
             }
             main {
                 margin-left: 0 !important;
-                padding: 16px !important;
+                padding: 8px 12px !important;
             }
-            /* 内容区顶部留出菜单按钮空间 */
+            /* 内容区顶部留出菜单按钮空间 - 匹配按钮高度44px */
             #page-container {
-                padding-top: 60px;
+                padding-top: 44px;
             }
         }
 
         /* 小屏幕进一步优化 */
         @media (max-width: 480px) {
             main {
-                padding: 12px !important;
+                padding: 6px 8px !important;
             }
         }
 
@@ -140,7 +140,7 @@
                 gap: 12px !important;
             }
             .stats-grid > div {
-                padding: 16px !important;
+                padding: 12px !important;
             }
             .stats-grid > div > div:first-child {
                 width: 44px !important;
@@ -151,9 +151,9 @@
                 font-size: 22px !important;
             }
 
-            /* 快速开始卡片 */
+            /* 快速开始卡片 - 减小padding */
             .quick-start-card {
-                padding: 20px !important;
+                padding: 16px !important;
             }
             .quick-start-header {
                 flex-direction: column !important;
@@ -407,9 +407,9 @@
                 padding-bottom: 0 !important;
             }
 
-            /* 页面容器底部留出空间 - 防止内容被固定按钮遮挡 */
+            /* 页面容器底部留出空间 - 减小到80px */
             #page-container {
-                padding-bottom: 100px !important;
+                padding-bottom: 80px !important;
             }
         }
 
@@ -420,9 +420,9 @@
                 padding-bottom: 0 !important;
             }
 
-            /* 页面容器底部留白 */
+            /* 页面容器底部留白 - 减小到70px */
             #page-container {
-                padding-bottom: 90px !important;
+                padding-bottom: 70px !important;
             }
 
             /* 设置页标题字号减小 */
@@ -617,7 +617,7 @@
 
             /* 训练类型卡片 - 压缩内边距 */
             .basic-training-card {
-                padding: 16px !important;
+                padding: 12px !important;
             }
 
             /* 等级按钮网格改为 3 列 */
@@ -795,9 +795,9 @@
 
         /* 结果页移动端适配 */
         @media (max-width: 768px) {
-            /* 结果页容器 */
+            /* 结果页容器 - 减小padding */
             .result-page {
-                padding: 16px !important;
+                padding: 12px !important;
             }
 
             /* 头部标题 */
@@ -842,7 +842,7 @@
             }
 
             .result-stats-grid > div {
-                padding: 16px !important;
+                padding: 12px !important;
             }
 
             .result-stats-grid .stat-number {
@@ -908,7 +908,7 @@
         @media (max-width: 768px) {
             /* 错题本页面容器 */
             .mistakes-page {
-                padding: 12px 16px !important;
+                padding: 10px 12px !important;
             }
 
             .mistakes-header {
@@ -1027,7 +1027,7 @@
 
         @media (max-width: 480px) {
             .mistakes-page {
-                padding: 10px 12px !important;
+                padding: 8px 12px !important;
             }
 
             .mistakes-header h2 {
@@ -1072,9 +1072,9 @@
 
         /* 历史记录页移动端适配 */
         @media (max-width: 768px) {
-            /* 历史记录页面容器 */
+            /* 历史记录页面容器 - 减小padding */
             .history-page {
-                padding: 16px !important;
+                padding: 12px !important;
             }
 
             .history-header h2 {
@@ -1090,9 +1090,9 @@
                 font-size: 24px !important;
             }
 
-            /* 记录列表项 */
+            /* 记录列表项 - 减小padding */
             .history-item {
-                padding: 16px !important;
+                padding: 12px !important;
             }
 
             .history-item .date-box {
@@ -1146,9 +1146,9 @@
 
         /* 设置页移动端适配 */
         @media (max-width: 768px) {
-            /* 设置页面容器 */
+            /* 设置页面容器 - 减小padding */
             .settings-page {
-                padding: 16px !important;
+                padding: 12px !important;
             }
 
             .settings-header h2 {
