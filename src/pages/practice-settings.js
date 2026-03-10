@@ -6,7 +6,7 @@
 const PracticeSettingsPage = {
     config: {
         mode: 'choice',
-        difficulty: 'level1',
+        difficulties: ['level2', 'level4'],  // 默认选择进阶和高手
         types: ['addition', 'subtraction'],
         count: 10
     },
@@ -23,7 +23,7 @@ const PracticeSettingsPage = {
     resetConfig() {
         this.config = {
             mode: 'choice',
-            difficulty: 'level1',
+            difficulties: ['level2', 'level4'],  // 默认选择进阶和高手
             types: ['addition', 'subtraction'],
             count: 10
         };
@@ -95,8 +95,8 @@ const PracticeSettingsPage = {
         this.elements.modeSection.appendChild(this.elements.modeGrid);
         leftColumn.appendChild(this.elements.modeSection);
 
-        // 2. 难度选择
-        this.elements.diffSection = this.createSection('难度等级');
+        // 2. 难度选择（可多选）
+        this.elements.diffSection = this.createSection('难度等级', '可多选');
         this.elements.diffSection.style.cssText += 'min-width: 0;';
         this.elements.diffGrid = this.createGrid(3, 'diff-grid');
         this.updateDifficultyButtons();
@@ -219,7 +219,7 @@ const PracticeSettingsPage = {
         });
     },
 
-    // 更新难度按钮（局部更新）- 使用挑战模式相同的6级难度
+    // 更新难度按钮（局部更新）- 使用挑战模式相同的6级难度，支持多选
     updateDifficultyButtons() {
         this.elements.diffGrid.innerHTML = '';
 
@@ -233,9 +233,9 @@ const PracticeSettingsPage = {
         ];
 
         diffs.forEach(diff => {
-            const isActive = this.config.difficulty === diff.id;
+            const isActive = this.config.difficulties.includes(diff.id);
             const btn = this.createOptionButton(diff.icon, diff.label, diff.desc, isActive, () => {
-                this.selectDifficulty(diff.id);
+                this.toggleDifficulty(diff.id);
             });
             this.elements.diffGrid.appendChild(btn);
         });
@@ -360,8 +360,21 @@ const PracticeSettingsPage = {
         this.updateModeButtons();
     },
 
-    selectDifficulty(difficulty) {
-        this.config.difficulty = difficulty;
+    toggleDifficulty(difficulty) {
+        const index = this.config.difficulties.indexOf(difficulty);
+
+        if (index > -1) {
+            // 至少保留一个难度
+            if (this.config.difficulties.length > 1) {
+                this.config.difficulties.splice(index, 1);
+            }
+        } else {
+            this.config.difficulties.push(difficulty);
+            // 按难度级别排序
+            const levelOrder = ['level1', 'level2', 'level3', 'level4', 'level5', 'level6'];
+            this.config.difficulties.sort((a, b) => levelOrder.indexOf(a) - levelOrder.indexOf(b));
+        }
+
         this.updateDifficultyButtons();
     },
 
@@ -394,19 +407,34 @@ const PracticeSettingsPage = {
             return;
         }
 
+        if (this.config.difficulties.length === 0) {
+            alert('请至少选择一种难度');
+            return;
+        }
+
         sessionStorage.setItem('practice_config', JSON.stringify(this.config));
 
         let questions;
-        if (this.config.types.length === 1) {
-            questions = QuestionGenerator.generate({
-                type: this.config.types[0],
-                difficulty: this.config.difficulty,
-                count: this.config.count
-            });
+        if (this.config.difficulties.length === 1) {
+            // 单难度：原有逻辑
+            if (this.config.types.length === 1) {
+                questions = QuestionGenerator.generate({
+                    type: this.config.types[0],
+                    difficulty: this.config.difficulties[0],
+                    count: this.config.count
+                });
+            } else {
+                questions = QuestionGenerator.generateMixed(
+                    this.config.types,
+                    this.config.difficulties[0],
+                    this.config.count
+                );
+            }
         } else {
-            questions = QuestionGenerator.generateMixed(
+            // 多难度：生成混合难度的题目
+            questions = QuestionGenerator.generateMixedDifficulties(
                 this.config.types,
-                this.config.difficulty,
+                this.config.difficulties,
                 this.config.count
             );
         }

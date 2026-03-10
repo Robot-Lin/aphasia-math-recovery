@@ -354,12 +354,43 @@ const QuestionGenerator = {
     },
 
     /**
-     * 验证答案
-     * @param {number} userAnswer - 用户答案
-     * @param {number} correctAnswer - 正确答案
-     * @returns {boolean}
+     * 生成混合难度的题目
+     * @param {Array} types - 运算类型数组
+     * @param {Array} difficulties - 难度数组
+     * @param {number} count - 总题目数
+     * @returns {Array}
      */
-    checkAnswer(userAnswer, correctAnswer) {
+    generateMixedDifficulties(types, difficulties, count) {
+        const questions = [];
+
+        // 计算每种难度应该生成的题目数量
+        const countPerDifficulty = Math.floor(count / difficulties.length);
+        const remainder = count % difficulties.length;
+
+        // 为每种难度生成题目
+        difficulties.forEach((difficulty, index) => {
+            const diffCount = countPerDifficulty + (index < remainder ? 1 : 0);
+
+            // 在当前难度下生成混合类型的题目
+            const countPerType = Math.floor(diffCount / types.length);
+            const typeRemainder = diffCount % types.length;
+
+            types.forEach((type, typeIndex) => {
+                const typeCount = countPerType + (typeIndex < typeRemainder ? 1 : 0);
+                if (typeCount > 0) {
+                    const typeQuestions = this.generate({
+                        type,
+                        difficulty,
+                        count: typeCount
+                    });
+                    questions.push(...typeQuestions);
+                }
+            });
+        });
+
+        // 打乱顺序
+        return this.shuffle(questions);
+    },
         const user = parseInt(userAnswer, 10);
         const correct = parseInt(correctAnswer, 10);
         return !isNaN(user) && user === correct;
