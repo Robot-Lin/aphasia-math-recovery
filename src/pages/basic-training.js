@@ -1085,6 +1085,9 @@ const BasicTrainingPage = {
 
     // 交互方法
     setType(type) {
+        if (this._isSwitching) return;
+        this._isSwitching = true;
+
         // 停止语音
         if (typeof SpeechManager !== 'undefined') {
             SpeechManager.stop();
@@ -1096,9 +1099,16 @@ const BasicTrainingPage = {
         this.loadProgress();
         this.generateItems();
         this.render();
+
+        setTimeout(() => {
+            this._isSwitching = false;
+        }, 300);
     },
 
     setLevel(level) {
+        if (this._isSwitching) return;
+        this._isSwitching = true;
+
         // 停止语音
         if (typeof SpeechManager !== 'undefined') {
             SpeechManager.stop();
@@ -1109,9 +1119,16 @@ const BasicTrainingPage = {
         this.saveProgress();
         this.generateItems();
         this.render();
+
+        setTimeout(() => {
+            this._isSwitching = false;
+        }, 300);
     },
 
     setMode(mode) {
+        if (this._isSwitching) return;
+        this._isSwitching = true;
+
         // 停止语音
         if (typeof SpeechManager !== 'undefined') {
             SpeechManager.stop();
@@ -1121,6 +1138,10 @@ const BasicTrainingPage = {
         this.state.showAnswer = false;
         this.state.isProcessing = false;
         this.render();
+
+        setTimeout(() => {
+            this._isSwitching = false;
+        }, 300);
     },
 
     showAnswer() {
