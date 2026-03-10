@@ -1263,6 +1263,12 @@
 
             /* 挑战模式移动端适配 - 大幅压缩纵向空间 */
             @media (max-width: 768px) {
+                /* 挑战模式布局改为单列 */
+                .challenge-layout {
+                    grid-template-columns: 1fr !important;
+                    gap: 12px !important;
+                }
+
                 /* 挑战模式页面容器 */
                 .challenge-page > div {
                     padding: 12px 16px !important;

@@ -312,7 +312,7 @@ const ChallengePage = {
         const page = document.createElement('div');
         page.className = 'challenge-page';
         page.style.cssText = `
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             padding: 16px 24px;
         `;
@@ -320,17 +320,30 @@ const ChallengePage = {
         // 页面标题
         page.appendChild(this.createHeader());
 
-        // 难度信息卡片
-        page.appendChild(this.createLevelInfoCard());
+        // 桌面端：左右分栏布局
+        const mainLayout = document.createElement('div');
+        mainLayout.className = 'challenge-layout';
+        mainLayout.style.cssText = `
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 20px;
+            align-items: start;
+        `;
 
-        // 连续答对进度条
-        page.appendChild(this.createStreakProgress());
+        // 左侧：题目卡片（主要内容）
+        const leftColumn = document.createElement('div');
+        leftColumn.appendChild(this.createChallengeCard());
+        mainLayout.appendChild(leftColumn);
 
-        // 训练卡片
-        page.appendChild(this.createChallengeCard());
+        // 右侧：等级信息、进度条、统计
+        const rightColumn = document.createElement('div');
+        rightColumn.style.cssText = 'display: flex; flex-direction: column; gap: 12px;';
+        rightColumn.appendChild(this.createLevelInfoCard());
+        rightColumn.appendChild(this.createStreakProgress());
+        rightColumn.appendChild(this.createStatsCard());
+        mainLayout.appendChild(rightColumn);
 
-        // 统计信息
-        page.appendChild(this.createStatsCard());
+        page.appendChild(mainLayout);
 
         container.appendChild(page);
     },
@@ -349,43 +362,39 @@ const ChallengePage = {
     createLevelInfoCard() {
         const config = this.difficultyConfig[this.state.level];
         const card = document.createElement('div');
-        card.className = 'glass';
+        card.className = 'glass challenge-level-card';
         card.style.cssText = `
             border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 16px;
+            padding: 16px;
             box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
         `;
 
         const levelColors = ['#34C759', '#30D158', '#007AFF', '#5856D6', '#AF52DE', '#FF2D55'];
         const color = levelColors[this.state.level - 1];
 
         card.innerHTML = `
-            <div style="display: flex; align-items: center; gap: 16px;">
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
                 <div style="
-                    width: 56px;
-                    height: 56px;
+                    width: 44px;
+                    height: 44px;
                     background: ${color};
-                    border-radius: 16px;
+                    border-radius: 12px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     color: white;
-                    font-size: 24px;
+                    font-size: 18px;
                     font-weight: 700;
                     box-shadow: 0 4px 12px ${color}40;
                 ">L${this.state.level}</div>
                 <div>
-                    <div style="font-size: 20px; font-weight: 700; color: #1C1C1E;">${config.name}</div>
-                    <div style="font-size: 14px; color: #8E8E93;">${config.desc}</div>
+                    <div style="font-size: 16px; font-weight: 700; color: #1C1C1E;">${config.name}</div>
+                    <div style="font-size: 12px; color: #8E8E93;">${config.desc}</div>
                 </div>
             </div>
-            <div style="text-align: right;">
-                <div style="font-size: 13px; color: #8E8E93;">最高记录</div>
-                <div style="font-size: 18px; font-weight: 700; color: ${color};">L${this.state.highestLevel}</div>
+            <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px solid rgba(0,0,0,0.06);">
+                <span style="font-size: 12px; color: #8E8E93;">最高记录</span>
+                <span style="font-size: 16px; font-weight: 700; color: ${color};">L${this.state.highestLevel}</span>
             </div>
         `;
 
@@ -394,11 +403,10 @@ const ChallengePage = {
 
     createStreakProgress() {
         const card = document.createElement('div');
-        card.className = 'glass';
+        card.className = 'glass challenge-streak-card';
         card.style.cssText = `
             border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 16px;
+            padding: 16px;
             box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
         `;
 
@@ -406,24 +414,24 @@ const ChallengePage = {
         const remaining = 5 - this.state.streak;
 
         card.innerHTML = `
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                <div style="font-size: 16px; font-weight: 600; color: #1C1C1E;">连续答对进度</div>
-                <div style="font-size: 14px; color: #8E8E93;">
-                    ${this.state.streak}/5 题
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <div style="font-size: 14px; font-weight: 600; color: #1C1C1E;">连续答对</div>
+                <div style="font-size: 13px; color: #8E8E93;">
+                    ${this.state.streak}/5
                 </div>
             </div>
-            <div style="height: 12px; background: #E5E5EA; border-radius: 6px; overflow: hidden;">
+            <div style="height: 10px; background: #E5E5EA; border-radius: 5px; overflow: hidden;">
                 <div style="
-                    width: ${progress}%;
+                    width: ${progress};
                     height: 100%;
                     background: linear-gradient(90deg, #34C759 0%, #30D158 100%);
-                    border-radius: 6px;
+                    border-radius: 5px;
                     transition: width 400ms cubic-bezier(0.4, 0, 0.2, 1);
                     box-shadow: 0 2px 8px rgba(52, 199, 89, 0.3);
                 "></div>
             </div>
-            <div style="margin-top: 8px; font-size: 13px; color: #8E8E93; text-align: center;">
-                ${remaining > 0 ? `再答对 ${remaining} 题升级！🚀` : '准备升级！✨'}
+            <div style="margin-top: 8px; font-size: 12px; color: #8E8E93; text-align: center;">
+                ${remaining > 0 ? `再答对 ${remaining} 题升级 🚀` : '准备升级 ✨'}
             </div>
         `;
 
@@ -435,15 +443,14 @@ const ChallengePage = {
         card.className = 'glass challenge-card';
         card.style.cssText = `
             border-radius: 24px;
-            padding: 48px;
-            min-height: 400px;
+            padding: 40px 48px;
+            min-height: 360px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
             text-align: center;
             display: flex;
             flex-direction: column;
             justify-content: center;
             background: linear-gradient(180deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.9) 100%);
-            margin-bottom: 16px;
         `;
 
         const q = this.state.currentQuestion;
@@ -456,16 +463,16 @@ const ChallengePage = {
         }, 300);
 
         card.innerHTML = `
-            <div style="margin-bottom: 40px;">
-                <div style="font-size: 80px; font-weight: 700; color: #1C1C1E; margin-bottom: 24px; font-feature-settings: 'tnum'; letter-spacing: 4px;">
+            <div style="margin-bottom: 32px;">
+                <div style="font-size: 72px; font-weight: 700; color: #1C1C1E; margin-bottom: 16px; font-feature-settings: 'tnum'; letter-spacing: 4px;">
                     ${q.a} + ${q.b} = ?
                 </div>
                 <button onclick="SpeechManager.speak('${q.a}加${q.b}等于多少')" style="
-                    padding: 12px 24px;
+                    padding: 10px 20px;
                     background: rgba(0,0,0,0.04);
                     border: none;
-                    border-radius: 20px;
-                    font-size: 14px;
+                    border-radius: 16px;
+                    font-size: 13px;
                     color: #8E8E93;
                     cursor: pointer;
                     display: inline-flex;
@@ -476,23 +483,27 @@ const ChallengePage = {
                 </button>
             </div>
 
-            <div id="challenge-options" class="challenge-options" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; max-width: 400px; margin: 0 auto;">
+            <div id="challenge-options" class="challenge-options" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; max-width: 480px; margin: 0 auto;">
                 ${this.generateOptions(q.answer).map(opt => `
                     <button onclick="ChallengePage.selectAnswer(${opt})" style="
-                        padding: 24px;
+                        padding: 20px;
                         background: #007AFF15;
                         color: #007AFF;
                         border: none;
                         border-radius: 16px;
-                        font-size: 32px;
+                        font-size: 28px;
                         font-weight: 700;
                         cursor: pointer;
                         transition: all 150ms ease;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        min-height: 72px;
                     ">${opt}</button>
                 `).join('')}
             </div>
 
-            <div id="challenge-feedback" style="margin-top: 32px; min-height: 48px;"></div>
+            <div id="challenge-feedback" style="margin-top: 24px; min-height: 40px;"></div>
         `;
 
         return card;
@@ -520,7 +531,7 @@ const ChallengePage = {
         card.className = 'glass challenge-stats';
         card.style.cssText = `
             border-radius: 16px;
-            padding: 20px;
+            padding: 16px;
             box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
         `;
 
@@ -528,18 +539,19 @@ const ChallengePage = {
         const accuracy = total > 0 ? Math.round((this.state.totalCorrect / total) * 100) : 0;
 
         card.innerHTML = `
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; text-align: center;">
+            <div style="font-size: 13px; font-weight: 600; color: #1C1C1E; margin-bottom: 12px; text-align: center;">本次挑战</div>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; text-align: center;">
                 <div>
-                    <div style="font-size: 28px; font-weight: 700; color: #34C759;">${this.state.totalCorrect}</div>
-                    <div style="font-size: 13px; color: #8E8E93; margin-top: 4px;">答对</div>
+                    <div style="font-size: 22px; font-weight: 700; color: #34C759;">${this.state.totalCorrect}</div>
+                    <div style="font-size: 11px; color: #8E8E93; margin-top: 2px;">答对</div>
                 </div>
                 <div>
-                    <div style="font-size: 28px; font-weight: 700; color: #FF3B30;">${this.state.totalWrong}</div>
-                    <div style="font-size: 13px; color: #8E8E93; margin-top: 4px;">答错</div>
+                    <div style="font-size: 22px; font-weight: 700; color: #FF3B30;">${this.state.totalWrong}</div>
+                    <div style="font-size: 11px; color: #8E8E93; margin-top: 2px;">答错</div>
                 </div>
                 <div>
-                    <div style="font-size: 28px; font-weight: 700; color: #007AFF;">${accuracy}%</div>
-                    <div style="font-size: 13px; color: #8E8E93; margin-top: 4px;">正确率</div>
+                    <div style="font-size: 22px; font-weight: 700; color: #007AFF;">${accuracy}%</div>
+                    <div style="font-size: 11px; color: #8E8E93; margin-top: 2px;">正确率</div>
                 </div>
             </div>
         `;
