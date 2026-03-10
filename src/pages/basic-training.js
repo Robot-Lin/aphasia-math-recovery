@@ -585,7 +585,7 @@ const BasicTrainingPage = {
                         <p style="font-size: 14px; color: #8E8E93; margin: 2px 0 0 0;">${typeConfig.desc}</p>
                     </div>
                 </div>
-                <button onclick="BasicTrainingPage.backToSelection()" style="
+                <button onclick="if(BasicTrainingPage._isSwitching)return;BasicTrainingPage.backToSelection()" style="
                     padding: 10px 20px;
                     background: rgba(0, 0, 0, 0.06);
                     border: none;
@@ -646,7 +646,7 @@ const BasicTrainingPage = {
             <div style="font-size: 12px; font-weight: 600; color: #8E8E93; margin-bottom: 8px; text-transform: uppercase;">训练类型</div>
             <div style="display: flex; flex-direction: column; gap: 6px;">
                 ${types.map(t => `
-                    <button onclick="BasicTrainingPage.setType('${t.id}')" style="
+                    <button onclick="if(BasicTrainingPage._isSwitching)return;BasicTrainingPage.setType('${t.id}')" style="
                         padding: 10px;
                         border-radius: 10px;
                         border: 2px solid ${this.state.type === t.id ? t.color : 'transparent'};
@@ -685,7 +685,7 @@ const BasicTrainingPage = {
             <div style="font-size: 12px; font-weight: 600; color: #8E8E93; margin-bottom: 8px; text-transform: uppercase;">难度等级</div>
             <div style="display: flex; flex-direction: column; gap: 6px;">
                 ${typeConfig.levels.map(l => `
-                    <button onclick="BasicTrainingPage.setLevel(${l.level})" style="
+                    <button onclick="if(BasicTrainingPage._isSwitching)return;BasicTrainingPage.setLevel(${l.level})" style="
                         padding: 8px 10px;
                         border-radius: 8px;
                         border: 2px solid ${this.state.level === l.level ? typeConfig.color : 'transparent'};
@@ -1063,7 +1063,7 @@ const BasicTrainingPage = {
             <div style="font-size: 12px; font-weight: 600; color: #8E8E93; margin-bottom: 8px; text-transform: uppercase;">训练模式</div>
             <div style="display: flex; gap: 8px;">
                 ${modes.map(m => `
-                    <button onclick="BasicTrainingPage.setMode('${m.key}')" style="
+                    <button onclick="if(BasicTrainingPage._isSwitching)return;BasicTrainingPage.setMode('${m.key}')" style="
                         flex: 1;
                         padding: 10px;
                         border-radius: 10px;
