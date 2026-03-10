@@ -446,7 +446,7 @@ const ChallengePage = {
                 color: #8E8E93;
                 margin-bottom: 32px;
                 line-height: 1.6;
-            ">不断突破自我，挑战算术极限<br>连续答对 5 题即可升级难度</p>
+            ">不断突破自我，挑战算术极限<br>连续答对 8 题即可升级难度</p>
 
             <!-- 难度等级预览 -->
             <div class="challenge-levels" style="
@@ -707,8 +707,8 @@ const ChallengePage = {
             box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
         `;
 
-        const progress = (this.state.streak / 5) * 100;
-        const remaining = 5 - this.state.streak;
+        const progress = (this.state.streak / 8) * 100;
+        const remaining = 8 - this.state.streak;
 
         card.innerHTML = `
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: ${isMobile ? '8px' : '10px'};">
@@ -901,9 +901,14 @@ const ChallengePage = {
             `;
             SpeechManager.speakFeedback(true);
 
-            // 检查是否升级
-            if (this.state.streak >= 5) {
-                this.showLevelUpAnimation();
+            // 检查是否升级（连续8题答对晋级）
+            if (this.state.streak >= 8) {
+                // 如果已经是最高等级，显示通关
+                if (this.state.level >= 6) {
+                    this.showCompletionAnimation();
+                } else {
+                    this.showLevelUpAnimation();
+                }
                 return;
             }
 
@@ -1025,6 +1030,169 @@ const ChallengePage = {
         SpeechManager.speak(`恭喜升级到${newConfig.name}难度`);
     },
 
+    // 显示通关动画（到达最高等级）
+    showCompletionAnimation() {
+        this.state.streak = 0;
+        this.saveProgress();
+
+        // 创建通关弹窗
+        const modal = document.createElement('div');
+        modal.style.cssText = `
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(175, 82, 222, 0.9) 0%, rgba(88, 86, 214, 0.9) 100%);
+            backdrop-filter: blur(12px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+            animation: fadeIn 500ms ease;
+        `;
+
+        const opConfig = this.getOperationConfig();
+        const totalQuestions = this.state.totalCorrect + this.state.totalWrong;
+        const accuracy = totalQuestions > 0 ? Math.round((this.state.totalCorrect / totalQuestions) * 100) : 0;
+
+        modal.innerHTML = `
+            <div class="glass" style="
+                max-width: 420px;
+                width: 100%;
+                border-radius: 28px;
+                padding: 48px 36px;
+                text-align: center;
+                box-shadow: 0 25px 80px rgba(0, 0, 0, 0.4);
+                animation: pageEnter 600ms cubic-bezier(0.34, 1.56, 0.64, 1);
+                background: white;
+            ">
+                <!-- 庆祝动画 -->
+                <div style="position: relative; margin-bottom: 24px;">
+                    <div style="
+                        font-size: 80px;
+                        animation: trophyPulse 1.5s ease-in-out infinite;
+                        display: inline-block;
+                    ">🏆</div>
+                    <!-- 星星装饰 -->
+                    <div style="
+                        position: absolute;
+                        top: -10px; left: 20%;
+                        font-size: 28px;
+                        animation: starFloat 2s ease-in-out infinite;
+                    ">✨</div>
+                    <div style="
+                        position: absolute;
+                        top: 10px; right: 20%;
+                        font-size: 22px;
+                        animation: starFloat 2.3s ease-in-out infinite 0.5s;
+                    ">⭐</div>
+                    <div style="
+                        position: absolute;
+                        bottom: 0; left: 10%;
+                        font-size: 20px;
+                        animation: starFloat 1.8s ease-in-out infinite 0.3s;
+                    ">✦</div>
+                </div>
+
+                <div style="
+                    font-size: 28px;
+                    font-weight: 800;
+                    color: #1C1C1E;
+                    margin-bottom: 8px;
+                    letter-spacing: -0.5px;
+                ">恭喜通关！</div>
+
+                <div style="
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 8px;
+                    padding: 8px 18px;
+                    background: ${opConfig.color}15;
+                    border-radius: 20px;
+                    margin-bottom: 20px;
+                ">
+                    <span style="font-size: 18px;">${opConfig.icon}</span>
+                    <span style="font-size: 15px; font-weight: 600; color: ${opConfig.color};">${this.getModeDisplayName()}</span>
+                </div>
+
+                <div style="
+                    font-size: 20px;
+                    font-weight: 700;
+                    color: #AF52DE;
+                    margin-bottom: 8px;
+                ">L6 大师</div>
+
+                <div style="
+                    font-size: 15px;
+                    color: #8E8E93;
+                    margin-bottom: 28px;
+                    line-height: 1.5;
+                ">
+                    你已到达最高难度<br>本次挑战答对 ${this.state.totalCorrect} 题，正确率 ${accuracy}%
+                </div>
+
+                <!-- 统计数据展示 -->
+                <div style="
+                    display: grid;
+                    grid-template-columns: repeat(3, 1fr);
+                    gap: 12px;
+                    margin-bottom: 28px;
+                    padding: 16px;
+                    background: #F2F2F7;
+                    border-radius: 16px;
+                ">
+                    <div>
+                        <div style="font-size: 22px; font-weight: 700; color: #34C759;">${this.state.totalCorrect}</div>
+                        <div style="font-size: 12px; color: #8E8E93;">答对</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 22px; font-weight: 700; color: #FF3B30;">${this.state.totalWrong}</div>
+                        <div style="font-size: 12px; color: #8E8E93;">答错</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 22px; font-weight: 700; color: #007AFF;">${accuracy}%</div>
+                        <div style="font-size: 12px; color: #8E8E93;">正确率</div>
+                    </div>
+                </div>
+
+                <button onclick="ChallengePage.finishChallenge()" style="
+                    padding: 18px 48px;
+                    background: linear-gradient(135deg, #AF52DE 0%, #5856D6 100%);
+                    color: white;
+                    border: none;
+                    border-radius: 14px;
+                    font-size: 18px;
+                    font-weight: 700;
+                    cursor: pointer;
+                    box-shadow: 0 6px 24px rgba(175, 82, 222, 0.4);
+                    transition: all 200ms ease;
+                ">
+                    🎉 完成挑战
+                </button>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        // 播放通关音效
+        if (window.SoundManager && SoundManager.isEnabled()) {
+            SoundManager.playComplete();
+        }
+
+        // 语音播报
+        SpeechManager.speak('恭喜你通关大师难度，挑战完成！');
+    },
+
+    // 完成挑战，返回首页
+    finishChallenge() {
+        // 移除弹窗
+        const modal = document.querySelector('[style*="position: fixed; inset: 0;"]');
+        if (modal) {
+            modal.remove();
+        }
+        // 重置状态并返回挑战首页
+        this.init();
+    },
+
     // 开始挑战
     startChallenge() {
         this.state.sessionStartTime = Date.now();
@@ -1104,6 +1272,16 @@ const ChallengePage = {
         } else {
             const opConfig = this.operationTypes[this.state.operationType];
             return opConfig ? `${opConfig.name}专项` : '专项挑战';
+        }
+    },
+
+    // 获取当前运算类型的颜色
+    getOperationColor() {
+        if (this.state.challengeMode === 'mixed') {
+            return '#007AFF';
+        } else {
+            const opConfig = this.operationTypes[this.state.operationType];
+            return opConfig ? opConfig.color : '#007AFF';
         }
     },
 
