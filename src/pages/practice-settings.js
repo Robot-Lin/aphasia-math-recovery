@@ -223,14 +223,42 @@ const PracticeSettingsPage = {
     updateDifficultyButtons() {
         this.elements.diffGrid.innerHTML = '';
 
-        const diffs = [
-            { id: 'level1', icon: '🌱', label: '入门', desc: '1位+1位' },
-            { id: 'level2', icon: '🌿', label: '进阶', desc: '1位+2位' },
-            { id: 'level3', icon: '🍃', label: '熟练', desc: '1位+3位' },
-            { id: 'level4', icon: '🌳', label: '高手', desc: '2位+2位' },
-            { id: 'level5', icon: '🏔️', label: '专家', desc: '2位+3位' },
-            { id: 'level6', icon: '⭐', label: '大师', desc: '3位+3位' }
-        ];
+        // 根据运算类型显示不同的难度描述
+        const hasSingleType = this.config.types.length === 1;
+        const type = hasSingleType ? this.config.types[0] : null;
+
+        let diffs;
+        if (type === 'division') {
+            // 除法难度描述
+            diffs = [
+                { id: 'level1', icon: '🌱', label: '入门', desc: '表内除法' },
+                { id: 'level2', icon: '🌿', label: '进阶', desc: '两位÷个位' },
+                { id: 'level3', icon: '🍃', label: '熟练', desc: '三位÷个位' },
+                { id: 'level4', icon: '🌳', label: '高手', desc: '两位÷两位' },
+                { id: 'level5', icon: '🏔️', label: '专家', desc: '三位÷两位' },
+                { id: 'level6', icon: '⭐', label: '大师', desc: '三位÷三位' }
+            ];
+        } else if (type === 'multiplication') {
+            // 乘法难度描述
+            diffs = [
+                { id: 'level1', icon: '🌱', label: '入门', desc: '表内乘法' },
+                { id: 'level2', icon: '🌿', label: '进阶', desc: '个位×两位' },
+                { id: 'level3', icon: '🍃', label: '熟练', desc: '个位×三位' },
+                { id: 'level4', icon: '🌳', label: '高手', desc: '两位×两位' },
+                { id: 'level5', icon: '🏔️', label: '专家', desc: '两位×三位' },
+                { id: 'level6', icon: '⭐', label: '大师', desc: '三位×三位' }
+            ];
+        } else {
+            // 加减法难度描述（默认）
+            diffs = [
+                { id: 'level1', icon: '🌱', label: '入门', desc: '1位+1位' },
+                { id: 'level2', icon: '🌿', label: '进阶', desc: '1位+2位' },
+                { id: 'level3', icon: '🍃', label: '熟练', desc: '1位+3位' },
+                { id: 'level4', icon: '🌳', label: '高手', desc: '2位+2位' },
+                { id: 'level5', icon: '🏔️', label: '专家', desc: '2位+3位' },
+                { id: 'level6', icon: '⭐', label: '大师', desc: '3位+3位' }
+            ];
+        }
 
         diffs.forEach(diff => {
             const isActive = this.config.difficulties.includes(diff.id);

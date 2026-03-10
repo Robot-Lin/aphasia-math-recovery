@@ -240,13 +240,20 @@ const HomePage = {
         quickGrid.className = 'quick-grid';
         quickGrid.style.cssText = `
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 12px;
         `;
 
         // 快捷入口项
         const todayMistakes = Storage.getTodayReviewMistakes();
         const quickItems = [
+            {
+                icon: '🏆',
+                label: '挑战模式',
+                subLabel: '突破极限',
+                onClick: () => router.navigate('challenge'),
+                disabled: false
+            },
             {
                 icon: '📚',
                 label: '复习错题',
@@ -403,26 +410,13 @@ const HomePage = {
             return { text: '错题复习', icon: '📖', action: 'mistakes' };
         }
 
-        // 找出正确率最低的类型
-        let lowestAccuracy = 100;
-        let recommendType = 'addition';
-        const typeNames = { addition: '加法', subtraction: '减法', multiplication: '乘法', division: '除法' };
-
-        Object.entries(typeStats).forEach(([type, stats]) => {
-            if (stats.total >= 5) {
-                const accuracy = (stats.correct / stats.total) * 100;
-                if (accuracy < lowestAccuracy) {
-                    lowestAccuracy = accuracy;
-                    recommendType = type;
-                }
-            }
-        });
-
+        // 默认推荐：加减乘除高手模式（L4）
         return {
-            text: typeNames[recommendType] || '加法',
-            icon: '💡',
-            action: 'practice',
-            type: recommendType
+            text: '高手模式',
+            icon: '🎯',
+            action: 'advanced_practice',
+            types: ['addition', 'subtraction', 'multiplication', 'division'],
+            difficulty: 'level4'
         };
     },
 
@@ -463,6 +457,30 @@ const HomePage = {
     startRecommendedPractice(recommended) {
         if (recommended.action === 'mistakes') {
             router.navigate('mistakes');
+        } else if (recommended.action === 'advanced_practice') {
+            // 高手模式：加减乘除混合，L4难度
+            const config = {
+                mode: 'choice',
+                difficulties: ['level4'],
+                types: ['addition', 'subtraction', 'multiplication', 'division'],
+                count: 10
+            };
+
+            sessionStorage.setItem('practice_config', JSON.stringify(config));
+
+            // 生成混合类型题目
+            const questions = QuestionGenerator.generateMixedDifficulties(
+                config.types,
+                config.difficulties,
+                config.count
+            );
+
+            sessionStorage.setItem('practice_questions', JSON.stringify(questions));
+            sessionStorage.setItem('practice_current', '0');
+            sessionStorage.setItem('practice_answers', JSON.stringify([]));
+            sessionStorage.setItem('practice_start_time', Date.now().toString());
+
+            router.navigate('practice-choice');
         } else {
             const config = {
                 mode: 'choice',

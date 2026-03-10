@@ -64,19 +64,66 @@ const ChallengePage = {
         this.renderModeSelect();
     },
 
-    // 加载历史进度
+    // 加载历史进度（根据模式）
     loadProgress() {
         const userData = Storage.getUserData();
-        this.state.highestLevel = userData.challengeHighestLevel || 1;
+        const mode = this.state.challengeMode;
+        const opType = this.state.operationType;
+
+        // 构建存储键
+        let storageKey;
+        if (mode === 'mixed') {
+            storageKey = 'challengeHighestLevel_mixed';
+        } else if (mode === 'specialized' && opType) {
+            storageKey = `challengeHighestLevel_${opType}`;
+        } else {
+            // 默认回退
+            storageKey = 'challengeHighestLevel_mixed';
+        }
+
+        this.state.highestLevel = userData[storageKey] || 1;
     },
 
-    // 保存最高等级
+    // 保存最高等级（根据模式）
     saveProgress() {
         const userData = Storage.getUserData();
+        const mode = this.state.challengeMode;
+        const opType = this.state.operationType;
+
         if (this.state.level > this.state.highestLevel) {
-            userData.challengeHighestLevel = this.state.level;
+            // 构建存储键
+            let storageKey;
+            if (mode === 'mixed') {
+                storageKey = 'challengeHighestLevel_mixed';
+            } else if (mode === 'specialized' && opType) {
+                storageKey = `challengeHighestLevel_${opType}`;
+            } else {
+                storageKey = 'challengeHighestLevel_mixed';
+            }
+
+            userData[storageKey] = this.state.level;
             Storage.saveUserData(userData);
         }
+    },
+
+    // 获取指定模式的最高等级
+    getModeHighestLevel(mode, operationType) {
+        const userData = Storage.getUserData();
+
+        // 如果没有传入参数，使用当前状态
+        const currentMode = mode || this.state.challengeMode;
+        const currentOpType = operationType || this.state.operationType;
+
+        let storageKey;
+        if (currentMode === 'mixed') {
+            storageKey = 'challengeHighestLevel_mixed';
+        } else if (currentMode === 'specialized' && currentOpType) {
+            storageKey = `challengeHighestLevel_${currentOpType}`;
+        } else {
+            return 1;
+        }
+
+        return userData[storageKey] || 1;
     },
 
     // 渲染模式选择页面
@@ -199,6 +246,7 @@ const ChallengePage = {
     // 选择模式
     selectMode(mode) {
         this.state.challengeMode = mode;
+        this.loadProgress(); // 加载当前模式的进度
         if (mode === 'specialized') {
             this.renderOperationSelect();
         } else {
@@ -268,6 +316,7 @@ const ChallengePage = {
 
             btn.onclick = () => {
                 this.state.operationType = type;
+                this.loadProgress(); // 加载当前专项模式的进度
                 this.renderIntro();
             };
 
@@ -313,6 +362,9 @@ const ChallengePage = {
     renderIntro() {
         const container = document.getElementById('page-container');
         if (!container) return;
+
+        // 获取当前模式的最高等级（确保显示正确的模式进度）
+        const modeHighestLevel = this.getModeHighestLevel();
 
         container.innerHTML = '';
 
@@ -362,7 +414,7 @@ const ChallengePage = {
 
         // 最高等级徽章
         const levelColors = ['#34C759', '#30D158', '#007AFF', '#5856D6', '#AF52DE', '#FF2D55'];
-        const highestColor = levelColors[this.state.highestLevel - 1] || '#34C759';
+        const highestColor = levelColors[modeHighestLevel - 1] || '#34C759';
 
         introCard.innerHTML = `
             <div style="position: relative; margin-bottom: 40px;">
@@ -416,7 +468,7 @@ const ChallengePage = {
                     font-weight: 700;
                     color: ${highestColor};
                     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-                ">最高 L${this.state.highestLevel}</div>
+                ">最高 L${modeHighestLevel}</div>
             </div>
 
             <h2 style="
@@ -458,7 +510,7 @@ const ChallengePage = {
             ">
                 ${Object.entries(this.difficultyConfig).map(([level, config]) => {
                     const color = levelColors[level - 1];
-                    const isUnlocked = level <= this.state.highestLevel;
+                    const isUnlocked = level <= modeHighestLevel;
                     return `
                         <div style="
                             padding: 12px 16px;
@@ -688,7 +740,7 @@ const ChallengePage = {
             </div>
             <div style="display: flex; justify-content: space-between; align-items: center; padding-top: ${isMobile ? '8px' : '12px'}; border-top: 1px solid rgba(0,0,0,0.06);">
                 <span style="font-size: ${isMobile ? '10px' : '12px'}; color: #8E8E93;">最高记录</span>
-                <span style="font-size: ${isMobile ? '14px' : '16px'}; font-weight: 700; color: ${color};">L${this.state.highestLevel}</span>
+                <span style="font-size: ${isMobile ? '14px' : '16px'}; font-weight: 700; color: ${color};">L${this.getModeHighestLevel()}</span>
             </div>
         `;
 

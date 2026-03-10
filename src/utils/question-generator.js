@@ -221,12 +221,12 @@ const QuestionGenerator = {
 
         // 除法难度配置（通过乘法反推，确保整除）
         const divConfig = {
-            level1: { minA: 1, maxA: 9, minB: 1, maxB: 9 },      // 表内除法
-            level2: { minA: 2, maxA: 9, minB: 10, maxB: 99 },    // 两位÷个位
-            level3: { minA: 2, maxA: 9, minB: 100, maxB: 999 },  // 三位÷个位
-            level4: { minA: 10, maxA: 99, minB: 10, maxB: 99 },  // 两位÷两位
-            level5: { minA: 10, maxA: 99, minB: 100, maxB: 999 },// 三位÷两位
-            level6: { minA: 100, maxA: 999, minB: 100, maxB: 999 }// 三位÷三位
+            level1: { minA: 1, maxA: 9, minB: 1, maxB: 9 },       // 表内除法：被除数1-81
+            level2: { minA: 2, maxA: 9, minB: 10, maxB: 99 },     // 两位数÷个位：被除数20-891
+            level3: { minA: 2, maxA: 9, minB: 100, maxB: 999 },   // 三位数÷个位：被除数200-8991
+            level4: { minA: 10, maxA: 99, minB: 1, maxB: 9 },     // 两位数÷两位数：被除数10-891
+            level5: { minA: 10, maxA: 99, minB: 10, maxB: 99 },   // 三位数÷两位数：被除数100-9801
+            level6: { minA: 100, maxA: 999, minB: 10, maxB: 99 }  // 三位数÷三位数：被除数1000-98901
         };
 
         const config = divConfig[difficulty] || divConfig.level1;
