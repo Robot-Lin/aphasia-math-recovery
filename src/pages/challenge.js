@@ -973,7 +973,19 @@ const ChallengePage = {
         const newConfig = this.difficultyConfig[this.state.level];
         const levelColors = ['#34C759', '#30D158', '#007AFF', '#5856D6', '#AF52DE', '#FF2D55'];
         const color = levelColors[this.state.level - 1];
-        const opConfig = this.getOperationConfig();
+
+        // 根据模式确定显示内容
+        let modeIcon, modeName, modeColor;
+        if (this.state.challengeMode === 'mixed') {
+            modeIcon = '🎲';
+            modeName = '混合挑战';
+            modeColor = '#007AFF';
+        } else {
+            const opConfig = this.operationTypes[this.state.operationType] || this.operationTypes.addition;
+            modeIcon = opConfig.icon;
+            modeName = opConfig.name;
+            modeColor = opConfig.color;
+        }
 
         modal.innerHTML = `
             <div class="glass" style="
@@ -990,9 +1002,9 @@ const ChallengePage = {
                 <div style="font-size: 24px; font-weight: 700; color: #1C1C1E; margin-bottom: 8px;">
                     恭喜升级！
                 </div>
-                <div style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; background: ${opConfig.color}15; border-radius: 20px; margin-bottom: 8px;">
-                    <span style="font-size: 16px;">${opConfig.icon}</span>
-                    <span style="font-size: 13px; font-weight: 600; color: ${opConfig.color};">${opConfig.name}</span>
+                <div style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; background: ${modeColor}15; border-radius: 20px; margin-bottom: 8px;">
+                    <span style="font-size: 16px;">${modeIcon}</span>
+                    <span style="font-size: 13px; font-weight: 600; color: ${modeColor};">${this.state.challengeMode === 'mixed' ? '混合挑战' : modeName + '专项'}</span>
                 </div>
                 <div style="font-size: 48px; font-weight: 700; color: ${color}; margin-bottom: 8px;">
                     L${this.state.level}
@@ -1050,7 +1062,19 @@ const ChallengePage = {
             animation: fadeIn 500ms ease;
         `;
 
-        const opConfig = this.getOperationConfig();
+        // 根据模式确定显示内容
+        let modeIcon, modeName, modeColor;
+        if (this.state.challengeMode === 'mixed') {
+            modeIcon = '🎲';
+            modeName = '混合挑战';
+            modeColor = '#007AFF';
+        } else {
+            const opConfig = this.operationTypes[this.state.operationType] || this.operationTypes.addition;
+            modeIcon = opConfig.icon;
+            modeName = opConfig.name + '专项';
+            modeColor = opConfig.color;
+        }
+
         const totalQuestions = this.state.totalCorrect + this.state.totalWrong;
         const accuracy = totalQuestions > 0 ? Math.round((this.state.totalCorrect / totalQuestions) * 100) : 0;
 
@@ -1106,12 +1130,12 @@ const ChallengePage = {
                     align-items: center;
                     gap: 8px;
                     padding: 8px 18px;
-                    background: ${opConfig.color}15;
+                    background: ${modeColor}15;
                     border-radius: 20px;
                     margin-bottom: 20px;
                 ">
-                    <span style="font-size: 18px;">${opConfig.icon}</span>
-                    <span style="font-size: 15px; font-weight: 600; color: ${opConfig.color};">${this.getModeDisplayName()}</span>
+                    <span style="font-size: 18px;">${modeIcon}</span>
+                    <span style="font-size: 15px; font-weight: 600; color: ${modeColor};">${modeName}</span>
                 </div>
 
                 <div style="
