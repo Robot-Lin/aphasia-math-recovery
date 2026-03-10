@@ -56,7 +56,7 @@ const PracticeSettingsPage = {
 
         // 主卡片
         const card = document.createElement('div');
-        card.className = 'glass card-hover';
+        card.className = 'glass card-hover practice-settings-card';
         card.style.cssText = `
             border-radius: 24px;
             padding: 24px;
@@ -65,10 +65,12 @@ const PracticeSettingsPage = {
 
         // 设置内容区域 - 左右两栏布局
         const content = document.createElement('div');
+        content.className = 'practice-settings-content';
         content.style.cssText = 'padding: 8px 16px 16px 16px;';
 
         // 创建左右两栏容器
         const mainGrid = document.createElement('div');
+        mainGrid.className = 'practice-settings-grid';
         mainGrid.style.cssText = `
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -82,7 +84,7 @@ const PracticeSettingsPage = {
 
         // 1. 答题模式
         this.elements.modeSection = this.createSection('答题模式');
-        this.elements.modeGrid = this.createGrid(2);
+        this.elements.modeGrid = this.createGrid(2, 'mode-grid');
         this.updateModeButtons();
         this.elements.modeSection.appendChild(this.elements.modeGrid);
         leftColumn.appendChild(this.elements.modeSection);
@@ -90,7 +92,7 @@ const PracticeSettingsPage = {
         // 2. 难度选择
         this.elements.diffSection = this.createSection('难度等级');
         this.elements.diffSection.style.cssText += 'min-width: 0;';
-        this.elements.diffGrid = this.createGrid(3);
+        this.elements.diffGrid = this.createGrid(3, 'diff-grid');
         this.updateDifficultyButtons();
         this.elements.diffSection.appendChild(this.elements.diffGrid);
         leftColumn.appendChild(this.elements.diffSection);
@@ -101,7 +103,7 @@ const PracticeSettingsPage = {
 
         // 3. 运算类型
         this.elements.typeSection = this.createSection('运算类型', '可多选');
-        this.elements.typeGrid = this.createGrid(2);
+        this.elements.typeGrid = this.createGrid(2, 'type-grid');
         this.updateTypeButtons();
         this.elements.typeSection.appendChild(this.elements.typeGrid);
 
@@ -114,7 +116,7 @@ const PracticeSettingsPage = {
 
         // 4. 题量选择
         this.elements.countSection = this.createSection('题目数量');
-        this.elements.countGrid = this.createGrid(4);
+        this.elements.countGrid = this.createGrid(4, 'count-grid');
         this.updateCountButtons();
         this.elements.countSection.appendChild(this.elements.countGrid);
         rightColumn.appendChild(this.elements.countSection);
@@ -132,6 +134,7 @@ const PracticeSettingsPage = {
             icon: '🚀',
             size: 'large'
         });
+        startBtn.className = 'practice-start-btn';
         buttonWrapper.appendChild(startBtn);
 
         const hint = document.createElement('p');
@@ -166,8 +169,9 @@ const PracticeSettingsPage = {
         return section;
     },
 
-    createGrid(columns) {
+    createGrid(columns, className = '') {
         const grid = document.createElement('div');
+        grid.className = className;
         grid.style.cssText = `
             display: grid;
             grid-template-columns: repeat(${columns}, 1fr);

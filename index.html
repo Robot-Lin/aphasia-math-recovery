@@ -241,6 +241,88 @@
                 max-width: 200px !important;
             }
         }
+
+        /* 智能练习设置页移动端适配 */
+        @media (max-width: 768px) {
+            /* 设置页容器 */
+            .practice-settings-content {
+                padding: 8px !important;
+            }
+
+            /* 主网格从 2 列改为 1 列 */
+            .practice-settings-grid {
+                grid-template-columns: 1fr !important;
+                gap: 16px !important;
+            }
+
+            /* 设置页卡片内边距减小 */
+            .practice-settings-card {
+                padding: 16px !important;
+            }
+
+            /* 难度选择改为 3 列但缩小间距 */
+            .diff-grid {
+                grid-template-columns: repeat(3, 1fr) !important;
+                gap: 8px !important;
+            }
+
+            /* 运算类型保持 2 列 */
+            .type-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 8px !important;
+            }
+
+            /* 题目数量改为 4 列但缩小 */
+            .count-grid {
+                grid-template-columns: repeat(4, 1fr) !important;
+                gap: 8px !important;
+            }
+
+            /* 设置页按钮触摸友好 */
+            .mode-grid button,
+            .diff-grid button,
+            .type-grid button,
+            .count-grid button {
+                padding: 14px 6px !important;
+                min-height: 60px !important;
+            }
+
+            /* 开始练习按钮全宽 */
+            .practice-start-btn {
+                width: 100% !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            /* 设置页卡片进一步减小 */
+            .practice-settings-card {
+                padding: 12px !important;
+            }
+
+            /* 设置页标题字号减小 */
+            .practice-settings-content h1 {
+                font-size: 24px !important;
+            }
+
+            /* 难度选择改为 2 列 */
+            .diff-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+            }
+
+            /* 题目数量改为 2 列 */
+            .count-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+            }
+
+            /* 按钮进一步调整 */
+            .mode-grid button,
+            .diff-grid button,
+            .type-grid button,
+            .count-grid button {
+                padding: 12px 4px !important;
+                min-height: 54px !important;
+            }
+        }
     </style>
 </head>
 <body style="background: #F5F5F7; min-height: 100vh; margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;">
