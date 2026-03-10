@@ -89,6 +89,7 @@ const HomePage = {
 
     createStatsGrid(summary) {
         const grid = document.createElement('div');
+        grid.className = 'stats-grid';
         grid.style.cssText = `
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -142,6 +143,7 @@ const HomePage = {
 
     createQuickStartCard() {
         const card = document.createElement('div');
+        card.className = 'quick-start-card';
         card.style.cssText = `
             background: linear-gradient(135deg, #007AFF 0%, #0051D5 100%);
             border-radius: 20px;
@@ -158,6 +160,7 @@ const HomePage = {
 
         // 主内容区
         const content = document.createElement('div');
+        content.className = 'quick-start-content';
         content.style.cssText = `
             display: flex;
             flex-direction: column;
@@ -166,6 +169,7 @@ const HomePage = {
 
         // 头部区域：欢迎语 + 主按钮
         const headerArea = document.createElement('div');
+        headerArea.className = 'quick-start-header';
         headerArea.style.cssText = `
             display: flex;
             flex-direction: row;
@@ -229,6 +233,7 @@ const HomePage = {
 
         // 快捷入口网格
         const quickGrid = document.createElement('div');
+        quickGrid.className = 'quick-grid';
         quickGrid.style.cssText = `
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -488,7 +493,7 @@ const HomePage = {
         };
 
         const card = document.createElement('div');
-        card.className = 'glass';
+        card.className = 'radar-chart glass';
         card.style.cssText = `
             border-radius: 24px;
             padding: 24px;
@@ -641,7 +646,7 @@ const HomePage = {
 
     createReviewAlert(count) {
         const card = document.createElement('div');
-        card.className = 'glass';
+        card.className = 'review-alert glass';
         card.style.cssText = `
             border-radius: 20px;
             padding: 20px;
@@ -929,6 +934,7 @@ const HomePage = {
 
         // 徽章网格
         const badgesGrid = document.createElement('div');
+        badgesGrid.className = 'badges-grid';
         badgesGrid.style.cssText = `
             display: grid;
             grid-template-columns: repeat(3, 1fr);
