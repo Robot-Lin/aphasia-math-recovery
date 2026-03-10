@@ -1,6 +1,6 @@
 /**
  * 挑战模式 - 动态难度自适应训练
- * 从简单到难，无限升级挑战
+ * 混合模式 + 专项模式
  */
 
 const ChallengePage = {
@@ -14,17 +14,33 @@ const ChallengePage = {
         isProcessing: false,
         highestLevel: 1,    // 历史最高等级
         sessionStartTime: null,
-        hasStarted: false   // 是否已开始挑战
+        hasStarted: false,  // 是否已开始挑战
+        challengeMode: null, // 'mixed' | 'specialized'
+        operationType: null, // 'addition' | 'subtraction' | 'multiplication' | 'division'
+        typeStats: {        // 各类型统计
+            addition: { correct: 0, wrong: 0 },
+            subtraction: { correct: 0, wrong: 0 },
+            multiplication: { correct: 0, wrong: 0 },
+            division: { correct: 0, wrong: 0 }
+        }
     },
 
     // 难度配置
     difficultyConfig: {
-        1: { name: '入门', desc: '个位数相加', digitsA: 1, digitsB: 1, minA: 1, minB: 1 },
+        1: { name: '入门', desc: '个位数运算', digitsA: 1, digitsB: 1, minA: 1, minB: 1 },
         2: { name: '进阶', desc: '个位+两位', digitsA: 1, digitsB: 2, minA: 1, minB: 10 },
         3: { name: '熟练', desc: '个位+三位', digitsA: 1, digitsB: 3, minA: 1, minB: 100 },
-        4: { name: '高手', desc: '两位数相加', digitsA: 2, digitsB: 2, minA: 10, minB: 10 },
+        4: { name: '高手', desc: '两位数运算', digitsA: 2, digitsB: 2, minA: 10, minB: 10 },
         5: { name: '专家', desc: '两位+三位', digitsA: 2, digitsB: 3, minA: 10, minB: 100 },
-        6: { name: '大师', desc: '三位数相加', digitsA: 3, digitsB: 3, minA: 100, minB: 100 }
+        6: { name: '大师', desc: '三位数运算', digitsA: 3, digitsB: 3, minA: 100, minB: 100 }
+    },
+
+    // 运算类型配置
+    operationTypes: {
+        addition: { name: '加法', icon: '➕', color: '#34C759', speech: '加' },
+        subtraction: { name: '减法', icon: '➖', color: '#FF9500', speech: '减' },
+        multiplication: { name: '乘法', icon: '✖️', color: '#007AFF', speech: '乘' },
+        division: { name: '除法', icon: '➗', color: '#AF52DE', speech: '除以' }
     },
 
     init() {
@@ -35,17 +51,17 @@ const ChallengePage = {
         this.state.streak = 0;
         this.state.level = 1;
         this.state.hasStarted = false;
+        this.state.challengeMode = null;
+        this.state.operationType = null;
+        this.state.typeStats = {
+            addition: { correct: 0, wrong: 0 },
+            subtraction: { correct: 0, wrong: 0 },
+            multiplication: { correct: 0, wrong: 0 },
+            division: { correct: 0, wrong: 0 }
+        };
 
-        // 显示开场页面
-        this.renderIntro();
-    },
-
-    // 开始挑战
-    startChallenge() {
-        this.state.sessionStartTime = Date.now();
-        this.state.hasStarted = true;
-        this.generateQuestion();
-        this.render();
+        // 显示模式选择页面
+        this.renderModeSelect();
     },
 
     // 加载历史进度
@@ -63,25 +79,234 @@ const ChallengePage = {
         }
     },
 
-    // 生成指定难度的题目
-    generateQuestion() {
-        const config = this.difficultyConfig[this.state.level];
+    // 渲染模式选择页面
+    renderModeSelect() {
+        const container = document.getElementById('page-container');
+        if (!container) return;
 
-        // 生成指定位数的随机数
-        const generateNumber = (digits, min) => {
-            const max = Math.pow(10, digits) - 1;
-            return Math.floor(Math.random() * (max - min + 1)) + min;
-        };
+        container.innerHTML = '';
 
-        const a = generateNumber(config.digitsA, config.minA);
-        const b = generateNumber(config.digitsB, config.minB);
+        const page = document.createElement('div');
+        page.style.cssText = `
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            min-height: 600px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        `;
 
-        // 50% 概率交换位置，增加变化
-        if (Math.random() > 0.5) {
-            this.state.currentQuestion = { a: b, b: a, answer: a + b };
+        // 标题
+        const header = document.createElement('div');
+        header.style.cssText = 'text-align: center; margin-bottom: 40px;';
+        header.innerHTML = `
+            <div style="font-size: 64px; margin-bottom: 16px;">🏆</div>
+            <h2 style="font-size: 32px; font-weight: 700; color: #1C1C1E; margin-bottom: 8px;">挑战模式</h2>
+            <p style="font-size: 16px; color: #8E8E93;">选择挑战方式，突破自我极限</p>
+        `;
+        page.appendChild(header);
+
+        // 模式选择卡片
+        const modeCard = document.createElement('div');
+        modeCard.className = 'glass';
+        modeCard.style.cssText = `
+            width: 100%;
+            max-width: 600px;
+            border-radius: 24px;
+            padding: 32px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        `;
+
+        // 混合模式按钮
+        const mixedBtn = this.createModeButton({
+            icon: '🎲',
+            title: '混合挑战',
+            desc: '随机出现加减乘除，考验综合能力',
+            color: '#007AFF',
+            onClick: () => this.selectMode('mixed')
+        });
+
+        // 专项模式按钮
+        const specializedBtn = this.createModeButton({
+            icon: '🎯',
+            title: '专项挑战',
+            desc: '专注单一运算类型，强化训练',
+            color: '#34C759',
+            onClick: () => this.selectMode('specialized')
+        });
+
+        modeCard.appendChild(mixedBtn);
+        modeCard.appendChild(document.createElement('div')).style.cssText = 'height: 16px;';
+        modeCard.appendChild(specializedBtn);
+
+        page.appendChild(modeCard);
+        container.appendChild(page);
+    },
+
+    createModeButton({ icon, title, desc, color, onClick }) {
+        const btn = document.createElement('button');
+        btn.className = 'btn-press';
+        btn.style.cssText = `
+            width: 100%;
+            padding: 24px;
+            background: white;
+            border: 2px solid rgba(0, 0, 0, 0.08);
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 200ms ease;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        `;
+
+        btn.innerHTML = `
+            <div style="
+                width: 56px;
+                height: 56px;
+                background: ${color}15;
+                border-radius: 14px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 28px;
+            ">${icon}</div>
+            <div style="flex: 1; text-align: left;">
+                <div style="font-size: 18px; font-weight: 700; color: #1C1C1E; margin-bottom: 4px;">${title}</div>
+                <div style="font-size: 14px; color: #8E8E93;">${desc}</div>
+            </div>
+            <div style="font-size: 24px; color: ${color};">→</div>
+        `;
+
+        btn.onclick = onClick;
+
+        btn.addEventListener('mouseenter', () => {
+            btn.style.borderColor = color;
+            btn.style.transform = 'scale(1.01)';
+            btn.style.boxShadow = `0 4px 16px ${color}20`;
+        });
+
+        btn.addEventListener('mouseleave', () => {
+            btn.style.borderColor = 'rgba(0, 0, 0, 0.08)';
+            btn.style.transform = 'scale(1)';
+            btn.style.boxShadow = 'none';
+        });
+
+        return btn;
+    },
+
+    // 选择模式
+    selectMode(mode) {
+        this.state.challengeMode = mode;
+        if (mode === 'specialized') {
+            this.renderOperationSelect();
         } else {
-            this.state.currentQuestion = { a, b, answer: a + b };
+            this.renderIntro();
         }
+    },
+
+    // 渲染运算类型选择页面
+    renderOperationSelect() {
+        const container = document.getElementById('page-container');
+        if (!container) return;
+
+        container.innerHTML = '';
+
+        const page = document.createElement('div');
+        page.style.cssText = `
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            min-height: 600px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        `;
+
+        // 标题
+        const header = document.createElement('div');
+        header.style.cssText = 'text-align: center; margin-bottom: 40px;';
+        header.innerHTML = `
+            <div style="font-size: 48px; margin-bottom: 16px;">🎯</div>
+            <h2 style="font-size: 28px; font-weight: 700; color: #1C1C1E; margin-bottom: 8px;">专项挑战</h2>
+            <p style="font-size: 16px; color: #8E8E93;">选择要挑战的运算类型</p>
+        `;
+        page.appendChild(header);
+
+        // 运算类型选择网格
+        const grid = document.createElement('div');
+        grid.style.cssText = `
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            width: 100%;
+            max-width: 500px;
+        `;
+
+        Object.entries(this.operationTypes).forEach(([type, config]) => {
+            const btn = document.createElement('button');
+            btn.className = 'btn-press';
+            btn.style.cssText = `
+                padding: 28px 20px;
+                background: white;
+                border: 2px solid rgba(0, 0, 0, 0.08);
+                border-radius: 16px;
+                cursor: pointer;
+                transition: all 200ms ease;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 12px;
+            `;
+
+            btn.innerHTML = `
+                <div style="font-size: 40px; filter: grayscale(0.3);">${config.icon}</div>
+                <div style="font-size: 16px; font-weight: 600; color: ${config.color};">${config.name}</div>
+            `;
+
+            btn.onclick = () => {
+                this.state.operationType = type;
+                this.renderIntro();
+            };
+
+            btn.addEventListener('mouseenter', () => {
+                btn.style.borderColor = config.color;
+                btn.style.transform = 'scale(1.03)';
+                btn.style.boxShadow = `0 4px 16px ${config.color}20`;
+            });
+
+            btn.addEventListener('mouseleave', () => {
+                btn.style.borderColor = 'rgba(0, 0, 0, 0.08)';
+                btn.style.transform = 'scale(1)';
+                btn.style.boxShadow = 'none';
+            });
+
+            grid.appendChild(btn);
+        });
+
+        page.appendChild(grid);
+
+        // 返回按钮
+        const backBtn = document.createElement('button');
+        backBtn.style.cssText = `
+            margin-top: 32px;
+            padding: 12px 24px;
+            background: transparent;
+            border: none;
+            color: #8E8E93;
+            font-size: 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        `;
+        backBtn.innerHTML = '← 返回';
+        backBtn.onclick = () => this.renderModeSelect();
+        page.appendChild(backBtn);
+
+        container.appendChild(page);
     },
 
     // 渲染开场页面
@@ -202,6 +427,20 @@ const ChallengePage = {
                 letter-spacing: -0.5px;
             ">挑战模式</h2>
 
+            <!-- 模式标签 -->
+            <div style="
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                padding: 8px 16px;
+                background: ${this.getOperationColor()}15;
+                border-radius: 20px;
+                margin-bottom: 16px;
+            ">
+                <span style="font-size: 16px;">${this.state.challengeMode === 'mixed' ? '🎲' : this.getOperationConfig().icon}</span>
+                <span style="font-size: 14px; font-weight: 600; color: ${this.getOperationColor()};">${this.getModeDisplayName()}</span>
+            </div>
+
             <p style="
                 font-size: 18px;
                 color: #8E8E93;
@@ -271,6 +510,20 @@ const ChallengePage = {
                 color: #C7C7CC;
                 margin-top: 20px;
             ">准备好迎接挑战了吗？</p>
+
+            <!-- 返回按钮 -->
+            <button onclick="ChallengePage.renderModeSelect()" style="
+                margin-top: 24px;
+                padding: 12px 24px;
+                background: transparent;
+                border: none;
+                color: #8E8E93;
+                font-size: 15px;
+                cursor: pointer;
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+            ">← 返回选择</button>
         `;
 
         page.appendChild(introCard);
@@ -382,9 +635,16 @@ const ChallengePage = {
         const header = document.createElement('div');
         header.className = 'challenge-header';
         header.style.cssText = 'text-align: center; margin-bottom: 24px;';
+
+        const opConfig = this.getOperationConfig();
+        const modeIcon = this.state.challengeMode === 'mixed' ? '🎲' : opConfig.icon;
+
         header.innerHTML = `
-            <h2 style="font-size: 32px; font-weight: 700; color: #1C1C1E; margin-bottom: 8px;">🏆 挑战模式</h2>
-            <p style="font-size: 17px; color: #8E8E93;">不断突破，挑战极限</p>
+            <div style="display: inline-flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                <span style="font-size: 28px;">${modeIcon}</span>
+                <h2 style="font-size: 32px; font-weight: 700; color: #1C1C1E;">${this.getModeDisplayName()}</h2>
+            </div>
+            <p style="font-size: 15px; color: #8E8E93;">不断突破，挑战极限</p>
         `;
         return header;
     },
@@ -395,6 +655,7 @@ const ChallengePage = {
         card.className = 'glass challenge-level-card';
 
         const isMobile = window.innerWidth < 768;
+        const opConfig = this.getOperationConfig();
 
         card.style.cssText = `
             border-radius: 16px;
@@ -422,7 +683,7 @@ const ChallengePage = {
                 ">L${this.state.level}</div>
                 <div>
                     <div style="font-size: ${isMobile ? '14px' : '16px'}; font-weight: 700; color: #1C1C1E;">${config.name}</div>
-                    <div style="font-size: ${isMobile ? '10px' : '12px'}; color: #8E8E93;">${config.desc}</div>
+                    <div style="font-size: ${isMobile ? '10px' : '12px'}; color: ${opConfig.color};">${opConfig.icon} ${opConfig.name}</div>
                 </div>
             </div>
             <div style="display: flex; justify-content: space-between; align-items: center; padding-top: ${isMobile ? '8px' : '12px'}; border-top: 1px solid rgba(0,0,0,0.06);">
@@ -494,20 +755,30 @@ const ChallengePage = {
         `;
 
         const q = this.state.currentQuestion;
+        const opConfig = this.getOperationConfig();
 
         // 语音朗读题目
         setTimeout(() => {
             if (SpeechManager.isEnabled()) {
-                SpeechManager.speak(`${q.a}加${q.b}等于多少`);
+                SpeechManager.speak(`${q.a}${opConfig.speech}${q.b}等于多少`);
             }
         }, 300);
+
+        // 获取运算符
+        const operators = {
+            addition: '+',
+            subtraction: '-',
+            multiplication: '×',
+            division: '÷'
+        };
+        const operator = operators[q.operation] || '+';
 
         card.innerHTML = `
             <div style="margin-bottom: ${isMobile ? '20px' : '32px'};">
                 <div style="font-size: ${isMobile ? '40px' : '72px'}; font-weight: 700; color: #1C1C1E; margin-bottom: ${isMobile ? '12px' : '16px'}; font-feature-settings: 'tnum'; letter-spacing: ${isMobile ? '2px' : '4px'};">
-                    ${q.a} + ${q.b} = ?
+                    ${q.a} ${operator} ${q.b} = ?
                 </div>
-                <button onclick="SpeechManager.speak('${q.a}加${q.b}等于多少')" style="
+                <button onclick="SpeechManager.speak('${q.a}${opConfig.speech}${q.b}等于多少')" style="
                     padding: ${isMobile ? '8px 16px' : '10px 20px'};
                     background: rgba(0,0,0,0.04);
                     border: none;
@@ -528,8 +799,8 @@ const ChallengePage = {
                 ${this.generateOptions(q.answer).map(opt => `
                     <button onclick="ChallengePage.selectAnswer(${opt})" style="
                         padding: ${isMobile ? '16px' : '20px'};
-                        background: #007AFF15;
-                        color: #007AFF;
+                        background: ${opConfig.color}15;
+                        color: ${opConfig.color};
                         border: none;
                         border-radius: 16px;
                         font-size: ${isMobile ? '22px' : '28px'};
@@ -620,7 +891,8 @@ const ChallengePage = {
             this.state.streak++;
 
             // 实时更新统计数据（用于能力雷达图）
-            this.updateTypeStats('addition', true);
+            const operationType = this.state.currentQuestion.operation || 'addition';
+            this.updateTypeStats(operationType, true);
 
             feedback.innerHTML = `
                 <div style="color: #34C759; font-size: 20px; font-weight: 600; animation: fadeIn 200ms ease;">
@@ -646,7 +918,8 @@ const ChallengePage = {
             this.state.streak = 0;
 
             // 实时更新统计数据（用于能力雷达图）
-            this.updateTypeStats('addition', false);
+            const operationType = this.state.currentQuestion.operation || 'addition';
+            this.updateTypeStats(operationType, false);
 
             // 高亮正确答案
             buttons.forEach(btn => {
@@ -695,6 +968,7 @@ const ChallengePage = {
         const newConfig = this.difficultyConfig[this.state.level];
         const levelColors = ['#34C759', '#30D158', '#007AFF', '#5856D6', '#AF52DE', '#FF2D55'];
         const color = levelColors[this.state.level - 1];
+        const opConfig = this.getOperationConfig();
 
         modal.innerHTML = `
             <div class="glass" style="
@@ -710,6 +984,10 @@ const ChallengePage = {
                 <div style="font-size: 64px; margin-bottom: 16px;">🎉</div>
                 <div style="font-size: 24px; font-weight: 700; color: #1C1C1E; margin-bottom: 8px;">
                     恭喜升级！
+                </div>
+                <div style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; background: ${opConfig.color}15; border-radius: 20px; margin-bottom: 8px;">
+                    <span style="font-size: 16px;">${opConfig.icon}</span>
+                    <span style="font-size: 13px; font-weight: 600; color: ${opConfig.color};">${opConfig.name}</span>
                 </div>
                 <div style="font-size: 48px; font-weight: 700; color: ${color}; margin-bottom: 8px;">
                     L${this.state.level}
@@ -745,6 +1023,94 @@ const ChallengePage = {
 
         // 语音播报
         SpeechManager.speak(`恭喜升级到${newConfig.name}难度`);
+    },
+
+    // 开始挑战
+    startChallenge() {
+        this.state.sessionStartTime = Date.now();
+        this.state.hasStarted = true;
+        this.generateQuestion();
+        this.render();
+    },
+
+    // 生成指定难度的题目
+    generateQuestion() {
+        const config = this.difficultyConfig[this.state.level];
+
+        // 确定运算类型
+        let operationType;
+        if (this.state.challengeMode === 'mixed') {
+            // 混合模式：随机选择运算类型
+            const types = ['addition', 'subtraction', 'multiplication', 'division'];
+            operationType = types[Math.floor(Math.random() * types.length)];
+        } else {
+            // 专项模式：使用选定的运算类型
+            operationType = this.state.operationType || 'addition';
+        }
+
+        // 生成指定位数的随机数
+        const generateNumber = (digits, min) => {
+            const max = Math.pow(10, digits) - 1;
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        };
+
+        const a = generateNumber(config.digitsA, config.minA);
+        const b = generateNumber(config.digitsB, config.minB);
+
+        let answer, displayA = a, displayB = b;
+
+        switch (operationType) {
+            case 'addition':
+                answer = a + b;
+                break;
+            case 'subtraction':
+                // 确保结果不为负
+                displayA = Math.max(a, b);
+                displayB = Math.min(a, b);
+                answer = displayA - displayB;
+                break;
+            case 'multiplication':
+                // 乘法使用较小的数字范围
+                const multA = Math.floor(Math.random() * 9) + 2; // 2-10
+                const multB = generateNumber(config.digitsB, config.minB);
+                displayA = multA;
+                displayB = multB;
+                answer = multA * multB;
+                break;
+            case 'division':
+                // 除法通过乘法反推确保整除
+                const divisor = Math.floor(Math.random() * 9) + 2; // 2-10
+                const quotient = generateNumber(config.digitsB, config.minB);
+                displayA = divisor * quotient; // 被除数
+                displayB = divisor; // 除数
+                answer = quotient;
+                break;
+            default:
+                answer = a + b;
+        }
+
+        this.state.currentQuestion = {
+            a: displayA,
+            b: displayB,
+            answer: answer,
+            operation: operationType
+        };
+    },
+
+    // 获取当前模式显示名称
+    getModeDisplayName() {
+        if (this.state.challengeMode === 'mixed') {
+            return '混合挑战';
+        } else {
+            const opConfig = this.operationTypes[this.state.operationType];
+            return opConfig ? `${opConfig.name}专项` : '专项挑战';
+        }
+    },
+
+    // 获取当前运算类型的配置
+    getOperationConfig() {
+        const op = this.state.currentQuestion?.operation || 'addition';
+        return this.operationTypes[op] || this.operationTypes.addition;
     },
 
     /**
