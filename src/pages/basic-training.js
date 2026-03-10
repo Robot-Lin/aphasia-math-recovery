@@ -17,6 +17,9 @@ const BasicTrainingPage = {
         hasStarted: false // 是否已开始训练
     },
 
+    // 全局切换锁，防止快速来回切换
+    _isSwitching: false,
+
     // 训练类型配置
     trainingTypes: {
         additionTen: {
