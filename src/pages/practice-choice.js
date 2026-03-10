@@ -209,10 +209,18 @@ const PracticeChoicePage = {
             this.currentOptions = this.generateOptions(current);
         }
 
+        // 处理题目显示，避免重复的等号和问号
+        let questionDisplay = current.display;
+        if (!questionDisplay.includes('=') && !questionDisplay.includes('？')) {
+            questionDisplay += ' = ?';
+        } else if (questionDisplay.includes('=') && !questionDisplay.includes('?') && !questionDisplay.includes('？')) {
+            questionDisplay += ' ?';
+        }
+
         // 更新题目
         this.elements.questionDisplay.innerHTML = `
             <div style="font-weight: 700; color: #1C1C1E; letter-spacing: 2px; font-feature-settings: 'tnum';">
-                ${current.display} = ?
+                ${questionDisplay}
             </div>
         `;
 
@@ -410,10 +418,34 @@ const PracticeChoicePage = {
 
         if (isCorrect) {
             this.streak++;
+            // 错题模式：记录答对
+            const isMistakeMode = sessionStorage.getItem('mistake_mode') === 'true';
+            if (isMistakeMode && typeof Storage !== 'undefined') {
+                // 优先从当前题目获取错题ID，其次是sessionStorage
+                const mistakeId = current.id || sessionStorage.getItem('mistake_id');
+                if (mistakeId) {
+                    const removed = Storage.recordMistakeCorrect(mistakeId);
+                    if (removed) {
+                        // 已从错题本移除，显示提示
+                        setTimeout(() => {
+                            SpeechManager.speak('恭喜，这道错题已消灭！');
+                        }, 500);
+                    }
+                }
+            }
         } else {
             this.streak = 0;
-            if (typeof Storage !== 'undefined') {
+            // 非错题模式才添加新错题
+            const isMistakeMode = sessionStorage.getItem('mistake_mode') === 'true';
+            if (!isMistakeMode && typeof Storage !== 'undefined') {
                 Storage.addMistake(current, answer);
+            }
+            // 错题模式下答错也要记录练习时间，让错题今天隐藏
+            if (isMistakeMode && typeof Storage !== 'undefined') {
+                const mistakeId = current.id || sessionStorage.getItem('mistake_id');
+                if (mistakeId) {
+                    Storage.recordMistakePractice(mistakeId);
+                }
             }
         }
 
@@ -450,11 +482,30 @@ const PracticeChoicePage = {
 
     endPractice() {
         if (confirm('确定要结束当前练习吗？进度将不会保存。')) {
-            router.navigate('home');
+            // 错题模式处理
+            const isMistakeMode = sessionStorage.getItem('mistake_mode') === 'true';
+            if (isMistakeMode) {
+                sessionStorage.removeItem('mistake_mode');
+                sessionStorage.removeItem('mistake_id');
+                sessionStorage.removeItem('mistake_batch');
+                router.navigate('mistakes');
+            } else {
+                router.navigate('home');
+            }
         }
     },
 
     finishPractice() {
+        // 错题模式处理
+        const isMistakeMode = sessionStorage.getItem('mistake_mode') === 'true';
+        if (isMistakeMode) {
+            sessionStorage.removeItem('mistake_mode');
+            sessionStorage.removeItem('mistake_id');
+            sessionStorage.removeItem('mistake_batch');
+            router.navigate('mistakes');
+            return;
+        }
+
         if (typeof SoundManager !== 'undefined') {
             SoundManager.playComplete();
         }

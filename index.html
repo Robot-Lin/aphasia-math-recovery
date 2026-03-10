@@ -1260,218 +1260,218 @@
                 font-size: 11px !important;
                 margin: 12px 0 6px 8px !important;
             }
+        }
 
-            /* 挑战模式移动端适配 - 大幅压缩纵向空间 */
-            @media (max-width: 768px) {
-                /* 挑战模式布局改为单列 */
-                .challenge-layout {
-                    grid-template-columns: 1fr !important;
-                    gap: 12px !important;
-                }
-
-                /* 挑战模式页面容器 */
-                .challenge-page > div {
-                    padding: 12px 16px !important;
-                }
-
-                /* 页面标题 - 更紧凑 */
-                .challenge-page h2 {
-                    font-size: 24px !important;
-                    margin-bottom: 4px !important;
-                }
-
-                .challenge-page p {
-                    font-size: 14px !important;
-                    margin-bottom: 12px !important;
-                }
-
-                /* 难度信息卡片 - 横向排列 */
-                .challenge-page .glass {
-                    padding: 12px 16px !important;
-                    margin-bottom: 12px !important;
-                }
-
-                /* 等级图标缩小 */
-                .challenge-page [style*="width: 56px"] {
-                    width: 44px !important;
-                    height: 44px !important;
-                    font-size: 18px !important;
-                    border-radius: 12px !important;
-                }
-
-                /* 连续答对进度条 */
-                .challenge-page [style*="padding: 20px"] {
-                    padding: 12px 16px !important;
-                }
-
-                /* 进度条高度 */
-                .challenge-page [style*="height: 12px"] {
-                    height: 8px !important;
-                }
-
-                /* 题目卡片 - 大幅压缩 */
-                .challenge-page [style*="border-radius: 24px"] {
-                    padding: 20px 16px !important;
-                    min-height: auto !important;
-                }
-
-                /* 题目数字 */
-                .challenge-page [style*="font-size: 48px"],
-                .challenge-page [style*="font-size: 56px"] {
-                    font-size: 32px !important;
-                }
-
-                /* 选项按钮网格 - 3列全宽，充分利用横向空间 */
-                .challenge-options {
-                    grid-template-columns: repeat(3, 1fr) !important;
-                    gap: 12px !important;
-                    max-width: 100% !important;
-                    padding: 0 8px !important;
-                }
-
-                .challenge-options button {
-                    padding: 0 !important;
-                    font-size: 24px !important;
-                    min-height: 64px;
-                    width: 100% !important;
-                    aspect-ratio: 1.8 !important;
-                    display: flex !important;
-                    align-items: center !important;
-                    justify-content: center !important;
-                }
-
-                /* 统计信息卡片 */
-                .challenge-stats {
-                    grid-template-columns: repeat(2, 1fr) !important;
-                    gap: 10px !important;
-                }
-
-                /* 统计卡片内部 */
-                .challenge-stats > div {
-                    padding: 12px !important;
-                }
-
-                /* 开场页面 */
-                .challenge-intro {
-                    padding: 24px 20px !important;
-                }
-
-                .challenge-intro [style*="width: 120px"] {
-                    width: 72px !important;
-                    height: 72px !important;
-                    font-size: 36px !important;
-                }
-
-                /* 难度等级预览 - 横向滚动或网格 */
-                .challenge-levels {
-                    display: grid !important;
-                    grid-template-columns: repeat(3, 1fr) !important;
-                    gap: 6px !important;
-                }
-
-                .challenge-levels > div {
-                    padding: 8px 4px !important;
-                    min-width: auto !important;
-                }
-
-                /* 语音按钮更紧凑 */
-                .challenge-page button[style*="display: inline-flex"] {
-                    padding: 6px 12px !important;
-                    font-size: 12px !important;
-                }
+        /* 挑战模式移动端适配 - 大幅压缩纵向空间 */
+        @media (max-width: 768px) {
+            /* 挑战模式布局改为单列 */
+            .challenge-layout {
+                grid-template-columns: 1fr !important;
+                gap: 12px !important;
             }
 
-            @media (max-width: 480px) {
-                /* 挑战模式更激进的压缩 */
-                .challenge-page > div {
-                    padding: 8px 12px !important;
-                }
+            /* 挑战模式页面容器 */
+            .challenge-page > div {
+                padding: 12px 16px !important;
+            }
 
-                /* 标题更小 */
-                .challenge-page h2 {
-                    font-size: 20px !important;
-                }
+            /* 页面标题 - 更紧凑 */
+            .challenge-page h2 {
+                font-size: 24px !important;
+                margin-bottom: 4px !important;
+            }
 
-                /* 难度卡片更紧凑 */
-                .challenge-page .glass {
-                    padding: 10px 12px !important;
-                    margin-bottom: 8px !important;
-                }
+            .challenge-page p {
+                font-size: 14px !important;
+                margin-bottom: 12px !important;
+            }
 
-                /* 等级描述隐藏，只显示等级名 */
-                .challenge-page [style*="font-size: 14px; color: #8E8E93"] {
-                    font-size: 11px !important;
-                }
+            /* 难度信息卡片 - 横向排列 */
+            .challenge-page .glass {
+                padding: 12px 16px !important;
+                margin-bottom: 12px !important;
+            }
 
-                /* 进度条文字 */
-                .challenge-page [style*="margin-top: 8px"] {
-                    font-size: 11px !important;
-                    margin-top: 6px !important;
-                }
+            /* 等级图标缩小 */
+            .challenge-page [style*="width: 56px"] {
+                width: 44px !important;
+                height: 44px !important;
+                font-size: 18px !important;
+                border-radius: 12px !important;
+            }
 
-                /* 题目卡片 */
-                .challenge-page [style*="border-radius: 24px"] {
-                    padding: 16px 12px !important;
-                }
+            /* 连续答对进度条 */
+            .challenge-page [style*="padding: 20px"] {
+                padding: 12px 16px !important;
+            }
 
-                /* 题目数字更小 */
-                .challenge-page [style*="font-size: 32px"] {
-                    font-size: 28px !important;
-                }
+            /* 进度条高度 */
+            .challenge-page [style*="height: 12px"] {
+                height: 8px !important;
+            }
 
-                /* 选项按钮网格 - 3列全宽，充分利用横向空间 */
-                .challenge-options {
-                    grid-template-columns: repeat(3, 1fr) !important;
-                    gap: 8px !important;
-                    max-width: 100% !important;
-                    padding: 0 4px !important;
-                }
+            /* 题目卡片 - 大幅压缩 */
+            .challenge-page [style*="border-radius: 24px"] {
+                padding: 20px 16px !important;
+                min-height: auto !important;
+            }
 
-                .challenge-options button {
-                    padding: 0 !important;
-                    font-size: 22px !important;
-                    min-height: 56px;
-                    width: 100% !important;
-                    aspect-ratio: 1.6 !important;
-                    display: flex !important;
-                    align-items: center !important;
-                    justify-content: center !important;
-                }
+            /* 题目数字 */
+            .challenge-page [style*="font-size: 48px"],
+            .challenge-page [style*="font-size: 56px"] {
+                font-size: 32px !important;
+            }
 
-                /* 开场页面 */
-                .challenge-intro {
-                    padding: 20px 16px !important;
-                }
+            /* 选项按钮网格 - 3列全宽，充分利用横向空间 */
+            .challenge-options {
+                grid-template-columns: repeat(3, 1fr) !important;
+                gap: 12px !important;
+                max-width: 100% !important;
+                padding: 0 8px !important;
+            }
 
-                .challenge-intro [style*="width: 72px"] {
-                    width: 56px !important;
-                    height: 56px !important;
-                    font-size: 28px !important;
-                }
+            .challenge-options button {
+                padding: 0 !important;
+                font-size: 24px !important;
+                min-height: 64px;
+                width: 100% !important;
+                aspect-ratio: 1.8 !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+            }
 
-                /* 难度等级 2 列 */
-                .challenge-levels {
-                    grid-template-columns: repeat(2, 1fr) !important;
-                }
+            /* 统计信息卡片 */
+            .challenge-stats {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 10px !important;
+            }
 
-                /* 开始按钮 */
-                #challenge-start-btn {
-                    padding: 14px 32px !important;
-                    font-size: 16px !important;
-                }
+            /* 统计卡片内部 */
+            .challenge-stats > div {
+                padding: 12px !important;
+            }
 
-                /* 统计信息 2 列紧凑 */
-                .challenge-stats {
-                    gap: 8px !important;
-                }
+            /* 开场页面 */
+            .challenge-intro {
+                padding: 24px 20px !important;
+            }
 
-                .challenge-stats > div {
-                    padding: 10px 8px !important;
-                }
+            .challenge-intro [style*="width: 120px"] {
+                width: 72px !important;
+                height: 72px !important;
+                font-size: 36px !important;
+            }
 
-                .challenge-stats [style*="font-size: 24px"] {
-                    font-size: 20px !important;
-                }
+            /* 难度等级预览 - 横向滚动或网格 */
+            .challenge-levels {
+                display: grid !important;
+                grid-template-columns: repeat(3, 1fr) !important;
+                gap: 6px !important;
+            }
+
+            .challenge-levels > div {
+                padding: 8px 4px !important;
+                min-width: auto !important;
+            }
+
+            /* 语音按钮更紧凑 */
+            .challenge-page button[style*="display: inline-flex"] {
+                padding: 6px 12px !important;
+                font-size: 12px !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            /* 挑战模式更激进的压缩 */
+            .challenge-page > div {
+                padding: 8px 12px !important;
+            }
+
+            /* 标题更小 */
+            .challenge-page h2 {
+                font-size: 20px !important;
+            }
+
+            /* 难度卡片更紧凑 */
+            .challenge-page .glass {
+                padding: 10px 12px !important;
+                margin-bottom: 8px !important;
+            }
+
+            /* 等级描述隐藏，只显示等级名 */
+            .challenge-page [style*="font-size: 14px; color: #8E8E93"] {
+                font-size: 11px !important;
+            }
+
+            /* 进度条文字 */
+            .challenge-page [style*="margin-top: 8px"] {
+                font-size: 11px !important;
+                margin-top: 6px !important;
+            }
+
+            /* 题目卡片 */
+            .challenge-page [style*="border-radius: 24px"] {
+                padding: 16px 12px !important;
+            }
+
+            /* 题目数字更小 */
+            .challenge-page [style*="font-size: 32px"] {
+                font-size: 28px !important;
+            }
+
+            /* 选项按钮网格 - 3列全宽，充分利用横向空间 */
+            .challenge-options {
+                grid-template-columns: repeat(3, 1fr) !important;
+                gap: 8px !important;
+                max-width: 100% !important;
+                padding: 0 4px !important;
+            }
+
+            .challenge-options button {
+                padding: 0 !important;
+                font-size: 22px !important;
+                min-height: 56px;
+                width: 100% !important;
+                aspect-ratio: 1.6 !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+            }
+
+            /* 开场页面 */
+            .challenge-intro {
+                padding: 20px 16px !important;
+            }
+
+            .challenge-intro [style*="width: 72px"] {
+                width: 56px !important;
+                height: 56px !important;
+                font-size: 28px !important;
+            }
+
+            /* 难度等级 2 列 */
+            .challenge-levels {
+                grid-template-columns: repeat(2, 1fr) !important;
+            }
+
+            /* 开始按钮 */
+            #challenge-start-btn {
+                padding: 14px 32px !important;
+                font-size: 16px !important;
+            }
+
+            /* 统计信息 2 列紧凑 */
+            .challenge-stats {
+                gap: 8px !important;
+            }
+
+            .challenge-stats > div {
+                padding: 10px 8px !important;
+            }
+
+            .challenge-stats [style*="font-size: 24px"] {
+                font-size: 20px !important;
             }
         }
     </style>

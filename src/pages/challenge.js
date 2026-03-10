@@ -314,34 +314,64 @@ const ChallengePage = {
         page.style.cssText = `
             max-width: 1400px;
             margin: 0 auto;
-            padding: 16px 24px;
+            padding: 16px;
         `;
 
         // 页面标题
         page.appendChild(this.createHeader());
 
-        // 桌面端：左右分栏布局
+        // 检测是否为移动端
+        const isMobile = window.innerWidth < 768;
+
+        // 响应式布局：桌面端左右分栏，移动端上下堆叠
         const mainLayout = document.createElement('div');
         mainLayout.className = 'challenge-layout';
-        mainLayout.style.cssText = `
+        mainLayout.style.cssText = isMobile ? `
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        ` : `
             display: grid;
             grid-template-columns: 1fr 320px;
             gap: 20px;
             align-items: start;
         `;
 
-        // 左侧：题目卡片（主要内容）
-        const leftColumn = document.createElement('div');
-        leftColumn.appendChild(this.createChallengeCard());
-        mainLayout.appendChild(leftColumn);
+        // 主要内容区（题目卡片）
+        const mainContent = document.createElement('div');
+        mainContent.appendChild(this.createChallengeCard());
+        mainLayout.appendChild(mainContent);
 
-        // 右侧：等级信息、进度条、统计
-        const rightColumn = document.createElement('div');
-        rightColumn.style.cssText = 'display: flex; flex-direction: column; gap: 12px;';
-        rightColumn.appendChild(this.createLevelInfoCard());
-        rightColumn.appendChild(this.createStreakProgress());
-        rightColumn.appendChild(this.createStatsCard());
-        mainLayout.appendChild(rightColumn);
+        // 侧边信息区（等级信息、进度条、统计）
+        const sideInfo = document.createElement('div');
+
+        if (isMobile) {
+            // 移动端：连续答对单独一行在答题区域下面
+            const streakRow = document.createElement('div');
+            streakRow.appendChild(this.createStreakProgress());
+            mainLayout.appendChild(streakRow);
+
+            // 另外两个模块分成两列在最下面
+            sideInfo.style.cssText = `
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 12px;
+            `;
+            sideInfo.appendChild(this.createLevelInfoCard());
+            sideInfo.appendChild(this.createStatsCard());
+            mainLayout.appendChild(sideInfo);
+        } else {
+            // 桌面端：右侧垂直排列
+            sideInfo.style.cssText = `
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+            `;
+            sideInfo.appendChild(this.createLevelInfoCard());
+            sideInfo.appendChild(this.createStreakProgress());
+            sideInfo.appendChild(this.createStatsCard());
+            mainLayout.appendChild(sideInfo);
+        }
 
         page.appendChild(mainLayout);
 
@@ -363,9 +393,12 @@ const ChallengePage = {
         const config = this.difficultyConfig[this.state.level];
         const card = document.createElement('div');
         card.className = 'glass challenge-level-card';
+
+        const isMobile = window.innerWidth < 768;
+
         card.style.cssText = `
             border-radius: 16px;
-            padding: 16px;
+            padding: ${isMobile ? '12px' : '16px'};
             box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
         `;
 
@@ -373,28 +406,28 @@ const ChallengePage = {
         const color = levelColors[this.state.level - 1];
 
         card.innerHTML = `
-            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+            <div style="display: flex; align-items: center; gap: ${isMobile ? '8px' : '12px'}; margin-bottom: ${isMobile ? '8px' : '12px'};">
                 <div style="
-                    width: 44px;
-                    height: 44px;
+                    width: ${isMobile ? '36px' : '44px'};
+                    height: ${isMobile ? '36px' : '44px'};
                     background: ${color};
-                    border-radius: 12px;
+                    border-radius: ${isMobile ? '10px' : '12px'};
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     color: white;
-                    font-size: 18px;
+                    font-size: ${isMobile ? '14px' : '18px'};
                     font-weight: 700;
                     box-shadow: 0 4px 12px ${color}40;
                 ">L${this.state.level}</div>
                 <div>
-                    <div style="font-size: 16px; font-weight: 700; color: #1C1C1E;">${config.name}</div>
-                    <div style="font-size: 12px; color: #8E8E93;">${config.desc}</div>
+                    <div style="font-size: ${isMobile ? '14px' : '16px'}; font-weight: 700; color: #1C1C1E;">${config.name}</div>
+                    <div style="font-size: ${isMobile ? '10px' : '12px'}; color: #8E8E93;">${config.desc}</div>
                 </div>
             </div>
-            <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px solid rgba(0,0,0,0.06);">
-                <span style="font-size: 12px; color: #8E8E93;">最高记录</span>
-                <span style="font-size: 16px; font-weight: 700; color: ${color};">L${this.state.highestLevel}</span>
+            <div style="display: flex; justify-content: space-between; align-items: center; padding-top: ${isMobile ? '8px' : '12px'}; border-top: 1px solid rgba(0,0,0,0.06);">
+                <span style="font-size: ${isMobile ? '10px' : '12px'}; color: #8E8E93;">最高记录</span>
+                <span style="font-size: ${isMobile ? '14px' : '16px'}; font-weight: 700; color: ${color};">L${this.state.highestLevel}</span>
             </div>
         `;
 
@@ -404,9 +437,12 @@ const ChallengePage = {
     createStreakProgress() {
         const card = document.createElement('div');
         card.className = 'glass challenge-streak-card';
+
+        const isMobile = window.innerWidth < 768;
+
         card.style.cssText = `
             border-radius: 16px;
-            padding: 16px;
+            padding: ${isMobile ? '12px' : '16px'};
             box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
         `;
 
@@ -414,13 +450,13 @@ const ChallengePage = {
         const remaining = 5 - this.state.streak;
 
         card.innerHTML = `
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                <div style="font-size: 14px; font-weight: 600; color: #1C1C1E;">连续答对</div>
-                <div style="font-size: 13px; color: #8E8E93;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: ${isMobile ? '8px' : '10px'};">
+                <div style="font-size: ${isMobile ? '12px' : '14px'}; font-weight: 600; color: #1C1C1E;">连续答对</div>
+                <div style="font-size: ${isMobile ? '11px' : '13px'}; color: #8E8E93;">
                     ${this.state.streak}/5
                 </div>
             </div>
-            <div style="height: 10px; background: #E5E5EA; border-radius: 5px; overflow: hidden;">
+            <div style="height: ${isMobile ? '8px' : '10px'}; background: #E5E5EA; border-radius: 5px; overflow: hidden;">
                 <div style="
                     width: ${progress};
                     height: 100%;
@@ -430,7 +466,7 @@ const ChallengePage = {
                     box-shadow: 0 2px 8px rgba(52, 199, 89, 0.3);
                 "></div>
             </div>
-            <div style="margin-top: 8px; font-size: 12px; color: #8E8E93; text-align: center;">
+            <div style="margin-top: ${isMobile ? '6px' : '8px'}; font-size: ${isMobile ? '10px' : '12px'}; color: #8E8E93; text-align: center;">
                 ${remaining > 0 ? `再答对 ${remaining} 题升级 🚀` : '准备升级 ✨'}
             </div>
         `;
@@ -441,10 +477,14 @@ const ChallengePage = {
     createChallengeCard() {
         const card = document.createElement('div');
         card.className = 'glass challenge-card';
+
+        // 检测是否为移动端
+        const isMobile = window.innerWidth < 768;
+
         card.style.cssText = `
-            border-radius: 24px;
-            padding: 40px 48px;
-            min-height: 360px;
+            border-radius: ${isMobile ? '20px' : '24px'};
+            padding: ${isMobile ? '24px 16px' : '40px 48px'};
+            min-height: ${isMobile ? '280px' : '360px'};
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
             text-align: center;
             display: flex;
@@ -463,47 +503,48 @@ const ChallengePage = {
         }, 300);
 
         card.innerHTML = `
-            <div style="margin-bottom: 32px;">
-                <div style="font-size: 72px; font-weight: 700; color: #1C1C1E; margin-bottom: 16px; font-feature-settings: 'tnum'; letter-spacing: 4px;">
+            <div style="margin-bottom: ${isMobile ? '20px' : '32px'};">
+                <div style="font-size: ${isMobile ? '40px' : '72px'}; font-weight: 700; color: #1C1C1E; margin-bottom: ${isMobile ? '12px' : '16px'}; font-feature-settings: 'tnum'; letter-spacing: ${isMobile ? '2px' : '4px'};">
                     ${q.a} + ${q.b} = ?
                 </div>
                 <button onclick="SpeechManager.speak('${q.a}加${q.b}等于多少')" style="
-                    padding: 10px 20px;
+                    padding: ${isMobile ? '8px 16px' : '10px 20px'};
                     background: rgba(0,0,0,0.04);
                     border: none;
                     border-radius: 16px;
-                    font-size: 13px;
+                    font-size: ${isMobile ? '12px' : '13px'};
                     color: #8E8E93;
                     cursor: pointer;
                     display: inline-flex;
                     align-items: center;
+                    justify-content: center;
                     gap: 6px;
                 ">
                     🔊 朗读题目
                 </button>
             </div>
 
-            <div id="challenge-options" class="challenge-options" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; max-width: 480px; margin: 0 auto;">
+            <div id="challenge-options" class="challenge-options" style="display: grid; grid-template-columns: repeat(${isMobile ? 2 : 3}, 1fr); gap: ${isMobile ? '12px' : '16px'}; max-width: 480px; margin: 0 auto;">
                 ${this.generateOptions(q.answer).map(opt => `
                     <button onclick="ChallengePage.selectAnswer(${opt})" style="
-                        padding: 20px;
+                        padding: ${isMobile ? '16px' : '20px'};
                         background: #007AFF15;
                         color: #007AFF;
                         border: none;
                         border-radius: 16px;
-                        font-size: 28px;
+                        font-size: ${isMobile ? '22px' : '28px'};
                         font-weight: 700;
                         cursor: pointer;
                         transition: all 150ms ease;
                         display: flex;
                         align-items: center;
                         justify-content: center;
-                        min-height: 72px;
+                        min-height: ${isMobile ? '56px' : '72px'};
                     ">${opt}</button>
                 `).join('')}
             </div>
 
-            <div id="challenge-feedback" style="margin-top: 24px; min-height: 40px;"></div>
+            <div id="challenge-feedback" style="margin-top: ${isMobile ? '16px' : '24px'}; min-height: 40px;"></div>
         `;
 
         return card;
@@ -529,9 +570,12 @@ const ChallengePage = {
     createStatsCard() {
         const card = document.createElement('div');
         card.className = 'glass challenge-stats';
+
+        const isMobile = window.innerWidth < 768;
+
         card.style.cssText = `
             border-radius: 16px;
-            padding: 16px;
+            padding: ${isMobile ? '12px' : '16px'};
             box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
         `;
 
@@ -539,19 +583,19 @@ const ChallengePage = {
         const accuracy = total > 0 ? Math.round((this.state.totalCorrect / total) * 100) : 0;
 
         card.innerHTML = `
-            <div style="font-size: 13px; font-weight: 600; color: #1C1C1E; margin-bottom: 12px; text-align: center;">本次挑战</div>
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; text-align: center;">
+            <div style="font-size: ${isMobile ? '11px' : '13px'}; font-weight: 600; color: #1C1C1E; margin-bottom: ${isMobile ? '8px' : '12px'}; text-align: center;">本次挑战</div>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: ${isMobile ? '4px' : '8px'}; text-align: center;">
                 <div>
-                    <div style="font-size: 22px; font-weight: 700; color: #34C759;">${this.state.totalCorrect}</div>
-                    <div style="font-size: 11px; color: #8E8E93; margin-top: 2px;">答对</div>
+                    <div style="font-size: ${isMobile ? '18px' : '22px'}; font-weight: 700; color: #34C759;">${this.state.totalCorrect}</div>
+                    <div style="font-size: ${isMobile ? '9px' : '11px'}; color: #8E8E93; margin-top: 2px;">答对</div>
                 </div>
                 <div>
-                    <div style="font-size: 22px; font-weight: 700; color: #FF3B30;">${this.state.totalWrong}</div>
-                    <div style="font-size: 11px; color: #8E8E93; margin-top: 2px;">答错</div>
+                    <div style="font-size: ${isMobile ? '18px' : '22px'}; font-weight: 700; color: #FF3B30;">${this.state.totalWrong}</div>
+                    <div style="font-size: ${isMobile ? '9px' : '11px'}; color: #8E8E93; margin-top: 2px;">答错</div>
                 </div>
                 <div>
-                    <div style="font-size: 22px; font-weight: 700; color: #007AFF;">${accuracy}%</div>
-                    <div style="font-size: 11px; color: #8E8E93; margin-top: 2px;">正确率</div>
+                    <div style="font-size: ${isMobile ? '18px' : '22px'}; font-weight: 700; color: #007AFF;">${accuracy}%</div>
+                    <div style="font-size: ${isMobile ? '9px' : '11px'}; color: #8E8E93; margin-top: 2px;">正确率</div>
                 </div>
             </div>
         `;

@@ -211,7 +211,8 @@ const Storage = {
             correctCount: existingIndex >= 0 ? userData.mistakes[existingIndex].correctCount : 0,
             createdAt: existingIndex >= 0 ? userData.mistakes[existingIndex].createdAt : new Date().toISOString(),
             lastWrongAt: new Date().toISOString(),
-            nextReviewDate: this.calculateNextReviewDate(0)
+            nextReviewDate: this.calculateNextReviewDate(0),
+            lastPracticedAt: null  // 上次练习时间（用于当天隐藏）
         };
 
         if (existingIndex >= 0) {
@@ -227,7 +228,7 @@ const Storage = {
     /**
      * 记录错题答对
      * @param {string} mistakeId - 错题ID
-     * @returns {boolean} - 是否已答对3次（可移除）
+     * @returns {boolean} - 是否已答对2次（可移除）
      */
     recordMistakeCorrect(mistakeId) {
         const userData = this.getUserData();
@@ -236,10 +237,11 @@ const Storage = {
         if (!mistake) return false;
 
         mistake.correctCount += 1;
+        mistake.lastPracticedAt = new Date().toISOString();  // 记录今天练习过
         mistake.nextReviewDate = this.calculateNextReviewDate(mistake.correctCount);
 
-        // 答对3次，从错题本移除
-        if (mistake.correctCount >= 3) {
+        // 答对2次，从错题本移除
+        if (mistake.correctCount >= 2) {
             userData.mistakes = userData.mistakes.filter(m => m.id !== mistakeId);
             // 记录已消灭的错题
             this.recordMasteredMistake(mistakeId);
@@ -249,6 +251,20 @@ const Storage = {
 
         this.saveUserData(userData);
         return false; // 未移除
+    },
+
+    /**
+     * 记录错题练习时间（答错时调用）
+     * @param {string} mistakeId - 错题ID
+     */
+    recordMistakePractice(mistakeId) {
+        const userData = this.getUserData();
+        const mistake = userData.mistakes.find(m => m.id === mistakeId);
+
+        if (!mistake) return;
+
+        mistake.lastPracticedAt = new Date().toISOString();  // 记录今天练习过
+        this.saveUserData(userData);
     },
 
     /**
@@ -269,14 +285,28 @@ const Storage = {
     },
 
     /**
-     * 获取今日待复习错题
+     * 获取今日待复习错题（排除今天已练习的）
      * @returns {Array}
      */
     getTodayReviewMistakes() {
         const userData = this.getUserData();
         const today = new Date().toISOString().split('T')[0];
 
-        return userData.mistakes.filter(m => m.nextReviewDate <= today);
+        return userData.mistakes.filter(m => {
+            // 基本条件：到复习日期了
+            const isReviewDue = m.nextReviewDate <= today;
+            if (!isReviewDue) return false;
+
+            // 排除今天已经练习过的（lastPracticedAt 是今天）
+            if (m.lastPracticedAt) {
+                const lastPracticeDate = m.lastPracticedAt.split('T')[0];
+                if (lastPracticeDate === today) {
+                    return false; // 今天练习过，今天不显示
+                }
+            }
+
+            return true;
+        });
     },
 
     /**
@@ -286,6 +316,7 @@ const Storage = {
     getStatsSummary() {
         const userData = this.getUserData();
         const stats = userData.stats;
+        // 使用过滤后的今日错题（排除今天已练习的）
         const todayMistakes = this.getTodayReviewMistakes();
 
         return {

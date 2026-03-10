@@ -290,10 +290,16 @@ const PracticeKeypadPage = {
     updateDisplay() {
         const current = this.questions[this.currentIndex];
 
+        // 处理题目显示，避免重复的等号
+        let questionDisplay = current.display;
+        if (!questionDisplay.includes('=') && !questionDisplay.includes('？')) {
+            questionDisplay += ' =';
+        }
+
         // 更新题目
         this.elements.questionDisplay.innerHTML = `
             <div style="font-size: 56px; font-weight: 700; color: #1C1C1E; letter-spacing: 4px; font-feature-settings: 'tnum';">
-                ${current.display} =
+                ${questionDisplay}
             </div>
         `;
 

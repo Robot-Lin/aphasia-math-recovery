@@ -84,7 +84,21 @@ const MistakesPage = {
 
     getTodayReviewMistakes() {
         const today = new Date().toISOString().split('T')[0];
-        return this.mistakes.filter(m => m.nextReviewDate <= today);
+        return this.mistakes.filter(m => {
+            // 到复习日期了
+            const isReviewDue = m.nextReviewDate <= today;
+            if (!isReviewDue) return false;
+
+            // 排除今天已经练习过的
+            if (m.lastPracticedAt) {
+                const lastPracticeDate = m.lastPracticedAt.split('T')[0];
+                if (lastPracticeDate === today) {
+                    return false;
+                }
+            }
+
+            return true;
+        });
     },
 
     createInsightCard() {
@@ -279,8 +293,8 @@ const MistakesPage = {
         sessionStorage.setItem('practice_answers', JSON.stringify([]));
         sessionStorage.setItem('practice_start_time', Date.now().toString());
 
-        // 跳转到键盘输入模式
-        router.navigate('practice-keypad');
+        // 跳转到选择题模式
+        router.navigate('practice-choice');
     },
 
     renderEmptyState(page) {
@@ -319,10 +333,21 @@ const MistakesPage = {
         const list = document.createElement('div');
         list.style.cssText = 'display: flex; flex-direction: column; gap: 16px;';
 
-        // 按复习日期排序（今天优先）
-        const sortedMistakes = [...this.mistakes].sort((a, b) => {
-            if (a.nextReviewDate <= new Date().toISOString().split('T')[0]) return -1;
-            if (b.nextReviewDate <= new Date().toISOString().split('T')[0]) return 1;
+        const today = new Date().toISOString().split('T')[0];
+
+        // 过滤并排序：排除今天练习过的，今天到期的优先
+        const sortedMistakes = [...this.mistakes].filter(m => {
+            // 排除今天已经练习过的
+            if (m.lastPracticedAt) {
+                const lastPracticeDate = m.lastPracticedAt.split('T')[0];
+                if (lastPracticeDate === today) {
+                    return false;
+                }
+            }
+            return true;
+        }).sort((a, b) => {
+            if (a.nextReviewDate <= today) return -1;
+            if (b.nextReviewDate <= today) return 1;
             return a.nextReviewDate.localeCompare(b.nextReviewDate);
         });
 
@@ -361,8 +386,16 @@ const MistakesPage = {
             opacity: 0;
         `;
 
-        // 进度条（答对次数）
-        const progressWidth = (mistake.correctCount / 3) * 100;
+        // 进度条（答对次数）- 2次消除
+        const progressWidth = (mistake.correctCount / 2) * 100;
+
+        // 处理题目显示，避免重复的等号和问号
+        let questionDisplay = mistake.question;
+        if (!questionDisplay.includes('=') && !questionDisplay.includes('？')) {
+            questionDisplay += ' = ?';
+        } else if (questionDisplay.includes('=') && !questionDisplay.includes('?') && !questionDisplay.includes('？')) {
+            questionDisplay += ' ?';
+        }
 
         item.innerHTML = `
             <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;" class="meta-row">
@@ -379,7 +412,7 @@ const MistakesPage = {
                         ${isReviewToday ? '<span style="font-size: 12px; color: #FF9500; font-weight: 500;">今日复习</span>' : ''}
                     </div>
                     <div style="font-size: 24px; font-weight: 700; color: #1C1C1E; margin-bottom: 8px;" class="question">
-                        ${mistake.question} = ?
+                        ${questionDisplay}
                     </div>
                     <div style="display: flex; align-items: center; gap: 16px; font-size: 14px;" class="answers">
                         <span style="color: #FF3B30;">你的答案: ${mistake.userAnswer}</span>
@@ -388,7 +421,7 @@ const MistakesPage = {
                 </div>
                 <div style="text-align: right;">
                     <div style="font-size: 13px; color: #8E8E93; margin-bottom: 4px;">答对次数</div>
-                    <div style="font-size: 20px; font-weight: 700; color: #007AFF;">${mistake.correctCount}/3</div>
+                    <div style="font-size: 20px; font-weight: 700; color: #007AFF;">${mistake.correctCount}/2</div>
                 </div>
             </div>
             <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(0, 0, 0, 0.06);" class="progress-area">
@@ -437,7 +470,7 @@ const MistakesPage = {
 
         // 创建针对这道错题的练习
         const question = {
-            id: Date.now().toString(),
+            id: mistake.id,  // 使用错题ID，不是生成新ID
             type: mistake.type,
             difficulty: mistake.difficulty,
             question: mistake.question,
@@ -462,7 +495,7 @@ const MistakesPage = {
         sessionStorage.setItem('practice_answers', JSON.stringify([]));
         sessionStorage.setItem('practice_start_time', Date.now().toString());
 
-        // 跳转到键盘输入模式
-        router.navigate('practice-keypad');
+        // 跳转到选择题模式
+        router.navigate('practice-choice');
     }
 };

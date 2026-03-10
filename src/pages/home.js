@@ -49,8 +49,9 @@ const HomePage = {
         }
 
         // 复习提醒（有条件显示，可开关）
-        if (displaySettings.reviewAlert !== false && summary.reviewCount > 0) {
-            this.elements.reviewAlert = this.createReviewAlert(summary.reviewCount);
+        const todayReviewCount = Storage.getTodayReviewMistakes().length;
+        if (displaySettings.reviewAlert !== false && todayReviewCount > 0) {
+            this.elements.reviewAlert = this.createReviewAlert(todayReviewCount);
             page.appendChild(this.elements.reviewAlert);
         }
 
@@ -97,9 +98,12 @@ const HomePage = {
             margin-bottom: 20px;
         `;
 
+        // 获取今日待复习错题数（过滤今天已练习的）
+        const todayReviewCount = Storage.getTodayReviewMistakes().length;
+
         const stats = [
             { icon: '✏️', label: '练习次数', value: summary.practiceCount, color: '#007AFF', bgColor: 'rgba(0, 122, 255, 0.08)' },
-            { icon: '📖', label: '待复习错题', value: summary.reviewCount, color: '#FF9500', bgColor: 'rgba(255, 149, 0, 0.08)' },
+            { icon: '📖', label: '待复习错题', value: todayReviewCount, color: '#FF9500', bgColor: 'rgba(255, 149, 0, 0.08)' },
             { icon: '✅', label: '已做题数', value: summary.totalQuestions, color: '#34C759', bgColor: 'rgba(52, 199, 89, 0.08)' },
             { icon: '🎯', label: '正确率', value: summary.accuracy + '%', color: '#AF52DE', bgColor: 'rgba(175, 82, 222, 0.08)' }
         ];
@@ -241,14 +245,15 @@ const HomePage = {
         `;
 
         // 快捷入口项
+        const todayMistakes = Storage.getTodayReviewMistakes();
         const quickItems = [
             {
                 icon: '📚',
                 label: '复习错题',
-                count: summary.reviewCount,
-                showBadge: summary.reviewCount > 0,
-                onClick: () => router.navigate('mistakes'),
-                disabled: summary.reviewCount === 0
+                count: todayMistakes.length,
+                showBadge: todayMistakes.length > 0,
+                onClick: () => this.startMistakeReview(),
+                disabled: todayMistakes.length === 0
             },
             {
                 icon: lastPractice.typeIcon || '✏️',
@@ -685,12 +690,57 @@ const HomePage = {
             white-space: nowrap;
         `;
         reviewBtn.textContent = '开始复习';
-        reviewBtn.onclick = () => alert('错题本功能将在后续版本推出');
+        reviewBtn.onclick = () => this.startMistakeReview();
 
         card.appendChild(leftContent);
         card.appendChild(reviewBtn);
 
         return card;
+    },
+
+    // 启动错题复习
+    startMistakeReview() {
+        // 获取今日待复习错题
+        const todayMistakes = Storage.getTodayReviewMistakes();
+        if (todayMistakes.length === 0) {
+            alert('今天没有需要复习的错题');
+            return;
+        }
+
+        // 生成错题练习题目
+        const questions = todayMistakes.map(mistake => {
+            const match = mistake.question.match(/(\d+)\s*([+\-×÷])\s*(\d+)/);
+            let num1 = 0, num2 = 0, operator = '+';
+            if (match) {
+                num1 = parseInt(match[1]);
+                operator = match[2];
+                num2 = parseInt(match[3]);
+            }
+
+            return {
+                id: mistake.id,
+                type: mistake.type,
+                difficulty: mistake.difficulty,
+                question: mistake.question,
+                display: mistake.question,
+                answer: mistake.correctAnswer,
+                num1,
+                num2,
+                operator,
+                isMistakeReview: true
+            };
+        });
+
+        // 保存到 sessionStorage
+        sessionStorage.setItem('mistake_mode', 'true');
+        sessionStorage.setItem('mistake_batch', 'true');
+        sessionStorage.setItem('practice_questions', JSON.stringify(questions));
+        sessionStorage.setItem('practice_current', '0');
+        sessionStorage.setItem('practice_answers', JSON.stringify([]));
+        sessionStorage.setItem('practice_start_time', Date.now().toString());
+
+        // 跳转到选择题模式
+        router.navigate('practice-choice');
     },
 
     createTipsSection() {
