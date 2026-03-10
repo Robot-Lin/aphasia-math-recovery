@@ -109,9 +109,11 @@
                 transform: translateX(-100%);
                 transition: transform 300ms ease;
                 width: 280px !important;
+                pointer-events: none; /* 隐藏时不接收点击事件 */
             }
             aside.show {
                 transform: translateX(0);
+                pointer-events: auto; /* 显示时恢复点击 */
             }
             main {
                 margin-left: 0 !important;
