@@ -58,6 +58,8 @@ const BasicTrainingPage = {
     },
 
     init() {
+        // 清除所有定时器
+        this._clearAllTimers();
         // 停止可能正在播放的语音
         if (typeof SpeechManager !== 'undefined') {
             try {
@@ -77,10 +79,38 @@ const BasicTrainingPage = {
         this.renderSelection();
     },
 
+    // 清除所有定时器
+    _clearAllTimers() {
+        if (this._timers) {
+            this._timers.forEach(timerId => clearTimeout(timerId));
+            this._timers = [];
+        }
+    },
+
+    // 添加定时器并跟踪
+    _setTrackedTimeout(fn, delay) {
+        if (!this._timers) this._timers = [];
+        const timerId = setTimeout(() => {
+            // 从跟踪列表中移除
+            const index = this._timers.indexOf(timerId);
+            if (index > -1) this._timers.splice(index, 1);
+            // 执行回调
+            try {
+                fn();
+            } catch (e) {
+                console.error('定时器回调异常:', e);
+            }
+        }, delay);
+        this._timers.push(timerId);
+        return timerId;
+    },
+
     // 开始训练
     startTraining(type, level) {
         console.log(`startTraining called: type=${type}, level=${level}`);
 
+        // 清除所有定时器
+        this._clearAllTimers();
         // 停止可能正在播放的语音
         if (typeof SpeechManager !== 'undefined') {
             try {
@@ -558,6 +588,8 @@ const BasicTrainingPage = {
 
     // 返回选择页面
     backToSelection() {
+        // 清除所有定时器
+        this._clearAllTimers();
         // 停止语音
         if (typeof SpeechManager !== 'undefined') {
             SpeechManager.stop();
@@ -797,7 +829,7 @@ const BasicTrainingPage = {
         const pageRenderId = Date.now();
         this._currentRenderId = pageRenderId;
 
-        setTimeout(() => {
+        this._setTrackedTimeout(() => {
             // 检查是否仍然是同一页面渲染，避免页面切换后的残留调用
             if (this._currentRenderId === pageRenderId &&
                 SpeechManager.isEnabled() &&
@@ -917,7 +949,7 @@ const BasicTrainingPage = {
         const pageRenderId = Date.now();
         this._currentRenderId = pageRenderId;
 
-        setTimeout(() => {
+        this._setTrackedTimeout(() => {
             // 检查是否仍然是同一页面渲染
             if (this._currentRenderId === pageRenderId &&
                 SpeechManager.isEnabled() &&
@@ -1074,7 +1106,7 @@ const BasicTrainingPage = {
         this.state.showAnswer = true;
         this.render();
         // 渲染完成后重置 isProcessing，允许点击"已掌握"/"还需练习"
-        setTimeout(() => {
+        this._setTrackedTimeout(() => {
             this.state.isProcessing = false;
         }, 100);
     },
@@ -1103,7 +1135,7 @@ const BasicTrainingPage = {
         // 实时更新进度面板
         this.updateProgressPanel();
 
-        setTimeout(() => {
+        this._setTrackedTimeout(() => {
             this.state.isProcessing = false;
             this.nextItem();
         }, 200);
@@ -1133,7 +1165,7 @@ const BasicTrainingPage = {
         // 实时更新进度面板
         this.updateProgressPanel();
 
-        setTimeout(() => {
+        this._setTrackedTimeout(() => {
             this.state.isProcessing = false;
             this.nextItem();
         }, 200);
@@ -1242,7 +1274,7 @@ const BasicTrainingPage = {
         this.render();
 
         // 渲染完成后重置 isProcessing
-        setTimeout(() => {
+        this._setTrackedTimeout(() => {
             this.state.isProcessing = false;
         }, 100);
     },
