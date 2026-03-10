@@ -189,6 +189,7 @@ const BasicTrainingPage = {
         container.innerHTML = '';
 
         const page = document.createElement('div');
+        page.className = 'basic-training-page';
         page.style.cssText = `
             max-width: 1400px;
             margin: 0 auto;
@@ -197,6 +198,7 @@ const BasicTrainingPage = {
 
         // 页面标题
         const header = document.createElement('div');
+        header.className = 'basic-training-header';
         header.style.cssText = 'text-align: center; margin-bottom: 40px;';
         header.innerHTML = `
             <h2 style="font-size: 36px; font-weight: 800; color: #1C1C1E; margin-bottom: 12px;">
@@ -210,6 +212,7 @@ const BasicTrainingPage = {
 
         // 训练类型卡片网格
         const typesGrid = document.createElement('div');
+        typesGrid.className = 'basic-training-grid';
         typesGrid.style.cssText = `
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -246,7 +249,7 @@ const BasicTrainingPage = {
     // 创建训练类型卡片
     createTypeCard(typeKey, type) {
         const card = document.createElement('div');
-        card.className = 'glass';
+        card.className = 'glass basic-training-card';
         card.style.cssText = `
             border-radius: 24px;
             padding: 28px;
@@ -303,7 +306,7 @@ const BasicTrainingPage = {
             </div>
 
             <!-- 等级选择按钮 -->
-            <div style="display: flex; gap: 10px;">
+            <div class="basic-training-levels" style="display: flex; gap: 10px;">
                 ${type.levels.map((lvl, idx) => {
                     const levelNum = idx + 1;
                     const isUnlocked = levelNum <= currentLevel;
@@ -532,6 +535,7 @@ const BasicTrainingPage = {
         container.innerHTML = '';
 
         const page = document.createElement('div');
+        page.className = 'basic-training-page';
         page.style.cssText = `
             max-width: 900px;
             margin: 0 auto;
@@ -543,6 +547,7 @@ const BasicTrainingPage = {
 
         // 主内容区：左侧训练卡片 + 右侧控制面板
         const mainContent = document.createElement('div');
+        mainContent.className = 'basic-training-layout';
         mainContent.style.cssText = `
             display: grid;
             grid-template-columns: 1fr 280px;
@@ -557,6 +562,7 @@ const BasicTrainingPage = {
 
         // 右侧：控制面板（类型、等级、进度、模式）
         const controlPanel = document.createElement('div');
+        controlPanel.className = 'basic-training-controls';
         controlPanel.style.cssText = `
             display: flex;
             flex-direction: column;
@@ -815,7 +821,7 @@ const BasicTrainingPage = {
     createTrainingCard() {
         const typeConfig = this.trainingTypes[this.state.type];
         const card = document.createElement('div');
-        card.className = 'glass';
+        card.className = 'glass basic-training-main-card';
         card.style.cssText = `
             border-radius: 24px;
             padding: 48px;
@@ -874,7 +880,7 @@ const BasicTrainingPage = {
             </div>
 
             <div style="margin-bottom: 48px; flex: 1; display: flex; flex-direction: column; justify-content: center;">
-                <div style="font-size: 96px; font-weight: 700; color: #1C1C1E; margin-bottom: 24px; font-feature-settings: 'tnum';">
+                <div class="basic-training-question" style="font-size: 96px; font-weight: 700; color: #1C1C1E; margin-bottom: 24px; font-feature-settings: 'tnum';">
                     ${current.display}
                 </div>
 
@@ -886,7 +892,7 @@ const BasicTrainingPage = {
                     <div style="font-size: 64px; font-weight: 700; color: ${typeConfig.color}; animation: fadeIn 300ms ease;">
                         ${current.answer}
                     </div>
-                    <button onclick="SpeechManager.speakNumber(${current.answer})" style="
+                    <button class="basic-training-btn" onclick="SpeechManager.speakNumber(${current.answer})" style="
                         margin-top: 16px;
                         padding: 12px 24px;
                         background: rgba(0,0,0,0.04);
@@ -905,7 +911,7 @@ const BasicTrainingPage = {
                     <div style="font-size: 64px; font-weight: 700; color: #E5E5EA;">?</div>
                 `}
 
-                <button onclick="SpeechManager.speakExpression('${current.display}')" style="
+                <button class="basic-training-btn" onclick="SpeechManager.speakExpression('${current.display}')" style="
                     margin-top: 24px;
                     padding: 12px 24px;
                     background: rgba(0,0,0,0.04);
@@ -924,7 +930,7 @@ const BasicTrainingPage = {
 
             <div style="display: flex; gap: 16px; justify-content: center;">
                 ${!this.state.showAnswer ? `
-                    <button id="btn-show-answer" onclick="if(BasicTrainingPage.state.isProcessing)return;BasicTrainingPage.showAnswer();this.disabled=true;this.style.opacity='0.5';" style="
+                    <button class="basic-training-btn" id="btn-show-answer" onclick="if(BasicTrainingPage.state.isProcessing)return;BasicTrainingPage.showAnswer();this.disabled=true;this.style.opacity='0.5';" style="
                         padding: 20px 48px;
                         background: ${typeConfig.color};
                         color: white;
@@ -937,7 +943,7 @@ const BasicTrainingPage = {
                         transition: transform 150ms ease;
                     ">显示答案</button>
                 ` : `
-                    <button id="btn-incorrect" onclick="if(BasicTrainingPage.state.isProcessing)return;BasicTrainingPage.markIncorrect();this.disabled=true;document.getElementById('btn-correct').disabled=true;" style="
+                    <button class="basic-training-btn" id="btn-incorrect" onclick="if(BasicTrainingPage.state.isProcessing)return;BasicTrainingPage.markIncorrect();this.disabled=true;document.getElementById('btn-correct').disabled=true;" style="
                         padding: 16px 32px;
                         background: #FF3B30;
                         color: white;
@@ -947,7 +953,7 @@ const BasicTrainingPage = {
                         font-weight: 600;
                         cursor: pointer;
                     ">还需练习</button>
-                    <button id="btn-correct" onclick="if(BasicTrainingPage.state.isProcessing)return;BasicTrainingPage.markCorrect();this.disabled=true;document.getElementById('btn-incorrect').disabled=true;" style="
+                    <button class="basic-training-btn" id="btn-correct" onclick="if(BasicTrainingPage.state.isProcessing)return;BasicTrainingPage.markCorrect();this.disabled=true;document.getElementById('btn-incorrect').disabled=true;" style="
                         padding: 16px 32px;
                         background: #34C759;
                         color: white;
@@ -961,7 +967,7 @@ const BasicTrainingPage = {
             </div>
 
             <div style="margin-top: 32px;">
-                <button id="btn-skip" onclick="if(BasicTrainingPage.state.isProcessing)return;BasicTrainingPage.nextItem();this.disabled=true;this.style.opacity='0.5';" style="
+                <button class="basic-training-btn" id="btn-skip" onclick="if(BasicTrainingPage.state.isProcessing)return;BasicTrainingPage.nextItem();this.disabled=true;this.style.opacity='0.5';" style="
                     padding: 12px 24px;
                     background: transparent;
                     color: #8E8E93;
@@ -993,10 +999,10 @@ const BasicTrainingPage = {
             </div>
 
             <div style="margin-bottom: 40px;">
-                <div style="font-size: 72px; font-weight: 700; color: #1C1C1E; margin-bottom: 32px; font-feature-settings: 'tnum'; letter-spacing: 8px;">
+                <div class="basic-training-question" style="font-size: 72px; font-weight: 700; color: #1C1C1E; margin-bottom: 32px; font-feature-settings: 'tnum'; letter-spacing: 8px;">
                     ${current.display} <span style="color: ${typeConfig.color};">?</span>
                 </div>
-                <button onclick="SpeechManager.speakExpression('${current.display}')" style="
+                <button class="basic-training-btn" onclick="SpeechManager.speakExpression('${current.display}')" style="
                     padding: 12px 24px;
                     background: rgba(0,0,0,0.04);
                     border: none;
@@ -1014,7 +1020,7 @@ const BasicTrainingPage = {
 
             <div id="fillblank-options" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; max-width: 360px; margin: 0 auto;">
                 ${this.generateOptions(current.answer).map(opt => `
-                    <button onclick="if(BasicTrainingPage.state.isProcessing)return;BasicTrainingPage.selectAnswer(${opt}, ${current.answer})" style="
+                    <button class="basic-training-btn" onclick="if(BasicTrainingPage.state.isProcessing)return;BasicTrainingPage.selectAnswer(${opt}, ${current.answer})" style="
                         padding: 20px;
                         background: ${typeConfig.color}15;
                         color: ${typeConfig.color};

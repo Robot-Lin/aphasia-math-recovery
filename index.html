@@ -593,6 +593,111 @@
                 border-radius: 12px !important;
             }
         }
+        /* 基础训练页移动端适配 */
+        @media (max-width: 768px) {
+            /* 选择页面网格改为单列 */
+            .basic-training-grid {
+                grid-template-columns: 1fr !important;
+                gap: 16px !important;
+            }
+
+            /* 训练类型卡片 */
+            .basic-training-card {
+                padding: 20px !important;
+            }
+
+            /* 等级按钮网格改为 3 列 */
+            .basic-training-levels {
+                flex-direction: row !important;
+                flex-wrap: wrap;
+            }
+
+            .basic-training-levels button {
+                flex: 1 1 calc(33.33% - 7px) !important;
+                min-width: 80px !important;
+            }
+
+            /* 训练页面主布局改为单列 */
+            .basic-training-layout {
+                grid-template-columns: 1fr !important;
+                gap: 16px !important;
+            }
+
+            /* 控制面板移到训练卡片下方 */
+            .basic-training-controls {
+                order: 2 !important;
+            }
+
+            /* 训练卡片 */
+            .basic-training-main-card {
+                order: 1 !important;
+                padding: 20px !important;
+            }
+
+            /* 题目显示区域 */
+            .basic-training-question {
+                font-size: 48px !important;
+            }
+
+            /* 答案输入框 */
+            .basic-training-input {
+                font-size: 36px !important;
+                padding: 16px !important;
+            }
+
+            /* 控制按钮 */
+            .basic-training-btn {
+                padding: 14px !important;
+                font-size: 16px !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            /* 选择页面标题 */
+            .basic-training-header h2 {
+                font-size: 28px !important;
+            }
+
+            /* 训练类型卡片 */
+            .basic-training-card {
+                padding: 16px !important;
+            }
+
+            .basic-training-card > div:first-child > div:first-child {
+                width: 48px !important;
+                height: 48px !important;
+                font-size: 24px !important;
+            }
+
+            /* 等级按钮改为 3 列但更紧凑 */
+            .basic-training-levels button {
+                padding: 10px 6px !important;
+            }
+
+            .basic-training-levels button > div:first-child {
+                font-size: 12px !important;
+            }
+
+            .basic-training-levels button > div:nth-child(2) {
+                font-size: 10px !important;
+            }
+
+            /* 训练页面标题 */
+            .basic-training-layout h2 {
+                font-size: 20px !important;
+            }
+
+            /* 题目显示 */
+            .basic-training-question {
+                font-size: 36px !important;
+            }
+
+            /* 答案输入 */
+            .basic-training-input {
+                font-size: 28px !important;
+                padding: 12px !important;
+            }
+        }
     </style>
 </head>
 <body style="background: #F5F5F7; min-height: 100vh; margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;">
