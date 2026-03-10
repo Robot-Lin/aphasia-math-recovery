@@ -203,12 +203,12 @@ const PracticeSettingsPage = {
         this.elements.diffGrid.innerHTML = '';
 
         const diffs = [
-            { id: 'level1', icon: '🌱', label: '入门', desc: '个位数相加' },
-            { id: 'level2', icon: '🌿', label: '进阶', desc: '个位+两位' },
-            { id: 'level3', icon: '🍃', label: '熟练', desc: '个位+三位' },
-            { id: 'level4', icon: '🌳', label: '高手', desc: '两位数相加' },
-            { id: 'level5', icon: '🏔️', label: '专家', desc: '两位+三位' },
-            { id: 'level6', icon: '⭐', label: '大师', desc: '三位数相加' }
+            { id: 'level1', icon: '🌱', label: '入门', desc: '1位+1位' },
+            { id: 'level2', icon: '🌿', label: '进阶', desc: '1位+2位' },
+            { id: 'level3', icon: '🍃', label: '熟练', desc: '1位+3位' },
+            { id: 'level4', icon: '🌳', label: '高手', desc: '2位+2位' },
+            { id: 'level5', icon: '🏔️', label: '专家', desc: '2位+3位' },
+            { id: 'level6', icon: '⭐', label: '大师', desc: '3位+3位' }
         ];
 
         diffs.forEach(diff => {

@@ -314,11 +314,40 @@
                 font-size: 12px !important;
             }
 
-            /* 描述文字隐藏或减小 */
-            .mode-grid button span:last-child,
+            /* 难度按钮描述 - 移动端显示简化版 */
+            .diff-grid button {
+                padding: 6px 2px 4px !important;
+                min-height: 52px !important;
+                display: flex !important;
+                flex-direction: column !important;
+                justify-content: center !important;
+                gap: 1px !important;
+            }
+
+            .diff-grid button span:first-child {
+                font-size: 18px !important;
+                line-height: 1 !important;
+            }
+
+            .diff-grid button span:nth-child(2) {
+                font-size: 11px !important;
+                font-weight: 600 !important;
+                line-height: 1.2 !important;
+            }
+
+            /* 描述文字 - 超小字号显示 */
             .diff-grid button span:last-child {
-                font-size: 10px !important;
-                display: none !important; /* 隐藏描述节省空间 */
+                display: block !important;
+                font-size: 9px !important;
+                color: #8E8E93 !important;
+                line-height: 1.1 !important;
+                margin-top: 1px !important;
+                white-space: nowrap !important;
+                transform: scale(0.9) !important;
+            }
+
+            .diff-grid button[style*="#007AFF"] span:last-child {
+                color: rgba(0, 122, 255, 0.8) !important;
             }
 
             /* 题目数量按钮 */
