@@ -80,7 +80,7 @@ const HomePage = {
         section.style.cssText = 'text-align: center; margin-bottom: 32px;';
         section.innerHTML = `
             <h2 style="font-size: 32px; font-weight: 700; color: #1C1C1E; margin-bottom: 8px; letter-spacing: -0.5px;">
-                欢迎来到算术康复练习
+                欢迎来到算术练习
             </h2>
             <p style="font-size: 17px; color: #8E8E93;">每天练习一点点，算术能力慢慢恢复</p>
         `;
